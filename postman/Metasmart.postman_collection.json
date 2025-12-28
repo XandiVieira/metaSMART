@@ -1,0 +1,541 @@
+{
+	"info": {
+		"_postman_id": "metasmart-api-collection",
+		"name": "Metasmart API",
+		"description": "API collection for Metasmart - Goal Management Platform",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/relyon/metasmart",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "goalId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "progressEntryId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "milestoneId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Goals",
+			"item": [
+				{
+					"name": "Create Goal",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('goalId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Run 5km without stopping\",\n    \"description\": \"Build endurance to run 5km continuously\",\n    \"goalCategory\": \"HEALTH\",\n    \"targetValue\": \"5\",\n    \"unit\": \"km\",\n    \"motivation\": \"I want to improve my cardiovascular health\",\n    \"startDate\": \"2025-01-01\",\n    \"targetDate\": \"2025-06-30\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Goals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals?page=0&size=10&sort=createdAt,desc",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt,desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Goal by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Goals by Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/status/ACTIVE?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "status", "ACTIVE"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Goals by Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/category/HEALTH?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "category", "HEALTH"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Goal",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Run 5km in under 30 minutes\",\n    \"motivation\": \"Updated motivation - feeling great about my progress!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Goal",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Progress",
+			"item": [
+				{
+					"name": "Add Progress Entry",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('progressEntryId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"progressValue\": 1,\n    \"note\": \"Ran in the park, it was cold but I pushed through!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "progress"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Progress (+1 Quick)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('progressEntryId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"progressValue\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "progress"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Progress (+5 Quick)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"progressValue\": 5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "progress"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Progress History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress?page=0&size=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "progress"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Progress History (Date Range)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress?startDate=2025-01-01&endDate=2025-12-31&page=0&size=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "progress"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-12-31"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Progress Entry",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"progressValue\": 2,\n    \"note\": \"Updated note - actually ran 2km today!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress/{{progressEntryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "progress", "{{progressEntryId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Progress Entry",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress/{{progressEntryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "progress", "{{progressEntryId}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Milestones",
+			"item": [
+				{
+					"name": "Add Milestone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('milestoneId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"percentage\": 10,\n    \"description\": \"First 10% - Great start!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/milestones",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "milestones"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Milestones",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/milestones",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "milestones"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Milestone",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/milestones/{{milestoneId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "milestones", "{{milestoneId}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	}
+}

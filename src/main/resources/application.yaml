@@ -1,0 +1,27 @@
+server:
+  servlet:
+    context-path: ${SERVER_CONTEXT_PATH:/relyon/metasmart}
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: metasmart
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/metasmart}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:admin}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    show-sql: ${JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+jwt:
+  secret: ${JWT_SECRET:bWV0YXNtYXJ0LXNlY3JldC1rZXktZm9yLWp3dC10b2tlbi1zaWduaW5nLTI1Ni1iaXRz}
+  expiration: ${JWT_EXPIRATION:86400000}

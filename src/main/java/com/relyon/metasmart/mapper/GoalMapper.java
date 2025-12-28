@@ -1,0 +1,32 @@
+package com.relyon.metasmart.mapper;
+
+import com.relyon.metasmart.entity.goal.Goal;
+import com.relyon.metasmart.entity.goal.dto.GoalRequest;
+import com.relyon.metasmart.entity.goal.dto.GoalResponse;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+@Mapper
+public interface GoalMapper {
+
+    GoalResponse toResponse(Goal goal);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "currentProgress", ignore = true)
+    @Mapping(target = "goalStatus", ignore = true)
+    @Mapping(target = "owner", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    Goal toEntity(GoalRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "owner", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    void updateEntity(GoalRequest request, @MappingTarget Goal goal);
+}
