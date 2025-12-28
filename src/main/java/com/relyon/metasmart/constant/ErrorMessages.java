@@ -22,4 +22,14 @@ public final class ErrorMessages {
     public static final String ACTION_ITEM_NOT_FOUND = "Action item not found";
     public static final String OBSTACLE_ENTRY_NOT_FOUND = "Obstacle entry not found";
     public static final String GOAL_TEMPLATE_NOT_FOUND = "Goal template not found";
+
+    // Guardian related
+    public static final String GUARDIAN_NOT_FOUND = "Guardian not found";
+    public static final String GUARDIAN_INVITATION_NOT_FOUND = "Guardian invitation not found";
+    public static final String GUARDIAN_ALREADY_EXISTS = "This user is already a guardian for this goal";
+    public static final String CANNOT_BE_OWN_GUARDIAN = "You cannot be a guardian for your own goal";
+    public static final String GUARDIAN_NOT_ACTIVE = "Guardian relationship is not active";
+    public static final String GUARDIAN_PERMISSION_DENIED = "You don't have permission to perform this action";
+    public static final String NUDGE_NOT_FOUND = "Nudge not found";
+    public static final String NUDGE_ACCESS_DENIED = "You don't have access to this nudge";
 }

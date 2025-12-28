@@ -30,4 +30,6 @@ public interface ProgressEntryRepository extends JpaRepository<ProgressEntry, Lo
     List<LocalDate> findDistinctProgressDates(@Param("goal") Goal goal);
 
     void deleteByGoal(Goal goal);
+
+    Optional<ProgressEntry> findTopByGoalOrderByCreatedAtDesc(Goal goal);
 }

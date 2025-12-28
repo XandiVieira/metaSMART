@@ -21,4 +21,6 @@ public interface ObstacleEntryRepository extends JpaRepository<ObstacleEntry, Lo
     void deleteByGoal(Goal goal);
 
     long countByGoalAndResolvedFalse(Goal goal);
+
+    long countByGoal(Goal goal);
 }

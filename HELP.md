@@ -18,7 +18,17 @@
 - [ ] Emotional anchors (photos, audio attachments)
 - [ ] Basic reminders (push, email)
 - [ ] AI goal assistance (vague → SMART, help completing pillars)
-- [ ] Goal guardian (accountability partner who can view progress and push you)
+- [x] Goal guardian (accountability partner who can view progress and push you)
+
+### Key Differentiators (Priority)
+
+These features are what will make Metasmart stand out from other goal apps:
+
+- [x] **Goal Guardian** ⭐⭐⭐ - Accountability partner who can view your progress, send nudges, and keep you honest. Studies show accountability increases success rates by 65%+.
+- [ ] **Emotional Anchors** ⭐⭐⭐ - Photos, audio, and video attachments representing *why* this goal matters. Creates visceral motivation when willpower fades.
+- [ ] **Adaptive Nudges** ⭐⭐ - Behavior-based smart reminders. "You usually log at 8pm but haven't today" beats generic time-based notifications.
+- [ ] **AI Review Cycle** ⭐⭐ - Weekly/monthly AI analysis of progress, obstacles, and personalized micro-adjustments.
+- [ ] **Rearview Mode** ⭐ - Past achievements timeline to boost motivation. "Remember when 1km felt impossible? You've done 50km total."
 
 ### Enhancements
 
@@ -26,12 +36,9 @@
 - [x] Setup completion indicator (% of goal configuration done)
 - [ ] Motivational messages (contextual encouragement)
 - [ ] Celebrate achievements (share milestones with community)
-- [ ] Adaptive nudges (location, time, behavior-based)
 - [ ] Multi-channel notifications (WhatsApp, Telegram, Alexa, smartwatch)
 - [x] Quick obstacle diary (daily check-in with solutions)
 - [ ] Goal groups (community with similar objectives)
-- [ ] AI review cycle (weekly/monthly analysis)
-- [ ] Rearview mode (past achievements timeline)
 - [x] Streak tracking (current and longest streak)
 - [ ] Calendar integration
 - [x] Goal templates (personal and public templates)
@@ -115,6 +122,40 @@ Create reusable templates from your goals. Templates can be personal (private) o
 - `GET /api/v1/goal-templates/{id}/goal` - Generate a GoalRequest from template
 - `PUT /api/v1/goal-templates/{id}` - Update template
 - `DELETE /api/v1/goal-templates/{id}` - Delete template
+
+### Goal Guardian
+Accountability partner system where you can invite others to watch over your goals. Guardians can view progress (based on permissions) and send motivational nudges.
+
+**Guardian Permissions:**
+- `VIEW_PROGRESS` - See progress entries and percentages
+- `VIEW_OBSTACLES` - See obstacle diary entries
+- `VIEW_ACTION_PLAN` - See action items and completion status
+- `VIEW_STREAK` - See current and longest streaks
+- `SEND_NUDGE` - Send motivational messages to goal owner
+
+**Nudge Types:**
+- `ENCOURAGEMENT` - "You've got this!"
+- `REMINDER` - "Don't forget your goal!"
+- `CELEBRATION` - "Congrats on your progress!"
+- `CHECK_IN` - "How's it going?"
+
+**Owner Endpoints (manage guardians on your goals):**
+- `POST /api/v1/goals/{goalId}/guardians` - Invite a guardian (by email)
+- `GET /api/v1/goals/{goalId}/guardians` - List guardians for a goal
+- `DELETE /api/v1/goals/{goalId}/guardians/{guardianshipId}` - Remove guardian
+- `GET /api/v1/goals/{goalId}/guardians/nudges` - Get nudges for my goal
+- `PUT /api/v1/goals/{goalId}/guardians/nudges/{nudgeId}/read` - Mark nudge as read
+- `PUT /api/v1/goals/{goalId}/guardians/nudges/{nudgeId}/react` - React to nudge
+
+**Guardian Endpoints (as someone guarding others' goals):**
+- `GET /api/v1/guardian/invitations` - Get pending invitations
+- `PUT /api/v1/guardian/invitations/{invitationId}/accept` - Accept invitation
+- `PUT /api/v1/guardian/invitations/{invitationId}/decline` - Decline invitation
+- `GET /api/v1/guardian/goals` - List goals I'm guarding
+- `GET /api/v1/guardian/goals/{goalId}` - View guarded goal details (filtered by permissions)
+- `POST /api/v1/guardian/goals/{goalId}/nudges` - Send nudge
+- `GET /api/v1/guardian/nudges/sent` - Get nudges I've sent
+- `GET /api/v1/guardian/nudges/unread-count` - Count unread nudges (as goal owner)
 
 ---
 
