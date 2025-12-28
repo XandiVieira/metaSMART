@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface ProgressEntryRepository extends JpaRepository<ProgressEntry, Long> {
@@ -23,6 +25,9 @@ public interface ProgressEntryRepository extends JpaRepository<ProgressEntry, Lo
 
     @Query("SELECT COALESCE(SUM(p.progressValue), 0) FROM ProgressEntry p WHERE p.goal = :goal")
     BigDecimal sumValueByGoal(@Param("goal") Goal goal);
+
+    @Query("SELECT DISTINCT CAST(p.createdAt AS LocalDate) FROM ProgressEntry p WHERE p.goal = :goal ORDER BY CAST(p.createdAt AS LocalDate) DESC")
+    List<LocalDate> findDistinctProgressDates(@Param("goal") Goal goal);
 
     void deleteByGoal(Goal goal);
 }

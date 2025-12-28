@@ -86,33 +86,47 @@ com.relyon.metasmart
 ├── config/              # Spring configuration classes
 ├── constant/            # Constants and static values
 ├── controller/          # REST controllers
-├── domain/              # Domain-based organization
-│   ├── goal/            # Goal domain
-│   │   ├── Goal.java    # Entity
+├── entity/              # Entity-based organization
+│   ├── AuditableEntity.java  # Base entity with audit fields
+│   ├── goal/            # Goal entity package
+│   │   ├── Goal.java
+│   │   ├── GoalCategory.java
+│   │   ├── GoalStatus.java
 │   │   └── dto/         # Goal DTOs
 │   │       ├── GoalRequest.java
 │   │       ├── UpdateGoalRequest.java
 │   │       └── GoalResponse.java
-│   └── user/            # User domain
-│       ├── User.java    # Entity
-│       └── dto/         # User DTOs
-│           ├── RegisterRequest.java
-│           ├── LoginRequest.java
-│           └── AuthResponse.java
-├── dto/                 # Shared DTOs (ErrorResponse)
-├── entity/              # Base entities (AuditableEntity)
+│   ├── user/            # User entity package
+│   │   ├── User.java
+│   │   └── dto/
+│   │       ├── RegisterRequest.java
+│   │       ├── LoginRequest.java
+│   │       └── AuthResponse.java
+│   ├── progress/        # Progress tracking
+│   │   ├── ProgressEntry.java
+│   │   ├── Milestone.java
+│   │   └── dto/
+│   ├── actionplan/      # Action items for goals
+│   │   ├── ActionItem.java
+│   │   └── dto/
+│   ├── obstacle/        # Obstacle diary entries
+│   │   ├── ObstacleEntry.java
+│   │   └── dto/
+│   └── template/        # Goal templates
+│       ├── GoalTemplate.java
+│       └── dto/
 ├── exception/           # Custom exceptions and global handler
 ├── mapper/              # MapStruct mappers
 ├── repository/          # Spring Data repositories
-├── service/             # Business logic services
-└── util/                # Utility classes (if needed)
+└── service/             # Business logic services
 ```
 
-## Domain Organization
+## Entity Organization
 
-- Each domain (goal, user, etc.) has its own package under `domain/`
-- Entity goes directly in the domain package
-- DTOs go in `dto/` subpackage within the domain
+- Each entity type has its own package under `entity/`
+- Entity classes go directly in the entity subpackage
+- DTOs go in `dto/` subpackage within the entity package
+- Enums related to the entity go in the same package
 - Naming: `{Action}Request.java` for input, `{Entity}Response.java` for output
 
 ## Mapping (MapStruct)

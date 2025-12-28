@@ -10,6 +10,11 @@ import org.mapstruct.MappingTarget;
 @Mapper
 public interface GoalMapper {
 
+    @Mapping(target = "smartPillars", ignore = true)
+    @Mapping(target = "setupCompletionPercentage", ignore = true)
+    @Mapping(target = "currentStreak", ignore = true)
+    @Mapping(target = "longestStreak", ignore = true)
+    @Mapping(target = "progressPercentage", ignore = true)
     GoalResponse toResponse(Goal goal);
 
     @Mapping(target = "id", ignore = true)

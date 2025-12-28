@@ -24,10 +24,15 @@ public class GoalResponse {
     private String targetValue;
     private String unit;
     private BigDecimal currentProgress;
+    private BigDecimal progressPercentage;
     private String motivation;
     private LocalDate startDate;
     private LocalDate targetDate;
     private GoalStatus goalStatus;
+    private SmartPillarsDto smartPillars;
+    private Integer setupCompletionPercentage;
+    private Integer currentStreak;
+    private Integer longestStreak;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

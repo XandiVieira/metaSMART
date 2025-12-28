@@ -30,6 +30,21 @@
 			"key": "milestoneId",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "actionItemId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "obstacleEntryId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "templateId",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"item": [
@@ -521,6 +536,396 @@
 							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/milestones/{{milestoneId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "goals", "{{goalId}}", "milestones", "{{milestoneId}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Action Items",
+			"item": [
+				{
+					"name": "Create Action Item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('actionItemId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Buy running shoes\",\n    \"description\": \"Get proper running shoes from the sports store\",\n    \"dueDate\": \"2025-01-15\",\n    \"orderIndex\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "action-items"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Action Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "action-items"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Action Item",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Buy running shoes - Nike Air Zoom\",\n    \"completed\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Action Item",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Obstacles",
+			"item": [
+				{
+					"name": "Create Obstacle Entry",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('obstacleEntryId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"obstacle\": \"Knee pain after running\",\n    \"solution\": \"Will do stretching before and after running\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Obstacles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles?page=0&size=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Obstacles (Date Range)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles?startDate=2025-01-01&endDate=2025-12-31&page=0&size=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-12-31"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Obstacle Entry",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"solution\": \"Bought knee brace and doing proper warm-up routine\",\n    \"resolved\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles/{{obstacleEntryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles", "{{obstacleEntryId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Obstacle Entry",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles/{{obstacleEntryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles", "{{obstacleEntryId}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Goal Templates",
+			"item": [
+				{
+					"name": "Create Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('templateId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Running Goal Template\",\n    \"description\": \"Template for running-related goals\",\n    \"defaultTitle\": \"Run [distance] in [time]\",\n    \"defaultDescription\": \"Build endurance to run consistently\",\n    \"defaultCategory\": \"HEALTH\",\n    \"defaultTargetValue\": \"5\",\n    \"defaultUnit\": \"km\",\n    \"defaultMotivation\": \"Improve cardiovascular health\",\n    \"defaultDurationDays\": 90,\n    \"isPublic\": false\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goal-templates",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goal-templates"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goal-templates?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goal-templates"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Available Templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goal-templates/available?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goal-templates", "available"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Public Templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goal-templates/public?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goal-templates", "public"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Template by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goal-templates/{{templateId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goal-templates", "{{templateId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Goal from Template",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goal-templates/{{templateId}}/goal",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goal-templates", "{{templateId}}", "goal"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Template",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Running Template\",\n    \"isPublic\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goal-templates/{{templateId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goal-templates", "{{templateId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Template",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goal-templates/{{templateId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goal-templates", "{{templateId}}"]
 						}
 					},
 					"response": []

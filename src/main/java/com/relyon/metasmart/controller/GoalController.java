@@ -56,7 +56,7 @@ public class GoalController {
 
     @GetMapping("/status/{status}")
     public ResponseEntity<Page<GoalResponse>> findByStatus(
-            @PathVariable GoalStatus goalStatus,
+            @PathVariable("status") GoalStatus goalStatus,
             @AuthenticationPrincipal User user,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
@@ -65,7 +65,7 @@ public class GoalController {
 
     @GetMapping("/category/{category}")
     public ResponseEntity<Page<GoalResponse>> findByCategory(
-            @PathVariable GoalCategory goalCategory,
+            @PathVariable("category") GoalCategory goalCategory,
             @AuthenticationPrincipal User user,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {

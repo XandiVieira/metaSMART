@@ -19,4 +19,7 @@ public final class ErrorMessages {
     public static final String PROGRESS_ENTRY_NOT_FOUND = "Progress entry not found";
     public static final String MILESTONE_NOT_FOUND = "Milestone not found";
     public static final String MILESTONE_ALREADY_EXISTS = "Milestone with this percentage already exists";
+    public static final String ACTION_ITEM_NOT_FOUND = "Action item not found";
+    public static final String OBSTACLE_ENTRY_NOT_FOUND = "Obstacle entry not found";
+    public static final String GOAL_TEMPLATE_NOT_FOUND = "Goal template not found";
 }
