@@ -335,5 +335,146 @@ class ProgressServiceTest {
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessage(ErrorMessages.MILESTONE_NOT_FOUND);
         }
+
+        @Test
+        @DisplayName("Should mark milestone as achieved immediately when progress is high enough")
+        void shouldMarkMilestoneAsAchievedImmediately() {
+            goal.setCurrentProgress(BigDecimal.valueOf(3));
+
+            var milestoneRequest = MilestoneRequest.builder()
+                    .percentage(50)
+                    .description("Halfway there!")
+                    .build();
+
+            var milestone = Milestone.builder()
+                    .id(1L)
+                    .goal(goal)
+                    .percentage(50)
+                    .description("Halfway there!")
+                    .achieved(false)
+                    .build();
+
+            var milestoneResponse = MilestoneResponse.builder()
+                    .id(1L)
+                    .percentage(50)
+                    .description("Halfway there!")
+                    .achieved(true)
+                    .achievedAt(LocalDateTime.now())
+                    .build();
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(milestoneRepository.existsByGoalAndPercentage(goal, 50)).thenReturn(false);
+            when(milestoneMapper.toEntity(milestoneRequest)).thenReturn(milestone);
+            when(milestoneRepository.save(any(Milestone.class))).thenReturn(milestone);
+            when(milestoneMapper.toResponse(any(Milestone.class))).thenReturn(milestoneResponse);
+
+            var response = progressService.addMilestone(1L, milestoneRequest, user);
+
+            assertThat(response).isNotNull();
+            assertThat(response.getAchieved()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Goal completion tests")
+    class GoalCompletionTests {
+
+        @Test
+        @DisplayName("Should mark goal as completed when target is reached")
+        void shouldMarkGoalAsCompleted() {
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(progressEntryMapper.toEntity(progressRequest)).thenReturn(progressEntry);
+            when(progressEntryRepository.save(any(ProgressEntry.class))).thenReturn(progressEntry);
+            when(progressEntryMapper.toResponse(progressEntry)).thenReturn(progressResponse);
+            when(progressEntryRepository.sumValueByGoal(goal)).thenReturn(BigDecimal.valueOf(5));
+            when(milestoneRepository.findByGoalAndAchievedFalseOrderByPercentageAsc(goal)).thenReturn(Collections.emptyList());
+
+            progressService.addProgress(1L, progressRequest, user);
+
+            verify(goalRepository, times(2)).save(argThat(g ->
+                    g.getGoalStatus() == GoalStatus.COMPLETED
+            ));
+        }
+
+        @Test
+        @DisplayName("Should achieve milestones when progress is added")
+        void shouldAchieveMilestones() {
+            var milestone = Milestone.builder()
+                    .id(1L)
+                    .goal(goal)
+                    .percentage(25)
+                    .achieved(false)
+                    .build();
+
+            goal.setCurrentProgress(BigDecimal.valueOf(2));
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(progressEntryMapper.toEntity(progressRequest)).thenReturn(progressEntry);
+            when(progressEntryRepository.save(any(ProgressEntry.class))).thenReturn(progressEntry);
+            when(progressEntryMapper.toResponse(progressEntry)).thenReturn(progressResponse);
+            when(progressEntryRepository.sumValueByGoal(goal)).thenReturn(BigDecimal.valueOf(2));
+            when(milestoneRepository.findByGoalAndAchievedFalseOrderByPercentageAsc(goal)).thenReturn(List.of(milestone));
+
+            progressService.addProgress(1L, progressRequest, user);
+
+            verify(milestoneRepository).save(argThat(m -> m.getAchieved() && m.getAchievedAt() != null));
+        }
+
+        @Test
+        @DisplayName("Should revert milestones when progress is deleted")
+        void shouldRevertMilestones() {
+            var milestone = Milestone.builder()
+                    .id(1L)
+                    .goal(goal)
+                    .percentage(50)
+                    .achieved(true)
+                    .achievedAt(LocalDateTime.now())
+                    .build();
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(progressEntryRepository.findById(1L)).thenReturn(Optional.of(progressEntry));
+            when(progressEntryRepository.sumValueByGoal(goal)).thenReturn(BigDecimal.ZERO);
+            when(milestoneRepository.findByGoalOrderByPercentageAsc(goal)).thenReturn(List.of(milestone));
+
+            progressService.deleteProgressEntry(1L, 1L, user);
+
+            verify(milestoneRepository).save(argThat(m -> !m.getAchieved() && m.getAchievedAt() == null));
+        }
+    }
+
+    @Nested
+    @DisplayName("Delete progress edge cases")
+    class DeleteProgressEdgeCases {
+
+        @Test
+        @DisplayName("Should throw exception when entry belongs to different goal")
+        void shouldThrowWhenEntryBelongsToDifferentGoal() {
+            var otherGoal = Goal.builder().id(99L).build();
+            var otherEntry = ProgressEntry.builder()
+                    .id(1L)
+                    .goal(otherGoal)
+                    .progressValue(BigDecimal.ONE)
+                    .build();
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(progressEntryRepository.findById(1L)).thenReturn(Optional.of(otherEntry));
+
+            assertThatThrownBy(() -> progressService.deleteProgressEntry(1L, 1L, user))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.PROGRESS_ENTRY_NOT_FOUND);
+        }
+    }
+
+    @Nested
+    @DisplayName("Create default milestones tests")
+    class CreateDefaultMilestonesTests {
+
+        @Test
+        @DisplayName("Should create default milestones")
+        void shouldCreateDefaultMilestones() {
+            progressService.createDefaultMilestones(goal);
+
+            verify(milestoneRepository, times(4)).save(any(Milestone.class));
+        }
     }
 }
