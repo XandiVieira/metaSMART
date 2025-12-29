@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "action_items")
@@ -31,13 +32,64 @@ public class ActionItem extends AuditableEntity {
     @Column(length = 500)
     private String description;
 
-    @Column
-    private LocalDate dueDate;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private TaskType taskType = TaskType.ONE_TIME;
 
     @Column
-    private Integer orderIndex;
+    private LocalDate targetDate;
 
     @Builder.Default
     @Column(nullable = false)
     private Boolean completed = false;
+
+    @Column
+    private LocalDateTime completedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private TaskPriority priority = TaskPriority.MEDIUM;
+
+    @Column(name = "order_index")
+    private Integer orderIndex;
+
+    @Column
+    @Builder.Default
+    private Integer impactScore = 5;
+
+    @Column
+    @Builder.Default
+    private Integer effortEstimate = 5;
+
+    @Column(length = 500)
+    private String context;
+
+    @Column(length = 500)
+    private String dependencies;
+
+    @Embedded
+    private TaskRecurrence recurrence;
+
+    @Embedded
+    private FrequencyGoal frequencyGoal;
+
+    @Embedded
+    private ReminderOverride reminderOverride;
+
+    @Column(length = 1000)
+    private String notes;
+
+    @Deprecated
+    @Transient
+    public LocalDate getDueDate() {
+        return targetDate;
+    }
+
+    @Deprecated
+    @Transient
+    public void setDueDate(LocalDate dueDate) {
+        this.targetDate = dueDate;
+    }
 }

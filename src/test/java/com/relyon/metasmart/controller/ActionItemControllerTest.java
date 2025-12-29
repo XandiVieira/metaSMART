@@ -69,7 +69,7 @@ class ActionItemControllerTest {
                 .id(1L)
                 .title("Buy running shoes")
                 .description("Get proper running shoes")
-                .dueDate(LocalDate.now().plusDays(7))
+                .targetDate(LocalDate.now().plusDays(7))
                 .orderIndex(1)
                 .completed(false)
                 .build();
@@ -85,7 +85,7 @@ class ActionItemControllerTest {
             var request = ActionItemRequest.builder()
                     .title("Buy running shoes")
                     .description("Get proper running shoes")
-                    .dueDate(LocalDate.now().plusDays(7))
+                    .targetDate(LocalDate.now().plusDays(7))
                     .orderIndex(1)
                     .build();
 

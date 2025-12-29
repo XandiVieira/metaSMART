@@ -8,10 +8,20 @@
 
 **Swagger UI:** `http://localhost:8080/relyon/metasmart/swagger-ui.html`
 
-**Autenticacao:** Todos os endpoints (exceto `/api/v1/auth/*`) exigem token JWT no header:
+**Health Check:** `http://localhost:8080/relyon/metasmart/actuator/health`
+
+**Autenticacao:** Todos os endpoints (exceto `/api/v1/auth/*` e `/actuator/*`) exigem token JWT no header:
 ```
 Authorization: Bearer <token>
 ```
+
+---
+
+## Health Check
+
+A aplicacao expoe endpoints de saude do Spring Boot Actuator:
+- `GET /actuator/health` - Status de saude da aplicacao
+- `GET /actuator/info` - Informacoes da aplicacao
 
 ---
 
@@ -54,6 +64,10 @@ Authorization: Bearer <token>
 | GET | `/profile` | Obter perfil do usuario |
 | PUT | `/profile` | Atualizar perfil (nome) |
 | POST | `/streak-shields/use` | Usar um escudo de sequencia |
+| GET | `/preferences` | Obter preferencias do usuario |
+| PUT | `/preferences` | Atualizar preferencias do usuario |
+| GET | `/notifications/preferences` | Obter preferencias de notificacao |
+| PUT | `/notifications/preferences` | Atualizar preferencias de notificacao |
 
 **Resposta do perfil inclui:**
 - Info do usuario (id, nome, email, dataEntrada)
@@ -61,6 +75,41 @@ Authorization: Bearer <token>
 - `streakShields` - Escudos de sequencia disponiveis
 
 *Escudos de sequencia sao ganhos nos marcos de 50% e 100%.*
+
+**Preferencias do usuario:**
+```json
+{
+  "timezone": "America/Sao_Paulo",
+  "language": "pt",
+  "emailNotifications": true,
+  "pushNotifications": true,
+  "weeklyDigest": true,
+  "streakReminders": true,
+  "guardianNudges": true,
+  "preferredReminderTime": "09:00"
+}
+```
+
+**Preferencias de notificacao:**
+```json
+{
+  "pushEnabled": true,
+  "pushGoalReminders": true,
+  "pushProgressReminders": true,
+  "pushMilestones": true,
+  "pushStreakAlerts": true,
+  "pushGuardianNudges": true,
+  "emailEnabled": true,
+  "emailWeeklyDigest": true,
+  "emailMilestones": true,
+  "emailStreakAtRisk": true,
+  "whatsappEnabled": false,
+  "whatsappNumber": "+5511999999999",
+  "quietHoursEnabled": true,
+  "quietHoursStart": "22:00",
+  "quietHoursEnd": "08:00"
+}
+```
 
 ---
 
@@ -72,7 +121,12 @@ Authorization: Bearer <token>
 | GET | `/{id}` | Buscar por ID |
 | GET | `/status/{status}` | Filtrar por status |
 | GET | `/category/{category}` | Filtrar por categoria |
+| GET | `/filter` | Filtros combinados (status + categoria) |
+| GET | `/search?query=` | Buscar por titulo/descricao |
+| GET | `/due-soon?days=7` | Metas vencendo em N dias |
 | GET | `/archived` | Listar metas arquivadas |
+| POST | `/{id}/duplicate` | Duplicar uma meta |
+| POST | `/{id}/use-streak-shield` | Usar escudo de sequencia (recuperacao 24h) |
 | PUT | `/{id}` | Atualizar meta |
 | PUT | `/{id}/archive` | Arquivar meta (exclusao suave) |
 | PUT | `/{id}/unarchive` | Restaurar meta arquivada |
@@ -94,6 +148,7 @@ Authorization: Bearer <token>
 | Metodo | Endpoint | Descricao |
 |--------|----------|-----------|
 | POST | `/` | Adicionar entrada de progresso |
+| POST | `/bulk` | Adicionar multiplas entradas de progresso |
 | GET | `/` | Historico (paginado) |
 | GET | `/?startDate=&endDate=` | Filtrar por periodo |
 | PUT | `/{progressId}` | Atualizar entrada |
@@ -102,6 +157,38 @@ Authorization: Bearer <token>
 **Corpo da requisicao:**
 ```json
 { "progressValue": 1, "note": "Nota opcional" }
+```
+
+**Requisicao de progresso em lote:**
+```json
+{
+  "entries": [
+    { "progressValue": 1, "note": "Dia 1" },
+    { "progressValue": 2, "note": "Dia 2" },
+    { "progressValue": 1.5, "note": "Dia 3" }
+  ]
+}
+```
+
+---
+
+### Notas de Metas (`/api/v1/goals/{goalId}/notes`)
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| POST | `/` | Criar nota |
+| GET | `/` | Listar notas (paginado) |
+| GET | `/?noteType=REFLECTION` | Filtrar por tipo |
+| PUT | `/{noteId}` | Atualizar nota |
+| DELETE | `/{noteId}` | Excluir nota |
+
+**Tipos de nota:** `GENERAL` (Geral), `REFLECTION` (Reflexao), `MILESTONE` (Marco), `OBSTACLE` (Obstaculo), `CELEBRATION` (Celebracao)
+
+**Corpo da requisicao:**
+```json
+{
+  "content": "Me sentindo otimo com meu progresso!",
+  "noteType": "REFLECTION"
+}
 ```
 
 ---
@@ -124,6 +211,62 @@ Authorization: Bearer <token>
 | GET | `/` | Listar todos (ordenados) |
 | PUT | `/{itemId}` | Atualizar item |
 | DELETE | `/{itemId}` | Excluir item |
+
+**Tipos de Tarefa:**
+- `ONE_TIME` - Tarefa de ocorrencia unica
+- `DAILY_HABIT` - Habito diario recorrente
+- `FREQUENCY_BASED` - Tarefa com meta de frequencia (ex: 3x por semana)
+- `MILESTONE` - Tarefa baseada em marco
+
+---
+
+### Conclusoes de Tarefa (`/api/v1/goals/{goalId}/action-items/{actionItemId}/completions`)
+
+*Rastrear historico de conclusoes para tarefas recorrentes (habitos diarios, tarefas baseadas em frequencia).*
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| POST | `/` | Registrar conclusao |
+| GET | `/` | Obter historico |
+| GET | `/paginated` | Historico paginado |
+| GET | `/range?startDate=&endDate=` | Por intervalo de datas |
+| GET | `/count` | Contar total |
+| GET | `/count/range?startDate=&endDate=` | Contar no periodo |
+| DELETE | `/{completionId}` | Excluir conclusao |
+
+**Requisicao de conclusao:**
+```json
+{
+    "date": "2025-01-15",  // Opcional, padrao e hoje
+    "note": "Corrida matinal concluida!"
+}
+```
+
+---
+
+### Tarefas Agendadas - Plano de Voo (`/api/v1/goals/{goalId}/scheduled-tasks`)
+
+*Agendar e gerenciar instancias de tarefas para tarefas recorrentes e baseadas em frequencia.*
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| POST | `/` | Criar tarefa agendada |
+| POST | `/generate/{actionItemId}?startDate=&endDate=` | Gerar agenda automaticamente |
+| GET | `/` | Obter todas agendadas |
+| GET | `/?startDate=&endDate=` | Por intervalo de datas |
+| GET | `/action-item/{actionItemId}` | Por item de acao |
+| GET | `/pending` | Pendentes (atrasadas + hoje) |
+| PATCH | `/{id}/complete` | Marcar como concluida |
+| PATCH | `/{id}/incomplete` | Marcar como incompleta |
+| DELETE | `/{id}` | Excluir agendamento |
+
+**Requisicao de agendamento:**
+```json
+{
+    "taskId": 1,
+    "scheduledDate": "2025-01-20"
+}
+```
 
 ---
 

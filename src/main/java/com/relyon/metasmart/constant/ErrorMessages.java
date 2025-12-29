@@ -40,4 +40,9 @@ public final class ErrorMessages {
     // Reflection related
     public static final String REFLECTION_NOT_FOUND = "Reflection not found";
     public static final String REFLECTION_ALREADY_EXISTS = "Reflection for this period already exists";
+
+    // Task completion related
+    public static final String TASK_COMPLETION_NOT_FOUND = "Task completion not found";
+    public static final String SCHEDULED_TASK_NOT_FOUND = "Scheduled task not found";
+    public static final String SCHEDULED_TASK_ALREADY_EXISTS = "Scheduled task already exists for this date";
 }

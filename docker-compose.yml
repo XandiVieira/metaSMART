@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: metasmart-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_URL=jdbc:postgresql://db:5432/metasmart
+      - DB_USERNAME=metasmart
+      - DB_PASSWORD=${DB_PASSWORD:-metasmart_secret}
+      - JWT_SECRET=${JWT_SECRET:-bWV0YXNtYXJ0LXByb2R1Y3Rpb24tc2VjcmV0LWtleS1mb3Itand0LXRva2VuLXNpZ25pbmctMjU2LWJpdHM=}
+      - JWT_EXPIRATION=86400000
+      - SWAGGER_ENABLED=false
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - metasmart-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/relyon/metasmart/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  db:
+    image: postgres:16-alpine
+    container_name: metasmart-db
+    environment:
+      - POSTGRES_DB=metasmart
+      - POSTGRES_USER=metasmart
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-metasmart_secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - metasmart-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U metasmart -d metasmart"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:
+
+networks:
+  metasmart-network:
+    driver: bridge

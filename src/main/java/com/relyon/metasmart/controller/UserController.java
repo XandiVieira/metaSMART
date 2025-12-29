@@ -1,9 +1,15 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
+import com.relyon.metasmart.entity.notification.dto.NotificationPreferencesRequest;
+import com.relyon.metasmart.entity.notification.dto.NotificationPreferencesResponse;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.entity.user.dto.UpdateProfileRequest;
+import com.relyon.metasmart.entity.user.dto.UserPreferencesRequest;
+import com.relyon.metasmart.entity.user.dto.UserPreferencesResponse;
 import com.relyon.metasmart.entity.user.dto.UserProfileResponse;
+import com.relyon.metasmart.service.NotificationPreferencesService;
+import com.relyon.metasmart.service.UserPreferencesService;
 import com.relyon.metasmart.service.UserProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +30,8 @@ import java.util.Map;
 public class UserController {
 
     private final UserProfileService userProfileService;
+    private final UserPreferencesService userPreferencesService;
+    private final NotificationPreferencesService notificationPreferencesService;
 
     @GetMapping("/profile")
     @Operation(summary = "Get current user profile")
@@ -58,5 +66,37 @@ public class UserController {
                     "message", "No streak shields available"
             ));
         }
+    }
+
+    @GetMapping("/preferences")
+    @Operation(summary = "Get user preferences")
+    public ResponseEntity<UserPreferencesResponse> getPreferences(@AuthenticationPrincipal User user) {
+        log.debug("Getting preferences for user: {}", user.getEmail());
+        return ResponseEntity.ok(userPreferencesService.getPreferences(user));
+    }
+
+    @PutMapping("/preferences")
+    @Operation(summary = "Update user preferences")
+    public ResponseEntity<UserPreferencesResponse> updatePreferences(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody UserPreferencesRequest request) {
+        log.debug("Updating preferences for user: {}", user.getEmail());
+        return ResponseEntity.ok(userPreferencesService.updatePreferences(user, request));
+    }
+
+    @GetMapping("/notifications/preferences")
+    @Operation(summary = "Get notification preferences")
+    public ResponseEntity<NotificationPreferencesResponse> getNotificationPreferences(@AuthenticationPrincipal User user) {
+        log.debug("Getting notification preferences for user: {}", user.getEmail());
+        return ResponseEntity.ok(notificationPreferencesService.getPreferences(user));
+    }
+
+    @PutMapping("/notifications/preferences")
+    @Operation(summary = "Update notification preferences")
+    public ResponseEntity<NotificationPreferencesResponse> updateNotificationPreferences(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody NotificationPreferencesRequest request) {
+        log.debug("Updating notification preferences for user: {}", user.getEmail());
+        return ResponseEntity.ok(notificationPreferencesService.updatePreferences(user, request));
     }
 }

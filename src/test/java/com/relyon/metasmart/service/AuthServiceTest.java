@@ -34,6 +34,9 @@ class AuthServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private com.relyon.metasmart.repository.PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -41,6 +44,9 @@ class AuthServiceTest {
 
     @Mock
     private AuthMapper authMapper;
+
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private AuthService authService;

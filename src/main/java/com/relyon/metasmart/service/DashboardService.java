@@ -115,10 +115,19 @@ public class DashboardService {
         var lastProgressDate = dates.getFirst();
         var daysWithoutProgress = (int) ChronoUnit.DAYS.between(lastProgressDate, today);
 
+        // Check if streak shield was used within recovery window (yesterday)
+        var shieldUsed = goal.getLastStreakShieldUsedAt() != null
+                && goal.getLastStreakShieldUsedAt().equals(today.minusDays(1));
+
+        // If shield was used yesterday and no progress today, extend grace period
+        if (shieldUsed && daysWithoutProgress == 1) {
+            daysWithoutProgress = 0;
+        }
+
         var currentStreak = 0;
         var streak = 1;
 
-        if (lastProgressDate.equals(today) || lastProgressDate.equals(today.minusDays(1))) {
+        if (lastProgressDate.equals(today) || lastProgressDate.equals(today.minusDays(1)) || shieldUsed) {
             currentStreak = 1;
         }
 
@@ -126,9 +135,14 @@ public class DashboardService {
             var current = dates.get(dateIndex);
             var next = dates.get(dateIndex + 1);
 
-            if (current.minusDays(1).equals(next)) {
+            // Check if this gap was covered by a shield
+            var gapCoveredByShield = goal.getLastStreakShieldUsedAt() != null
+                    && goal.getLastStreakShieldUsedAt().equals(current.minusDays(1))
+                    && next.equals(current.minusDays(2));
+
+            if (current.minusDays(1).equals(next) || gapCoveredByShield) {
                 streak++;
-                if (lastProgressDate.equals(today) || lastProgressDate.equals(today.minusDays(1))) {
+                if (lastProgressDate.equals(today) || lastProgressDate.equals(today.minusDays(1)) || shieldUsed) {
                     currentStreak = streak;
                 }
             } else {

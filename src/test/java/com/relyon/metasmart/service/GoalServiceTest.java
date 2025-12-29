@@ -60,6 +60,9 @@ class GoalServiceTest {
     @Mock
     private GoalMapper goalMapper;
 
+    @Mock
+    private UserProfileService userProfileService;
+
     @InjectMocks
     private GoalService goalService;
 

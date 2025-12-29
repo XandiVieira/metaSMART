@@ -2,12 +2,17 @@ package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.config.JwtService;
 import com.relyon.metasmart.constant.ErrorMessages;
+import com.relyon.metasmart.entity.user.PasswordResetToken;
 import com.relyon.metasmart.entity.user.dto.AuthResponse;
+import com.relyon.metasmart.entity.user.dto.ForgotPasswordRequest;
 import com.relyon.metasmart.entity.user.dto.LoginRequest;
 import com.relyon.metasmart.entity.user.dto.RegisterRequest;
+import com.relyon.metasmart.entity.user.dto.ResetPasswordRequest;
 import com.relyon.metasmart.exception.AuthenticationException;
+import com.relyon.metasmart.exception.BadRequestException;
 import com.relyon.metasmart.exception.DuplicateResourceException;
 import com.relyon.metasmart.mapper.AuthMapper;
+import com.relyon.metasmart.repository.PasswordResetTokenRepository;
 import com.relyon.metasmart.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,15 +20,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
+    private static final int TOKEN_EXPIRY_HOURS = 24;
+
     private final UserRepository userRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthMapper authMapper;
+    private final EmailService emailService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -69,5 +81,71 @@ public class AuthService {
                 .email(email)
                 .name(name)
                 .build();
+    }
+
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        log.debug("Processing forgot password request for email: {}", request.getEmail());
+
+        var userOptional = userRepository.findByEmail(request.getEmail());
+
+        if (userOptional.isEmpty()) {
+            log.warn("Forgot password requested for non-existent email: {}", request.getEmail());
+            // Don't reveal that email doesn't exist - just return silently
+            return;
+        }
+
+        var user = userOptional.get();
+
+        // Invalidate any existing tokens
+        passwordResetTokenRepository.invalidateAllTokensForUser(user);
+
+        // Generate new token
+        var token = UUID.randomUUID().toString();
+        var resetToken = PasswordResetToken.builder()
+                .token(token)
+                .user(user)
+                .expiresAt(LocalDateTime.now().plusHours(TOKEN_EXPIRY_HOURS))
+                .used(false)
+                .build();
+
+        passwordResetTokenRepository.save(resetToken);
+        log.info("Password reset token generated for user ID: {}", user.getId());
+
+        // Send email
+        emailService.sendPasswordResetEmail(user.getEmail(), token, user.getName());
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        log.debug("Processing password reset with token");
+
+        var resetToken = passwordResetTokenRepository.findByTokenAndUsedFalse(request.getToken())
+                .orElseThrow(() -> {
+                    log.warn("Invalid or expired password reset token");
+                    return new BadRequestException("Invalid or expired password reset token");
+                });
+
+        if (!resetToken.isValid()) {
+            log.warn("Password reset token is expired or already used");
+            throw new BadRequestException("Password reset token has expired");
+        }
+
+        var user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        // Mark token as used
+        resetToken.setUsed(true);
+        passwordResetTokenRepository.save(resetToken);
+
+        log.info("Password reset successfully for user ID: {}", user.getId());
+    }
+
+    @Transactional
+    public boolean validateResetToken(String token) {
+        return passwordResetTokenRepository.findByTokenAndUsedFalse(token)
+                .map(PasswordResetToken::isValid)
+                .orElse(false);
     }
 }

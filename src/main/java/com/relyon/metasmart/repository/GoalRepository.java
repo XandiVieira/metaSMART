@@ -36,6 +36,28 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     long countByOwnerAndGoalStatusAndArchivedAtIsNull(User owner, GoalStatus goalStatus);
 
+    // Search
+    @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL " +
+           "AND (LOWER(g.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+           "OR LOWER(g.description) LIKE LOWER(CONCAT('%', :query, '%')))")
+    Page<Goal> searchByOwner(@Param("owner") User owner, @Param("query") String query, Pageable pageable);
+
+    // Combined filters
+    @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL " +
+           "AND (:status IS NULL OR g.goalStatus = :status) " +
+           "AND (:category IS NULL OR g.goalCategory = :category)")
+    Page<Goal> findByOwnerWithFilters(
+            @Param("owner") User owner,
+            @Param("status") GoalStatus status,
+            @Param("category") GoalCategory category,
+            Pageable pageable);
+
+    // Goals due soon (within days)
+    @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL " +
+           "AND g.goalStatus = 'ACTIVE' " +
+           "AND g.targetDate <= :dueDate ORDER BY g.targetDate ASC")
+    List<Goal> findGoalsDueSoon(@Param("owner") User owner, @Param("dueDate") java.time.LocalDate dueDate);
+
     // Legacy methods (keeping for backward compatibility)
     default Page<Goal> findByOwner(User owner, Pageable pageable) {
         return findByOwnerAndArchivedAtIsNull(owner, pageable);

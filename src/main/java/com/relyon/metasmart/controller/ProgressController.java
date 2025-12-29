@@ -39,6 +39,17 @@ public class ProgressController {
                 .body(progressService.addProgress(goalId, request, user));
     }
 
+    @PostMapping(ApiPaths.PROGRESS + "/bulk")
+    public ResponseEntity<List<ProgressEntryResponse>> addBulkProgress(
+            @PathVariable Long goalId,
+            @Valid @RequestBody BulkProgressRequest request,
+            @AuthenticationPrincipal User user
+    ) {
+        log.debug("Received request to add {} bulk progress entries for goal ID: {}", request.getEntries().size(), goalId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(progressService.addBulkProgress(goalId, request, user));
+    }
+
     @GetMapping(ApiPaths.PROGRESS)
     public ResponseEntity<Page<ProgressEntryResponse>> getProgressHistory(
             @PathVariable Long goalId,

@@ -41,6 +41,7 @@ public class GoalService {
     private final ActionItemRepository actionItemRepository;
     private final ObstacleEntryRepository obstacleEntryRepository;
     private final GoalMapper goalMapper;
+    private final UserProfileService userProfileService;
 
     @Transactional
     public GoalResponse create(GoalRequest request, User owner) {
@@ -186,6 +187,89 @@ public class GoalService {
                 .map(this::enrichGoalResponse);
     }
 
+    @Transactional(readOnly = true)
+    public Page<GoalResponse> search(User owner, String query, Pageable pageable) {
+        log.debug("Searching goals with query: {} for user ID: {}", query, owner.getId());
+        return goalRepository.searchByOwner(owner, query, pageable)
+                .map(this::enrichGoalResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<GoalResponse> filter(User owner, GoalStatus status, GoalCategory category, Pageable pageable) {
+        log.debug("Filtering goals with status: {}, category: {} for user ID: {}", status, category, owner.getId());
+        return goalRepository.findByOwnerWithFilters(owner, status, category, pageable)
+                .map(this::enrichGoalResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GoalResponse> findDueSoon(User owner, int days) {
+        log.debug("Finding goals due within {} days for user ID: {}", days, owner.getId());
+        var dueDate = LocalDate.now().plusDays(days);
+        return goalRepository.findGoalsDueSoon(owner, dueDate).stream()
+                .map(this::enrichGoalResponse)
+                .toList();
+    }
+
+    @Transactional
+    public GoalResponse duplicate(Long id, User owner) {
+        log.debug("Duplicating goal ID: {} for user ID: {}", id, owner.getId());
+
+        var original = goalRepository.findByIdAndOwner(id, owner)
+                .orElseThrow(() -> {
+                    log.warn("Goal not found with ID: {} for user ID: {}", id, owner.getId());
+                    return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
+                });
+
+        var duplicate = Goal.builder()
+                .title(original.getTitle() + " (Copy)")
+                .description(original.getDescription())
+                .goalCategory(original.getGoalCategory())
+                .targetValue(original.getTargetValue())
+                .unit(original.getUnit())
+                .motivation(original.getMotivation())
+                .startDate(LocalDate.now())
+                .targetDate(original.getTargetDate() != null
+                        ? LocalDate.now().plusDays(java.time.temporal.ChronoUnit.DAYS.between(original.getStartDate(), original.getTargetDate()))
+                        : null)
+                .owner(owner)
+                .build();
+
+        var savedGoal = goalRepository.save(duplicate);
+        log.info("Goal duplicated from ID: {} to new ID: {} for user ID: {}", id, savedGoal.getId(), owner.getId());
+
+        createDefaultMilestones(savedGoal);
+
+        return enrichGoalResponse(savedGoal);
+    }
+
+    @Transactional
+    public GoalResponse useStreakShield(Long goalId, User owner) {
+        log.debug("Using streak shield for goal ID: {} by user ID: {}", goalId, owner.getId());
+
+        var goal = goalRepository.findByIdAndOwnerAndArchivedAtIsNull(goalId, owner)
+                .orElseThrow(() -> {
+                    log.warn("Goal not found with ID: {} for user ID: {}", goalId, owner.getId());
+                    return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
+                });
+
+        // Check if shield was already used today
+        if (goal.getLastStreakShieldUsedAt() != null
+                && goal.getLastStreakShieldUsedAt().equals(LocalDate.now())) {
+            throw new IllegalStateException("Streak shield already used today for this goal");
+        }
+
+        // Try to use a shield
+        if (!userProfileService.useStreakShield(owner)) {
+            throw new IllegalStateException("No streak shields available");
+        }
+
+        goal.setLastStreakShieldUsedAt(LocalDate.now());
+        var savedGoal = goalRepository.save(goal);
+        log.info("Streak shield used for goal ID: {} by user ID: {}", goalId, owner.getId());
+
+        return enrichGoalResponse(savedGoal);
+    }
+
     private GoalResponse enrichGoalResponse(Goal goal) {
         var response = goalMapper.toResponse(goal);
         response.setSmartPillars(calculateSmartPillars(goal));
@@ -267,7 +351,12 @@ public class GoalService {
         var streak = 1;
         var today = LocalDate.now();
 
-        if (dates.getFirst().equals(today) || dates.getFirst().equals(today.minusDays(1))) {
+        // Check if streak shield was used within recovery window (today or yesterday)
+        var shieldUsed = goal.getLastStreakShieldUsedAt() != null
+                && (goal.getLastStreakShieldUsedAt().equals(today)
+                    || goal.getLastStreakShieldUsedAt().equals(today.minusDays(1)));
+
+        if (dates.getFirst().equals(today) || dates.getFirst().equals(today.minusDays(1)) || shieldUsed) {
             currentStreak = 1;
         }
 
@@ -275,9 +364,14 @@ public class GoalService {
             var current = dates.get(dateIndex);
             var next = dates.get(dateIndex + 1);
 
-            if (current.minusDays(1).equals(next)) {
+            // Check if this gap was covered by a shield
+            var gapCoveredByShield = goal.getLastStreakShieldUsedAt() != null
+                    && goal.getLastStreakShieldUsedAt().equals(current.minusDays(1))
+                    && next.equals(current.minusDays(2));
+
+            if (current.minusDays(1).equals(next) || gapCoveredByShield) {
                 streak++;
-                if (dateIndex == 0 || dates.getFirst().equals(today) || dates.getFirst().equals(today.minusDays(1))) {
+                if (dateIndex == 0 || dates.getFirst().equals(today) || dates.getFirst().equals(today.minusDays(1)) || shieldUsed) {
                     currentStreak = streak;
                 }
             } else {

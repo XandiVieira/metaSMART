@@ -75,6 +75,21 @@
 			"key": "reflectionId",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "resetToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "taskCompletionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "scheduledTaskId",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"item": [
@@ -1068,6 +1083,69 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "forgot-password"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Validate Reset Token",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/validate-reset-token?token={{resetToken}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "validate-reset-token"],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{resetToken}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{resetToken}}\",\n    \"newPassword\": \"NewPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/reset-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "reset-password"]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1151,6 +1229,76 @@
 							"raw": "{{baseUrl}}/api/v1/users/streak-shields/use",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "users", "streak-shields", "use"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Preferences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/preferences",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users", "preferences"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Preferences",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"timezone\": \"America/Sao_Paulo\",\n    \"language\": \"pt\",\n    \"emailNotifications\": true,\n    \"pushNotifications\": true,\n    \"weeklyDigest\": true,\n    \"streakReminders\": true,\n    \"guardianNudges\": true,\n    \"preferredReminderTime\": \"09:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/preferences",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users", "preferences"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notification Preferences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/notifications/preferences",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users", "notifications", "preferences"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Notification Preferences",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pushEnabled\": true,\n    \"pushGoalReminders\": true,\n    \"pushProgressReminders\": true,\n    \"pushMilestones\": true,\n    \"pushStreakAlerts\": true,\n    \"pushGuardianNudges\": true,\n    \"emailEnabled\": true,\n    \"emailWeeklyDigest\": true,\n    \"emailMilestones\": true,\n    \"emailStreakAtRisk\": true,\n    \"whatsappEnabled\": false,\n    \"quietHoursEnabled\": true,\n    \"quietHoursStart\": \"22:00\",\n    \"quietHoursEnd\": \"08:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/notifications/preferences",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users", "notifications", "preferences"]
 						}
 					},
 					"response": []
@@ -1355,6 +1503,152 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Search Goals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/search?query=run",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "search"],
+							"query": [
+								{
+									"key": "query",
+									"value": "run"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Goals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/filter?status=ACTIVE&category=HEALTH",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "filter"],
+							"query": [
+								{
+									"key": "status",
+									"value": "ACTIVE"
+								},
+								{
+									"key": "category",
+									"value": "HEALTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Goals Due Soon",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/due-soon?days=7",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "due-soon"],
+							"query": [
+								{
+									"key": "days",
+									"value": "7"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Duplicate Goal",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/duplicate",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "duplicate"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Use Streak Shield for Goal",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/use-streak-shield",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "use-streak-shield"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Goal Notes",
+			"item": [
+				{
+					"name": "Create Note",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Feeling great about my progress today!\",\n    \"noteType\": \"REFLECTION\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/notes",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "notes"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/notes",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "notes"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notes by Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/notes?noteType=REFLECTION",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "notes"],
+							"query": [
+								{
+									"key": "noteType",
+									"value": "REFLECTION"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1393,6 +1687,28 @@
 							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "goals", "{{goalId}}", "progress"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Bulk Progress",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entries\": [\n        { \"progressValue\": 1, \"note\": \"Day 1\" },\n        { \"progressValue\": 2, \"note\": \"Day 2\" },\n        { \"progressValue\": 1.5, \"note\": \"Day 3\" }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress/bulk",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "progress", "bulk"]
 						}
 					},
 					"response": []
@@ -1696,6 +2012,280 @@
 							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Task Completions",
+			"description": "Track completions for recurring tasks",
+			"item": [
+				{
+					"name": "Record Task Completion",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('taskCompletionId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"note\": \"Completed morning run!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Record Completion for Specific Date",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"date\": \"2025-01-15\",\n    \"note\": \"Completed afternoon session\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Completion History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Completions by Date Range",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions/range?startDate=2025-01-01&endDate=2025-01-31",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions", "range"],
+							"query": [
+								{"key": "startDate", "value": "2025-01-01"},
+								{"key": "endDate", "value": "2025-01-31"}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Count Completions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions/count",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions", "count"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Completion",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions/{{taskCompletionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions", "{{taskCompletionId}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Scheduled Tasks (Flight Plan)",
+			"description": "Schedule and manage task instances for recurring and frequency-based tasks",
+			"item": [
+				{
+					"name": "Create Scheduled Task",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('scheduledTaskId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"taskId\": {{actionItemId}},\n    \"scheduledDate\": \"2025-01-20\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Schedule for Frequency Task",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/generate/{{actionItemId}}?startDate=2025-01-01&endDate=2025-01-31",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "generate", "{{actionItemId}}"],
+							"query": [
+								{"key": "startDate", "value": "2025-01-01"},
+								{"key": "endDate", "value": "2025-01-31"}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Scheduled Tasks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Scheduled Tasks by Date Range",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks?startDate=2025-01-01&endDate=2025-01-31",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks"],
+							"query": [
+								{"key": "startDate", "value": "2025-01-01"},
+								{"key": "endDate", "value": "2025-01-31"}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Scheduled Tasks for Action Item",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/action-item/{{actionItemId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "action-item", "{{actionItemId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Tasks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/pending",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "pending"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Scheduled Task Complete",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/{{scheduledTaskId}}/complete",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "{{scheduledTaskId}}", "complete"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Scheduled Task Incomplete",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/{{scheduledTaskId}}/incomplete",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "{{scheduledTaskId}}", "incomplete"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Scheduled Task",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/{{scheduledTaskId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "{{scheduledTaskId}}"]
 						}
 					},
 					"response": []

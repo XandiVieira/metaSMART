@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -43,4 +44,18 @@ public class GoalRequest {
     @NotNull(message = "Target date is required")
     @Future(message = "Target date must be in the future")
     private LocalDate targetDate;
+
+    private GoalPillarsDto pillars;
+
+    private GoalMeasurementDto measurement;
+
+    private GoalRemindersDto reminders;
+
+    private EmotionalAnchorsDto emotionalAnchors;
+
+    private AiSupportDto aiSupport;
+
+    private List<String> tags;
+
+    private String actionPlanOverview;
 }

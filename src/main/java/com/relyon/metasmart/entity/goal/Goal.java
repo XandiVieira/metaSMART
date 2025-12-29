@@ -39,7 +39,7 @@ public class Goal extends AuditableEntity {
     private String unit;
 
     @Builder.Default
-    @Column(nullable = false, precision = 5, scale = 2)
+    @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal currentProgress = BigDecimal.ZERO;
 
     @Column(length = 500)
@@ -61,4 +61,31 @@ public class Goal extends AuditableEntity {
     private User owner;
 
     private LocalDate archivedAt;
+
+    private LocalDate lastStreakShieldUsedAt;
+
+    @Embedded
+    private GoalPillars pillars;
+
+    @Embedded
+    private GoalMeasurement measurement;
+
+    @Embedded
+    private GoalReminders reminders;
+
+    @Embedded
+    private EmotionalAnchors emotionalAnchors;
+
+    @Embedded
+    private AiSupport aiSupport;
+
+    @Column(length = 500)
+    private String tags;
+
+    @Column(name = "action_plan_overview", length = 2000)
+    private String actionPlanOverview;
+
+    @Builder.Default
+    @Column(name = "streak")
+    private Integer streak = 0;
 }

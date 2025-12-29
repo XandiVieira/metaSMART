@@ -8,10 +8,54 @@
 
 **Swagger UI:** `http://localhost:8080/relyon/metasmart/swagger-ui.html`
 
-**Authentication:** All endpoints (except `/api/v1/auth/*`) require JWT token in header:
+**Health Check:** `http://localhost:8080/relyon/metasmart/actuator/health`
+
+**Authentication:** All endpoints (except `/api/v1/auth/*` and `/actuator/*`) require JWT token in header:
 ```
 Authorization: Bearer <token>
 ```
+
+---
+
+## Running with Docker
+
+### Production (Full Stack)
+```bash
+# Copy and configure environment
+cp .env.example .env
+# Edit .env with your secrets
+
+# Build and run
+docker-compose up -d
+
+# View logs
+docker-compose logs -f app
+```
+
+### Development (Database Only)
+```bash
+# Start only PostgreSQL
+docker-compose -f docker-compose.dev.yml up -d
+
+# Run app with IDE or Maven
+./mvnw spring-boot:run
+```
+
+### Environment Variables
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DB_PASSWORD` | PostgreSQL password | Yes |
+| `JWT_SECRET` | JWT signing secret (256-bit) | Yes |
+| `DB_URL` | Database connection URL | No (default provided) |
+| `SWAGGER_ENABLED` | Enable Swagger UI | No (default: false) |
+
+---
+
+## Health Check
+
+The application exposes Spring Boot Actuator health endpoints:
+- `GET /actuator/health` - Application health status
+- `GET /actuator/info` - Application information
 
 ---
 
@@ -22,10 +66,23 @@ Authorization: Bearer <token>
 |--------|----------|-------------|
 | POST | `/register` | Register user → returns `{ token }` |
 | POST | `/login` | Login → returns `{ token }` |
+| POST | `/forgot-password` | Request password reset email |
+| POST | `/reset-password` | Reset password with token |
+| GET | `/validate-reset-token?token=` | Check if reset token is valid |
 
-**Request body:**
+**Register/Login body:**
 ```json
 { "name": "John", "email": "john@example.com", "password": "Password123!" }
+```
+
+**Forgot password:**
+```json
+{ "email": "john@example.com" }
+```
+
+**Reset password:**
+```json
+{ "token": "uuid-reset-token", "newPassword": "NewPassword123!" }
 ```
 
 **Password requirements:** At least 8 characters with uppercase, lowercase, number, and special character (@$!%*?&).
@@ -54,6 +111,10 @@ Authorization: Bearer <token>
 | GET | `/profile` | Get current user profile |
 | PUT | `/profile` | Update profile (name) |
 | POST | `/streak-shields/use` | Use a streak shield |
+| GET | `/preferences` | Get user preferences |
+| PUT | `/preferences` | Update user preferences |
+| GET | `/notifications/preferences` | Get notification preferences |
+| PUT | `/notifications/preferences` | Update notification preferences |
 
 **Profile response includes:**
 - User info (id, name, email, joinedAt)
@@ -61,6 +122,41 @@ Authorization: Bearer <token>
 - `streakShields` - Available streak shields
 
 *Streak shields are earned at 50% and 100% milestones.*
+
+**User preferences:**
+```json
+{
+  "timezone": "America/Sao_Paulo",
+  "language": "pt",
+  "emailNotifications": true,
+  "pushNotifications": true,
+  "weeklyDigest": true,
+  "streakReminders": true,
+  "guardianNudges": true,
+  "preferredReminderTime": "09:00"
+}
+```
+
+**Notification preferences:**
+```json
+{
+  "pushEnabled": true,
+  "pushGoalReminders": true,
+  "pushProgressReminders": true,
+  "pushMilestones": true,
+  "pushStreakAlerts": true,
+  "pushGuardianNudges": true,
+  "emailEnabled": true,
+  "emailWeeklyDigest": true,
+  "emailMilestones": true,
+  "emailStreakAtRisk": true,
+  "whatsappEnabled": false,
+  "whatsappNumber": "+5511999999999",
+  "quietHoursEnabled": true,
+  "quietHoursStart": "22:00",
+  "quietHoursEnd": "08:00"
+}
+```
 
 ---
 
@@ -72,7 +168,12 @@ Authorization: Bearer <token>
 | GET | `/{id}` | Get by ID |
 | GET | `/status/{status}` | Filter by status |
 | GET | `/category/{category}` | Filter by category |
+| GET | `/filter` | Combined filters (status + category) |
+| GET | `/search?query=` | Search by title/description |
+| GET | `/due-soon?days=7` | Goals due within N days |
 | GET | `/archived` | List archived goals |
+| POST | `/{id}/duplicate` | Duplicate a goal |
+| POST | `/{id}/use-streak-shield` | Use streak shield (24h recovery) |
 | PUT | `/{id}` | Update goal |
 | PUT | `/{id}/archive` | Archive goal (soft delete) |
 | PUT | `/{id}/unarchive` | Restore archived goal |
@@ -94,6 +195,7 @@ Authorization: Bearer <token>
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/` | Add progress entry |
+| POST | `/bulk` | Add multiple progress entries |
 | GET | `/` | Get history (paginated) |
 | GET | `/?startDate=&endDate=` | Filter by date range |
 | PUT | `/{progressId}` | Update entry |
@@ -102,6 +204,38 @@ Authorization: Bearer <token>
 **Request body:**
 ```json
 { "progressValue": 1, "note": "Optional note" }
+```
+
+**Bulk progress request:**
+```json
+{
+  "entries": [
+    { "progressValue": 1, "note": "Day 1" },
+    { "progressValue": 2, "note": "Day 2" },
+    { "progressValue": 1.5, "note": "Day 3" }
+  ]
+}
+```
+
+---
+
+### Goal Notes (`/api/v1/goals/{goalId}/notes`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/` | Create note |
+| GET | `/` | List notes (paginated) |
+| GET | `/?noteType=REFLECTION` | Filter by type |
+| PUT | `/{noteId}` | Update note |
+| DELETE | `/{noteId}` | Delete note |
+
+**Note types:** `GENERAL`, `REFLECTION`, `MILESTONE`, `OBSTACLE`, `CELEBRATION`
+
+**Request body:**
+```json
+{
+  "content": "Feeling great about my progress!",
+  "noteType": "REFLECTION"
+}
 ```
 
 ---
@@ -124,6 +258,62 @@ Authorization: Bearer <token>
 | GET | `/` | List all (ordered) |
 | PUT | `/{itemId}` | Update item |
 | DELETE | `/{itemId}` | Delete item |
+
+**Task Types:**
+- `ONE_TIME` - Single occurrence task
+- `DAILY_HABIT` - Recurring daily task
+- `FREQUENCY_BASED` - Task with frequency goal (e.g., 3x per week)
+- `MILESTONE` - Milestone-based task
+
+---
+
+### Task Completions (`/api/v1/goals/{goalId}/action-items/{actionItemId}/completions`)
+
+*Track completion history for recurring tasks (daily habits, frequency-based tasks).*
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/` | Record completion |
+| GET | `/` | Get completion history |
+| GET | `/paginated` | Get paginated history |
+| GET | `/range?startDate=&endDate=` | Get by date range |
+| GET | `/count` | Count total completions |
+| GET | `/count/range?startDate=&endDate=` | Count in period |
+| DELETE | `/{completionId}` | Delete completion |
+
+**Record completion request:**
+```json
+{
+    "date": "2025-01-15",  // Optional, defaults to today
+    "note": "Completed morning run!"
+}
+```
+
+---
+
+### Scheduled Tasks - Flight Plan (`/api/v1/goals/{goalId}/scheduled-tasks`)
+
+*Schedule and manage task instances for frequency-based and recurring tasks.*
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/` | Create scheduled task |
+| POST | `/generate/{actionItemId}?startDate=&endDate=` | Auto-generate schedule |
+| GET | `/` | Get all scheduled tasks |
+| GET | `/?startDate=&endDate=` | Get by date range |
+| GET | `/action-item/{actionItemId}` | Get by action item |
+| GET | `/pending` | Get pending (overdue + today) |
+| PATCH | `/{id}/complete` | Mark as completed |
+| PATCH | `/{id}/incomplete` | Mark as incomplete |
+| DELETE | `/{id}` | Delete scheduled task |
+
+**Create scheduled task request:**
+```json
+{
+    "taskId": 1,
+    "scheduledDate": "2025-01-20"
+}
+```
 
 ---
 

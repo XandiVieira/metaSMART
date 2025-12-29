@@ -9,8 +9,10 @@ import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
 import com.relyon.metasmart.mapper.ActionItemMapper;
+import com.relyon.metasmart.mapper.TaskCompletionMapper;
 import com.relyon.metasmart.repository.ActionItemRepository;
 import com.relyon.metasmart.repository.GoalRepository;
+import com.relyon.metasmart.repository.TaskCompletionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +42,13 @@ class ActionItemServiceTest {
     private GoalRepository goalRepository;
 
     @Mock
+    private TaskCompletionRepository taskCompletionRepository;
+
+    @Mock
     private ActionItemMapper actionItemMapper;
+
+    @Mock
+    private TaskCompletionMapper taskCompletionMapper;
 
     @InjectMocks
     private ActionItemService actionItemService;
@@ -60,7 +69,7 @@ class ActionItemServiceTest {
                 .goal(goal)
                 .title("Buy running shoes")
                 .description("Get proper running shoes")
-                .dueDate(LocalDate.now().plusDays(7))
+                .targetDate(LocalDate.now().plusDays(7))
                 .orderIndex(1)
                 .completed(false)
                 .build();
@@ -68,7 +77,7 @@ class ActionItemServiceTest {
         request = ActionItemRequest.builder()
                 .title("Buy running shoes")
                 .description("Get proper running shoes")
-                .dueDate(LocalDate.now().plusDays(7))
+                .targetDate(LocalDate.now().plusDays(7))
                 .orderIndex(1)
                 .build();
 
@@ -76,7 +85,7 @@ class ActionItemServiceTest {
                 .id(1L)
                 .title("Buy running shoes")
                 .description("Get proper running shoes")
-                .dueDate(LocalDate.now().plusDays(7))
+                .targetDate(LocalDate.now().plusDays(7))
                 .orderIndex(1)
                 .completed(false)
                 .build();
@@ -93,6 +102,7 @@ class ActionItemServiceTest {
             when(actionItemMapper.toEntity(request)).thenReturn(actionItem);
             when(actionItemRepository.save(any(ActionItem.class))).thenReturn(actionItem);
             when(actionItemMapper.toResponse(actionItem)).thenReturn(response);
+            when(taskCompletionRepository.findByActionItemOrderByCompletedAtDesc(any())).thenReturn(Collections.emptyList());
 
             var result = actionItemService.create(1L, request, user);
 
@@ -123,6 +133,7 @@ class ActionItemServiceTest {
             when(actionItemRepository.findByGoalOrderByOrderIndexAscCreatedAtAsc(goal))
                     .thenReturn(List.of(actionItem));
             when(actionItemMapper.toResponse(actionItem)).thenReturn(response);
+            when(taskCompletionRepository.findByActionItemOrderByCompletedAtDesc(any())).thenReturn(Collections.emptyList());
 
             var result = actionItemService.findByGoal(1L, user);
 
@@ -147,6 +158,7 @@ class ActionItemServiceTest {
             when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
             when(actionItemRepository.save(any(ActionItem.class))).thenReturn(actionItem);
             when(actionItemMapper.toResponse(actionItem)).thenReturn(response);
+            when(taskCompletionRepository.findByActionItemOrderByCompletedAtDesc(any())).thenReturn(Collections.emptyList());
 
             var result = actionItemService.update(1L, 1L, updateRequest, user);
 
@@ -176,9 +188,11 @@ class ActionItemServiceTest {
         void shouldDeleteActionItemSuccessfully() {
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
             when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
+            doNothing().when(taskCompletionRepository).deleteByActionItem(any());
 
             actionItemService.delete(1L, 1L, user);
 
+            verify(taskCompletionRepository).deleteByActionItem(actionItem);
             verify(actionItemRepository).delete(actionItem);
         }
 

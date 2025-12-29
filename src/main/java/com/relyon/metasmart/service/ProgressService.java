@@ -4,6 +4,8 @@ import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.goal.GoalStatus;
 import com.relyon.metasmart.entity.progress.Milestone;
+import com.relyon.metasmart.entity.progress.ProgressEntry;
+import com.relyon.metasmart.entity.progress.dto.BulkProgressRequest;
 import com.relyon.metasmart.entity.progress.dto.MilestoneRequest;
 import com.relyon.metasmart.entity.progress.dto.MilestoneResponse;
 import com.relyon.metasmart.entity.progress.dto.ProgressEntryRequest;
@@ -22,6 +24,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +61,32 @@ public class ProgressService {
         checkAndUpdateMilestones(goal, user);
 
         return progressEntryMapper.toResponse(savedEntry);
+    }
+
+    @Transactional
+    public List<ProgressEntryResponse> addBulkProgress(Long goalId, BulkProgressRequest request, User user) {
+        log.debug("Adding {} bulk progress entries for goal ID: {}", request.getEntries().size(), goalId);
+
+        var goal = findGoalByIdAndOwner(goalId, user);
+        var responses = new ArrayList<ProgressEntryResponse>();
+
+        for (var item : request.getEntries()) {
+            var entry = ProgressEntry.builder()
+                    .goal(goal)
+                    .progressValue(item.getProgressValue())
+                    .note(item.getNote())
+                    .build();
+
+            var savedEntry = progressEntryRepository.save(entry);
+            responses.add(progressEntryMapper.toResponse(savedEntry));
+        }
+
+        log.info("{} progress entries created for goal ID: {}", responses.size(), goalId);
+
+        updateGoalProgress(goal);
+        checkAndUpdateMilestones(goal, user);
+
+        return responses;
     }
 
     @Transactional(readOnly = true)

@@ -118,4 +118,52 @@ public class GoalController {
         log.debug("Received request to get archived goals for user ID: {}", user.getId());
         return ResponseEntity.ok(goalService.findArchived(user, pageable));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<GoalResponse>> search(
+            @RequestParam String query,
+            @AuthenticationPrincipal User user,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        log.debug("Searching goals with query: {} for user ID: {}", query, user.getId());
+        return ResponseEntity.ok(goalService.search(user, query, pageable));
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<Page<GoalResponse>> filter(
+            @RequestParam(required = false) GoalStatus status,
+            @RequestParam(required = false) GoalCategory category,
+            @AuthenticationPrincipal User user,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        log.debug("Filtering goals with status: {}, category: {} for user ID: {}", status, category, user.getId());
+        return ResponseEntity.ok(goalService.filter(user, status, category, pageable));
+    }
+
+    @GetMapping("/due-soon")
+    public ResponseEntity<java.util.List<GoalResponse>> dueSoon(
+            @RequestParam(defaultValue = "7") int days,
+            @AuthenticationPrincipal User user
+    ) {
+        log.debug("Finding goals due within {} days for user ID: {}", days, user.getId());
+        return ResponseEntity.ok(goalService.findDueSoon(user, days));
+    }
+
+    @PostMapping("/{id}/duplicate")
+    public ResponseEntity<GoalResponse> duplicate(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user
+    ) {
+        log.debug("Received request to duplicate goal ID: {} for user ID: {}", id, user.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(goalService.duplicate(id, user));
+    }
+
+    @PostMapping("/{id}/use-streak-shield")
+    public ResponseEntity<GoalResponse> useStreakShield(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user
+    ) {
+        log.debug("Received request to use streak shield for goal ID: {} for user ID: {}", id, user.getId());
+        return ResponseEntity.ok(goalService.useStreakShield(id, user));
+    }
 }

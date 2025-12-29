@@ -1,0 +1,26 @@
+version: '3.8'
+
+# Development docker-compose - only runs PostgreSQL
+# Use this when developing locally with IDE
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: metasmart-db-dev
+    environment:
+      - POSTGRES_DB=metasmart
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d metasmart"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data_dev:

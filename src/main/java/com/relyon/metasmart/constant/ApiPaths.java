@@ -22,4 +22,6 @@ public final class ApiPaths {
     public static final String SOCIAL = API_V1 + "/social";
     public static final String DASHBOARD = API_V1 + "/dashboard";
     public static final String USERS = API_V1 + "/users";
+    public static final String COMPLETIONS = "/completions";
+    public static final String SCHEDULED_TASKS = "/scheduled-tasks";
 }

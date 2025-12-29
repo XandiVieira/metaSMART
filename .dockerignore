@@ -1,0 +1,40 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iml
+.vscode
+*.swp
+
+# Build outputs
+target/
+build/
+*.jar
+*.war
+
+# Logs
+*.log
+logs/
+
+# Environment files (keep secrets out of images)
+.env
+*.env.local
+
+# Documentation
+*.md
+docs/
+
+# Test files
+src/test/
+
+# Postman collection
+postman/
+
+# Node modules (if any frontend)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
