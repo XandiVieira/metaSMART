@@ -278,6 +278,38 @@ class GoalGuardianServiceTest {
                 gg.getStatus() == GuardianStatus.DECLINED && gg.getDeclinedAt() != null
             ));
         }
+
+        @Test
+        @DisplayName("Should throw when invitation not found for decline")
+        void shouldThrowWhenInvitationNotFoundForDecline() {
+            when(goalGuardianRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> goalGuardianService.declineInvitation(1L, guardian))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.GUARDIAN_INVITATION_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("Should throw when not the invited guardian for decline")
+        void shouldThrowWhenNotInvitedGuardianForDecline() {
+            var otherUser = User.builder().id(99L).build();
+            when(goalGuardianRepository.findById(1L)).thenReturn(Optional.of(goalGuardian));
+
+            assertThatThrownBy(() -> goalGuardianService.declineInvitation(1L, otherUser))
+                    .isInstanceOf(AccessDeniedException.class)
+                    .hasMessage(ErrorMessages.GUARDIAN_PERMISSION_DENIED);
+        }
+
+        @Test
+        @DisplayName("Should throw when invitation not pending for decline")
+        void shouldThrowWhenNotPendingForDecline() {
+            goalGuardian.setStatus(GuardianStatus.ACTIVE);
+            when(goalGuardianRepository.findById(1L)).thenReturn(Optional.of(goalGuardian));
+
+            assertThatThrownBy(() -> goalGuardianService.declineInvitation(1L, guardian))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage(ErrorMessages.GUARDIAN_INVITATION_NOT_FOUND);
+        }
     }
 
     @Nested
@@ -389,6 +421,150 @@ class GoalGuardianServiceTest {
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> goalGuardianService.getGuardedGoalDetails(1L, guardian))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.GUARDIAN_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("Should get guarded goal details with all permissions")
+        void shouldGetGuardedGoalDetailsWithAllPermissions() {
+            goalGuardian.setStatus(GuardianStatus.ACTIVE);
+            goalGuardian.setPermissions(Set.of(
+                    GuardianPermission.VIEW_PROGRESS,
+                    GuardianPermission.VIEW_STREAK,
+                    GuardianPermission.VIEW_ACTION_PLAN,
+                    GuardianPermission.VIEW_OBSTACLES
+            ));
+
+            var progressEntry = com.relyon.metasmart.entity.progress.ProgressEntry.builder()
+                    .id(1L)
+                    .goal(goal)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            when(goalGuardianRepository.findActiveGuardianship(1L, guardian, GuardianStatus.ACTIVE))
+                    .thenReturn(Optional.of(goalGuardian));
+            when(progressEntryRepository.findTopByGoalOrderByCreatedAtDesc(goal)).thenReturn(Optional.of(progressEntry));
+            when(progressEntryRepository.findDistinctProgressDates(goal)).thenReturn(List.of(LocalDate.now()));
+            when(actionItemRepository.countByGoal(goal)).thenReturn(10L);
+            when(actionItemRepository.countByGoalAndCompletedTrue(goal)).thenReturn(5L);
+            when(obstacleEntryRepository.countByGoalAndResolvedFalse(goal)).thenReturn(2L);
+
+            var result = goalGuardianService.getGuardedGoalDetails(1L, guardian);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getCurrentProgress()).isEqualTo(BigDecimal.ZERO);
+            assertThat(result.getTotalActionsCount()).isEqualTo(10);
+            assertThat(result.getCompletedActionsCount()).isEqualTo(5);
+            assertThat(result.getUnresolvedObstaclesCount()).isEqualTo(2);
+            assertThat(result.getLastProgressAt()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("Should handle invalid target value for progress percentage")
+        void shouldHandleInvalidTargetValueForProgressPercentage() {
+            goal.setTargetValue("invalid");
+            goalGuardian.setStatus(GuardianStatus.ACTIVE);
+            goalGuardian.setPermissions(Set.of(GuardianPermission.VIEW_PROGRESS));
+
+            when(goalGuardianRepository.findActiveGuardianship(1L, guardian, GuardianStatus.ACTIVE))
+                    .thenReturn(Optional.of(goalGuardian));
+            when(progressEntryRepository.findTopByGoalOrderByCreatedAtDesc(goal)).thenReturn(Optional.empty());
+
+            var result = goalGuardianService.getGuardedGoalDetails(1L, guardian);
+
+            assertThat(result.getProgressPercentage()).isEqualTo(BigDecimal.ZERO);
+        }
+
+        @Test
+        @DisplayName("Should handle zero target value for progress percentage")
+        void shouldHandleZeroTargetValueForProgressPercentage() {
+            goal.setTargetValue("0");
+            goalGuardian.setStatus(GuardianStatus.ACTIVE);
+            goalGuardian.setPermissions(Set.of(GuardianPermission.VIEW_PROGRESS));
+
+            when(goalGuardianRepository.findActiveGuardianship(1L, guardian, GuardianStatus.ACTIVE))
+                    .thenReturn(Optional.of(goalGuardian));
+            when(progressEntryRepository.findTopByGoalOrderByCreatedAtDesc(goal)).thenReturn(Optional.empty());
+
+            var result = goalGuardianService.getGuardedGoalDetails(1L, guardian);
+
+            assertThat(result.getProgressPercentage()).isEqualTo(BigDecimal.ZERO);
+        }
+
+        @Test
+        @DisplayName("Should calculate streak with consecutive dates")
+        void shouldCalculateStreakWithConsecutiveDates() {
+            var today = LocalDate.now();
+            goalGuardian.setStatus(GuardianStatus.ACTIVE);
+            goalGuardian.setPermissions(Set.of(GuardianPermission.VIEW_STREAK));
+
+            when(goalGuardianRepository.findActiveGuardianship(1L, guardian, GuardianStatus.ACTIVE))
+                    .thenReturn(Optional.of(goalGuardian));
+            when(progressEntryRepository.findDistinctProgressDates(goal))
+                    .thenReturn(List.of(today, today.minusDays(1), today.minusDays(2)));
+
+            var result = goalGuardianService.getGuardedGoalDetails(1L, guardian);
+
+            assertThat(result.getCurrentStreak()).isEqualTo(3);
+            assertThat(result.getLongestStreak()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("Should calculate streak with non-consecutive dates")
+        void shouldCalculateStreakWithNonConsecutiveDates() {
+            var today = LocalDate.now();
+            goalGuardian.setStatus(GuardianStatus.ACTIVE);
+            goalGuardian.setPermissions(Set.of(GuardianPermission.VIEW_STREAK));
+
+            when(goalGuardianRepository.findActiveGuardianship(1L, guardian, GuardianStatus.ACTIVE))
+                    .thenReturn(Optional.of(goalGuardian));
+            when(progressEntryRepository.findDistinctProgressDates(goal))
+                    .thenReturn(List.of(today.minusDays(10), today.minusDays(11), today.minusDays(12)));
+
+            var result = goalGuardianService.getGuardedGoalDetails(1L, guardian);
+
+            // Longest streak should be 3 (the consecutive old dates)
+            assertThat(result.getLongestStreak()).isEqualTo(3);
+        }
+    }
+
+    @Nested
+    @DisplayName("Get guardians goal not found tests")
+    class GetGuardiansGoalNotFoundTests {
+
+        @Test
+        @DisplayName("Should throw when goal not found for get guardians")
+        void shouldThrowWhenGoalNotFoundForGetGuardians() {
+            when(goalRepository.findByIdAndOwner(1L, owner)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> goalGuardianService.getGuardiansForGoal(1L, owner))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.GOAL_NOT_FOUND);
+        }
+    }
+
+    @Nested
+    @DisplayName("Remove guardian edge cases")
+    class RemoveGuardianEdgeCases {
+
+        @Test
+        @DisplayName("Should throw when goal not found for remove guardian")
+        void shouldThrowWhenGoalNotFoundForRemoveGuardian() {
+            when(goalRepository.findByIdAndOwner(1L, owner)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> goalGuardianService.removeGuardian(1L, 1L, owner))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.GOAL_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("Should throw when guardian relationship not found")
+        void shouldThrowWhenGuardianRelationshipNotFound() {
+            when(goalRepository.findByIdAndOwner(1L, owner)).thenReturn(Optional.of(goal));
+            when(goalGuardianRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> goalGuardianService.removeGuardian(1L, 1L, owner))
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessage(ErrorMessages.GUARDIAN_NOT_FOUND);
         }

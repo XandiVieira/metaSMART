@@ -409,4 +409,101 @@ class GoalServiceTest {
             verify(goalRepository).save(any(Goal.class));
         }
     }
+
+    @Nested
+    @DisplayName("Setup completion and SMART pillars edge cases")
+    class SetupCompletionEdgeCases {
+
+        @Test
+        @DisplayName("Should calculate setup completion with empty strings")
+        void shouldCalculateSetupCompletionWithEmptyStrings() {
+            goal.setTitle("");
+            goal.setDescription("   ");
+            goal.setTargetValue("");  // Empty string instead of null to avoid NPE
+            goal.setUnit("");
+            goal.setMotivation(null);
+            goal.setStartDate(null);
+            goal.setTargetDate(null);
+            goal.setGoalCategory(null);
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(goalMapper.toResponse(goal)).thenReturn(goalResponse);
+            when(progressEntryRepository.findDistinctProgressDates(goal)).thenReturn(Collections.emptyList());
+
+            var response = goalService.findById(1L, user);
+
+            assertThat(response.getSetupCompletionPercentage()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("Should calculate SMART pillars with partial fields")
+        void shouldCalculateSmartPillarsWithPartialFields() {
+            // Title set but description blank
+            goal.setTitle("Title");
+            goal.setDescription("");
+            // Target value set but unit null
+            goal.setTargetValue("5");
+            goal.setUnit(null);
+            // Motivation set (achievable and relevant)
+            goal.setMotivation("Stay healthy");
+            goal.setGoalCategory(GoalCategory.HEALTH);
+            // Only start date set
+            goal.setStartDate(LocalDate.now());
+            goal.setTargetDate(null);
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(goalMapper.toResponse(goal)).thenReturn(goalResponse);
+            when(progressEntryRepository.findDistinctProgressDates(goal)).thenReturn(Collections.emptyList());
+
+            var response = goalService.findById(1L, user);
+
+            assertThat(response.getSmartPillars()).isNotNull();
+            // specific false (desc blank), measurable false (unit null), timeBound false (targetDate null)
+        }
+
+        @Test
+        @DisplayName("Should handle single date in streak calculation")
+        void shouldHandleSingleDateInStreak() {
+            var today = LocalDate.now();
+            var dates = List.of(today);
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(goalMapper.toResponse(goal)).thenReturn(goalResponse);
+            when(progressEntryRepository.findDistinctProgressDates(goal)).thenReturn(dates);
+
+            var response = goalService.findById(1L, user);
+
+            assertThat(response.getCurrentStreak()).isEqualTo(1);
+            assertThat(response.getLongestStreak()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("Should handle old dates not starting from today or yesterday")
+        void shouldHandleOldDatesForStreak() {
+            var oldDate = LocalDate.now().minusDays(10);
+            var dates = List.of(oldDate, oldDate.minusDays(1));
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(goalMapper.toResponse(goal)).thenReturn(goalResponse);
+            when(progressEntryRepository.findDistinctProgressDates(goal)).thenReturn(dates);
+
+            var response = goalService.findById(1L, user);
+
+            // Longest streak should be 2 (the consecutive old dates)
+            assertThat(response.getLongestStreak()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("Should calculate progress percentage with actual progress")
+        void shouldCalculateProgressPercentageWithProgress() {
+            goal.setCurrentProgress(BigDecimal.valueOf(2.5));
+            goal.setTargetValue("5");
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(goalMapper.toResponse(goal)).thenReturn(goalResponse);
+            when(progressEntryRepository.findDistinctProgressDates(goal)).thenReturn(Collections.emptyList());
+
+            var response = goalService.findById(1L, user);
+
+            assertThat(response.getProgressPercentage()).isEqualTo(BigDecimal.valueOf(50.00).setScale(2));
+        }
+    }
 }

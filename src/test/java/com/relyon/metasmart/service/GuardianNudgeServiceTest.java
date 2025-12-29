@@ -307,5 +307,79 @@ class GuardianNudgeServiceTest {
                 "THANKS".equals(n.getReaction()) && n.getReadAt() != null
             ));
         }
+
+        @Test
+        @DisplayName("Should throw when goal not found for react")
+        void shouldThrowWhenGoalNotFoundForReact() {
+            var reactRequest = ReactToNudgeRequest.builder().reaction("THANKS").build();
+
+            when(goalRepository.findByIdAndOwner(1L, owner)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> guardianNudgeService.reactToNudge(1L, 1L, reactRequest, owner))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.GOAL_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("Should throw when nudge not found for react")
+        void shouldThrowWhenNudgeNotFoundForReact() {
+            var reactRequest = ReactToNudgeRequest.builder().reaction("THANKS").build();
+
+            when(goalRepository.findByIdAndOwner(1L, owner)).thenReturn(Optional.of(goal));
+            when(guardianNudgeRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> guardianNudgeService.reactToNudge(1L, 1L, reactRequest, owner))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.NUDGE_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("Should throw when nudge belongs to different goal for react")
+        void shouldThrowWhenNudgeBelongsToDifferentGoalForReact() {
+            var reactRequest = ReactToNudgeRequest.builder().reaction("THANKS").build();
+            var otherGoal = Goal.builder().id(99L).build();
+            goalGuardian.setGoal(otherGoal);
+
+            when(goalRepository.findByIdAndOwner(1L, owner)).thenReturn(Optional.of(goal));
+            when(guardianNudgeRepository.findById(1L)).thenReturn(Optional.of(nudge));
+
+            assertThatThrownBy(() -> guardianNudgeService.reactToNudge(1L, 1L, reactRequest, owner))
+                    .isInstanceOf(AccessDeniedException.class)
+                    .hasMessage(ErrorMessages.NUDGE_ACCESS_DENIED);
+        }
+
+        @Test
+        @DisplayName("Should not update readAt if already read when reacting")
+        void shouldNotUpdateReadAtIfAlreadyReadWhenReacting() {
+            nudge.setReadAt(LocalDateTime.now().minusHours(1));
+            var originalReadAt = nudge.getReadAt();
+            var reactRequest = ReactToNudgeRequest.builder().reaction("THANKS").build();
+
+            when(goalRepository.findByIdAndOwner(1L, owner)).thenReturn(Optional.of(goal));
+            when(guardianNudgeRepository.findById(1L)).thenReturn(Optional.of(nudge));
+            when(guardianNudgeRepository.save(any(GuardianNudge.class))).thenReturn(nudge);
+            when(guardianNudgeMapper.toResponse(any(GuardianNudge.class))).thenReturn(nudgeResponse);
+
+            guardianNudgeService.reactToNudge(1L, 1L, reactRequest, owner);
+
+            verify(guardianNudgeRepository).save(argThat(n ->
+                "THANKS".equals(n.getReaction()) && n.getReadAt().equals(originalReadAt)
+            ));
+        }
+    }
+
+    @Nested
+    @DisplayName("Mark as read goal not found tests")
+    class MarkAsReadGoalNotFoundTests {
+
+        @Test
+        @DisplayName("Should throw when goal not found for mark as read")
+        void shouldThrowWhenGoalNotFoundForMarkAsRead() {
+            when(goalRepository.findByIdAndOwner(1L, owner)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> guardianNudgeService.markAsRead(1L, 1L, owner))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.GOAL_NOT_FOUND);
+        }
     }
 }

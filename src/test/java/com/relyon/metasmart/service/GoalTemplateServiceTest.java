@@ -227,6 +227,32 @@ class GoalTemplateServiceTest {
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessage(ErrorMessages.GOAL_TEMPLATE_NOT_FOUND);
         }
+
+        @Test
+        @DisplayName("Should update template with all fields")
+        void shouldUpdateTemplateWithAllFields() {
+            var updateRequest = UpdateGoalTemplateRequest.builder()
+                    .name("Updated Name")
+                    .description("Updated Description")
+                    .defaultTitle("Updated Title")
+                    .defaultDescription("Updated Default Description")
+                    .defaultCategory(GoalCategory.FINANCE)
+                    .defaultTargetValue("100")
+                    .defaultUnit("dollars")
+                    .defaultMotivation("Financial freedom")
+                    .defaultDurationDays(180)
+                    .isPublic(true)
+                    .build();
+
+            when(goalTemplateRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(template));
+            when(goalTemplateRepository.save(any(GoalTemplate.class))).thenReturn(template);
+            when(goalTemplateMapper.toResponse(template)).thenReturn(response);
+
+            var result = goalTemplateService.update(1L, updateRequest, user);
+
+            assertThat(result).isNotNull();
+            verify(goalTemplateRepository).save(any(GoalTemplate.class));
+        }
     }
 
     @Nested
