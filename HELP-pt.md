@@ -249,7 +249,7 @@ As seguintes funcionalidades estao planejadas para versoes futuras:
 - **Lembretes de metas** - Notificacoes agendadas para lembrar usuarios sobre suas metas
 - **Lembretes de progresso** - Alertas diarios/semanais para registrar progresso
 - **Celebracoes de marcos** - Notificacoes quando marcos sao alcancados
-- **Alertas de sequencia** - Avisos antes de perder uma sequencia
+- **Alertas de sequencia** - Avisos antes de perder uma sequencia ("Sua sequencia de 45 dias esta em risco!")
 - **Notificacoes de guardiao** - Push em tempo real quando guardioes enviam cutucadas
 
 ### Integracao com WhatsApp
@@ -257,3 +257,85 @@ As seguintes funcionalidades estao planejadas para versoes futuras:
 - **Registro rapido de progresso** - Responder mensagens do WhatsApp para registrar progresso
 - **Cutucadas de guardiao via WhatsApp** - Guardioes podem enviar encorajamento pelo WhatsApp
 - **Resumos diarios/semanais** - Resumos de progresso entregues no WhatsApp
+
+### Funcionalidades de Engajamento e Retencao
+- **Reflexoes Semanais** - Avaliar sua semana, ajustar metas e celebrar conquistas
+- **Conquistas/Medalhas** - Gamificacao com medalhas como "Sequencia de 30 Dias", "Primeiro Marco", "Heroi Guardiao"
+- **Pontuacao de Saude da Meta** - Pontuacao calculada por IA baseada na consistencia do progresso
+- **Desafios Sazonais** - Desafios mensais tematicos para manter o engajamento
+- **Fotos de Progresso** - Acompanhamento visual antes/depois para metas de fitness, criativas ou de casa
+- **Ranking de Guardioes** - Classificacao dos melhores parceiros de responsabilidade
+- **Prova Social** - Estatisticas como "87% dos usuarios com metas similares atingiram seu marco"
+- **Construcao de Identidade** - Mensagens como "60 dias consistente - voce e um conquistador de metas!"
+
+### Botao de Dificuldade
+- **Pedir ajuda** - Botao de um toque quando estiver travado em uma meta
+- **Sugestoes inteligentes** - Recomendacoes por IA para dividir metas ou estender prazos
+- **Alerta ao guardiao** - Opcionalmente notificar guardioes quando estiver com dificuldade
+
+---
+
+### Ajuda com Dificuldades (`/api/v1/goals`)
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| GET | `/struggling/status` | Ver pedidos gratuitos restantes |
+| POST | `/{goalId}/struggling` | Pedir ajuda para uma meta |
+| GET | `/struggling/history` | Ver historico de pedidos |
+| PUT | `/struggling/{requestId}/feedback` | Marcar se a ajuda foi util |
+
+**Tipos de dificuldade:** `LACK_OF_TIME` (Falta de tempo), `LACK_OF_MOTIVATION` (Falta de motivacao), `GOAL_TOO_AMBITIOUS` (Meta muito ambiciosa), `UNCLEAR_NEXT_STEPS` (Proximos passos incertos), `EXTERNAL_OBSTACLES` (Obstaculos externos), `LOST_INTEREST` (Perda de interesse), `OTHER` (Outro)
+
+**Corpo da requisicao:**
+```json
+{
+  "strugglingType": "LACK_OF_MOTIVATION",
+  "message": "Nao consigo encontrar energia para continuar",
+  "notifyGuardians": true
+}
+```
+
+---
+
+### Assinatura (`/api/v1/subscription`)
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| GET | `/` | Ver assinatura atual |
+| GET | `/entitlements` | Ver acesso a funcionalidades e limites |
+| GET | `/purchases` | Ver historico de compras |
+
+---
+
+## Funcionalidades Premium (Planejadas)
+
+### Niveis de Assinatura
+
+| Funcionalidade | Gratis | Premium |
+|----------------|--------|---------|
+| Metas ativas | 3 | Ilimitadas |
+| Guardioes por meta | 1 | 5 |
+| Historico de progresso | 30 dias | Ilimitado |
+| Templates de meta | Apenas publicos | Criar e compartilhar |
+| Reflexoes semanais | Basico | Insights por IA |
+| Escudos de sequencia | 1/mes | 3/mes |
+| Botao de dificuldade | 1/mes | Ilimitado |
+| Conquistas/Medalhas | Conjunto basico | Colecao completa |
+| Exportar dados | - | CSV/PDF |
+| Suporte prioritario | - | Sim |
+
+### Compras Avulsas (Consumiveis)
+
+| Item | Descricao |
+|------|-----------|
+| **Escudo de Sequencia** | Proteja sua sequencia por 1 dia perdido |
+| **Assistencia de Dificuldade** | Pedido adicional de ajuda "Estou com dificuldade" |
+| **Impulso de Meta** | Slot extra para metas ativas |
+| **Slot de Guardiao** | Adicionar mais um guardiao a uma meta |
+
+### Funcionalidades Exclusivas Premium (Recomendadas para Monetizacao)
+
+1. **Escudos de Sequencia Ilimitados** - Alto valor, usuarios odeiam perder sequencias
+2. **Insights e Sugestoes por IA** - Recomendacoes personalizadas baseadas em padroes de progresso
+3. **Analytics Avancado** - Graficos, tendencias, previsoes
+4. **Marketplace de Templates** - Criar e vender templates personalizados
+5. **Integracao com WhatsApp** - Alto fator de conveniencia
+6. **Planos de Equipe/Familia** - Multiplos usuarios, metas compartilhadas

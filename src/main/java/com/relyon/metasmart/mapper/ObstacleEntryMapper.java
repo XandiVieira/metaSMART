@@ -5,11 +5,12 @@ import com.relyon.metasmart.entity.obstacle.dto.ObstacleEntryRequest;
 import com.relyon.metasmart.entity.obstacle.dto.ObstacleEntryResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.lang.NonNull;
 
-@Mapper
+@Mapper(config = MapperConfig.class)
 public interface ObstacleEntryMapper {
 
-    ObstacleEntryResponse toResponse(ObstacleEntry obstacleEntry);
+    ObstacleEntryResponse toResponse(@NonNull ObstacleEntry obstacleEntry);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "goal", ignore = true)

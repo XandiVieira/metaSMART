@@ -5,12 +5,13 @@ import com.relyon.metasmart.entity.progress.dto.ProgressEntryRequest;
 import com.relyon.metasmart.entity.progress.dto.ProgressEntryResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.lang.NonNull;
 
-@Mapper
+@Mapper(config = MapperConfig.class)
 public interface ProgressEntryMapper {
 
     @Mapping(target = "goalId", source = "goal.id")
-    ProgressEntryResponse toResponse(ProgressEntry progressEntry);
+    ProgressEntryResponse toResponse(@NonNull ProgressEntry progressEntry);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "goal", ignore = true)

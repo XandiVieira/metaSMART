@@ -4,10 +4,11 @@ import com.relyon.metasmart.entity.guardian.GoalGuardian;
 import com.relyon.metasmart.entity.guardian.dto.GoalGuardianResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 
-@Mapper
+@Mapper(config = MapperConfig.class)
 public interface GoalGuardianMapper {
 
     @Mapping(source = "goal.id", target = "goalId")
@@ -18,7 +19,7 @@ public interface GoalGuardianMapper {
     @Mapping(source = "owner.id", target = "ownerId")
     @Mapping(source = "owner.name", target = "ownerName")
     @Mapping(source = "createdAt", target = "invitedAt")
-    GoalGuardianResponse toResponse(GoalGuardian goalGuardian);
+    GoalGuardianResponse toResponse(@NonNull GoalGuardian goalGuardian);
 
     List<GoalGuardianResponse> toResponseList(List<GoalGuardian> goalGuardians);
 }

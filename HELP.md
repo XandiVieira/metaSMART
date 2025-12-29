@@ -240,7 +240,7 @@ The following features are planned for future releases:
 - **Goal reminders** - Scheduled notifications to remind users about their goals
 - **Progress reminders** - Daily/weekly prompts to log progress
 - **Milestone celebrations** - Notifications when milestones are reached
-- **Streak alerts** - Warnings before losing a streak
+- **Streak alerts** - Warnings before losing a streak ("Your 45-day streak is at risk!")
 - **Guardian notifications** - Real-time push when guardians send nudges
 
 ### WhatsApp Integration
@@ -248,3 +248,85 @@ The following features are planned for future releases:
 - **Quick progress logging** - Reply to WhatsApp messages to log progress
 - **Guardian nudges via WhatsApp** - Guardians can send encouragement through WhatsApp
 - **Daily/weekly summaries** - Progress summaries delivered to WhatsApp
+
+### Engagement & Retention Features
+- **Weekly Reflections** - Prompts to rate your week, adjust goals, and celebrate wins
+- **Achievements/Badges** - Gamification with badges like "30-Day Streak", "First Milestone", "Guardian Hero"
+- **Goal Health Score** - AI-calculated score based on progress consistency
+- **Seasonal Challenges** - Monthly themed challenges to keep engagement fresh
+- **Progress Photos** - Visual before/after tracking for fitness, creative, or home goals
+- **Guardian Leaderboard** - Rankings for best accountability partners
+- **Social Proof** - Stats like "87% of users with similar goals hit their milestone"
+- **Identity Building** - Messages like "60 days consistent - you're a goal achiever!"
+
+### Struggling Button
+- **Request help** - One-tap button when feeling stuck on a goal
+- **Smart suggestions** - AI-powered recommendations to break down goals or extend deadlines
+- **Guardian alert** - Optionally notify guardians when you're struggling
+
+---
+
+### Struggling Help (`/api/v1/goals`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/struggling/status` | Get remaining free requests |
+| POST | `/{goalId}/struggling` | Request help for a goal |
+| GET | `/struggling/history` | View help request history |
+| PUT | `/struggling/{requestId}/feedback` | Mark if help was useful |
+
+**Struggling types:** `LACK_OF_TIME`, `LACK_OF_MOTIVATION`, `GOAL_TOO_AMBITIOUS`, `UNCLEAR_NEXT_STEPS`, `EXTERNAL_OBSTACLES`, `LOST_INTEREST`, `OTHER`
+
+**Request body:**
+```json
+{
+  "strugglingType": "LACK_OF_MOTIVATION",
+  "message": "I can't seem to find the energy to continue",
+  "notifyGuardians": true
+}
+```
+
+---
+
+### Subscription (`/api/v1/subscription`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Get current subscription |
+| GET | `/entitlements` | Get feature access and limits |
+| GET | `/purchases` | Get purchase history |
+
+---
+
+## Premium Features (Planned)
+
+### Subscription Tiers
+
+| Feature | Free | Premium |
+|---------|------|---------|
+| Active goals | 3 | Unlimited |
+| Guardians per goal | 1 | 5 |
+| Progress history | 30 days | Unlimited |
+| Goal templates | Public only | Create & share |
+| Weekly reflections | Basic | AI-powered insights |
+| Streak shields | 1/month | 3/month |
+| Struggling button | 1/month | Unlimited |
+| Achievements/Badges | Basic set | Full collection |
+| Export data | - | CSV/PDF export |
+| Priority support | - | Yes |
+
+### One-Time Purchases (Consumables)
+
+| Item | Description |
+|------|-------------|
+| **Streak Shield** | Protect your streak for 1 missed day |
+| **Struggling Assist** | Additional "I'm struggling" help request |
+| **Goal Boost** | Extra slot for active goals |
+| **Guardian Slot** | Add one more guardian to a goal |
+
+### Premium-Only Features (Recommended for Monetization)
+
+1. **Unlimited Streak Shields** - High value, users hate losing streaks
+2. **AI Insights & Suggestions** - Personalized recommendations based on progress patterns
+3. **Advanced Analytics** - Charts, trends, predictions
+4. **Goal Templates Marketplace** - Create and sell custom templates
+5. **WhatsApp Integration** - High convenience factor
+6. **Team/Family Plans** - Multiple users, shared goals

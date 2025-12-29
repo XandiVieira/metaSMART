@@ -5,10 +5,11 @@ import com.relyon.metasmart.entity.guardian.dto.NudgeResponse;
 import com.relyon.metasmart.entity.guardian.dto.SendNudgeRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 
-@Mapper
+@Mapper(config = MapperConfig.class)
 public interface GuardianNudgeMapper {
 
     @Mapping(source = "goalGuardian.id", target = "goalGuardianId")
@@ -16,7 +17,7 @@ public interface GuardianNudgeMapper {
     @Mapping(source = "goalGuardian.goal.title", target = "goalTitle")
     @Mapping(source = "createdAt", target = "sentAt")
     @Mapping(target = "isRead", expression = "java(nudge.isRead())")
-    NudgeResponse toResponse(GuardianNudge nudge);
+    NudgeResponse toResponse(@NonNull GuardianNudge nudge);
 
     List<NudgeResponse> toResponseList(List<GuardianNudge> nudges);
 

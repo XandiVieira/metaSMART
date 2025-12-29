@@ -41,4 +41,7 @@ public interface GoalGuardianRepository extends JpaRepository<GoalGuardian, Long
 
     // Count active guardians for a goal
     long countByGoalAndStatus(Goal goal, GuardianStatus status);
+
+    // Find all guardians for a goal with specific status
+    List<GoalGuardian> findByGoalAndStatus(Goal goal, GuardianStatus status);
 }

@@ -5,12 +5,13 @@ import com.relyon.metasmart.entity.user.dto.AuthResponse;
 import com.relyon.metasmart.entity.user.dto.RegisterRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.lang.NonNull;
 
-@Mapper
+@Mapper(config = MapperConfig.class)
 public interface AuthMapper {
 
     @Mapping(target = "token", ignore = true)
-    AuthResponse toResponse(User user);
+    AuthResponse toResponse(@NonNull User user);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)

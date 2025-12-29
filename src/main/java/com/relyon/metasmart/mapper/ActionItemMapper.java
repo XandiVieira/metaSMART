@@ -5,11 +5,12 @@ import com.relyon.metasmart.entity.actionplan.dto.ActionItemRequest;
 import com.relyon.metasmart.entity.actionplan.dto.ActionItemResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.lang.NonNull;
 
-@Mapper
+@Mapper(config = MapperConfig.class)
 public interface ActionItemMapper {
 
-    ActionItemResponse toResponse(ActionItem actionItem);
+    ActionItemResponse toResponse(@NonNull ActionItem actionItem);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "goal", ignore = true)

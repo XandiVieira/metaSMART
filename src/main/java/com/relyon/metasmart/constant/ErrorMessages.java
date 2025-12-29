@@ -32,4 +32,8 @@ public final class ErrorMessages {
     public static final String GUARDIAN_PERMISSION_DENIED = "You don't have permission to perform this action";
     public static final String NUDGE_NOT_FOUND = "Nudge not found";
     public static final String NUDGE_ACCESS_DENIED = "You don't have access to this nudge";
+
+    // Struggling related
+    public static final String STRUGGLING_LIMIT_REACHED = "You have reached your monthly limit for help requests. Upgrade to premium for unlimited access.";
+    public static final String STRUGGLING_REQUEST_NOT_FOUND = "Help request not found";
 }

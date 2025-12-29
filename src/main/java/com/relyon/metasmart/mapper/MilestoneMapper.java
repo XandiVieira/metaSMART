@@ -5,12 +5,13 @@ import com.relyon.metasmart.entity.progress.dto.MilestoneRequest;
 import com.relyon.metasmart.entity.progress.dto.MilestoneResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.lang.NonNull;
 
-@Mapper
+@Mapper(config = MapperConfig.class)
 public interface MilestoneMapper {
 
     @Mapping(target = "goalId", source = "goal.id")
-    MilestoneResponse toResponse(Milestone milestone);
+    MilestoneResponse toResponse(@NonNull Milestone milestone);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "goal", ignore = true)
