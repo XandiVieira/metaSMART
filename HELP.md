@@ -249,6 +249,13 @@ The following features are planned for future releases:
 - **Guardian nudges via WhatsApp** - Guardians can send encouragement through WhatsApp
 - **Daily/weekly summaries** - Progress summaries delivered to WhatsApp
 
+### Stripe Payment Integration
+- **Subscription management** - Premium tier with Stripe Checkout
+- **One-time purchases** - Consumables (streak shields, goal boosts) via Stripe
+- **Customer portal** - Self-service subscription management
+- **Webhook handling** - Real-time subscription status updates
+- **Mobile support** - Stripe API integration for iOS/Android
+
 ### Engagement & Retention Features
 - **Weekly Reflections** - Prompts to rate your week, adjust goals, and celebrate wins
 - **Achievements/Badges** - Gamification with badges like "30-Day Streak", "First Milestone", "Guardian Hero"

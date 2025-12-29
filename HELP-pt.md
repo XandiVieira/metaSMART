@@ -258,6 +258,13 @@ As seguintes funcionalidades estao planejadas para versoes futuras:
 - **Cutucadas de guardiao via WhatsApp** - Guardioes podem enviar encorajamento pelo WhatsApp
 - **Resumos diarios/semanais** - Resumos de progresso entregues no WhatsApp
 
+### Integracao com Stripe (Pagamentos)
+- **Gerenciamento de assinaturas** - Plano Premium via Stripe Checkout
+- **Compras avulsas** - Consumiveis (escudos de sequencia, impulsos) via Stripe
+- **Portal do cliente** - Autoatendimento para gerenciar assinatura
+- **Webhooks** - Atualizacoes em tempo real do status da assinatura
+- **Suporte mobile** - Integracao da API Stripe para iOS/Android
+
 ### Funcionalidades de Engajamento e Retencao
 - **Reflexoes Semanais** - Avaliar sua semana, ajustar metas e celebrar conquistas
 - **Conquistas/Medalhas** - Gamificacao com medalhas como "Sequencia de 30 Dias", "Primeiro Marco", "Heroi Guardiao"
