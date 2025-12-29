@@ -54,7 +54,7 @@ class AuthControllerTest {
             var request = RegisterRequest.builder()
                     .name("John Doe")
                     .email("john@example.com")
-                    .password("password123")
+                    .password("Password123!")
                     .build();
 
             var response = AuthResponse.builder()
@@ -80,7 +80,7 @@ class AuthControllerTest {
             var request = RegisterRequest.builder()
                     .name("John Doe")
                     .email("john@example.com")
-                    .password("password123")
+                    .password("Password123!")
                     .build();
 
             when(authService.register(any(RegisterRequest.class)))

@@ -38,6 +38,10 @@ public class User extends AuditableEntity implements UserDetails {
     @Builder.Default
     private Role role = Role.USER;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer streakShields = 0;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

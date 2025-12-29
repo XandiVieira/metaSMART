@@ -25,8 +25,42 @@ Authorization: Bearer <token>
 
 **Corpo da requisicao:**
 ```json
-{ "name": "John", "email": "john@example.com", "password": "123456" }
+{ "name": "John", "email": "john@example.com", "password": "Password123!" }
 ```
+
+**Requisitos de senha:** Minimo 8 caracteres com maiuscula, minuscula, numero e caractere especial (@$!%*?&).
+
+---
+
+### Painel (`/api/v1/dashboard`)
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| GET | `/` | Obter resumo do painel |
+| GET | `/stats` | Obter estatisticas de metas |
+
+**Resposta do painel inclui:**
+- `activeGoalsCount` - Numero de metas ativas
+- `completedGoalsCount` - Numero de metas concluidas
+- `pendingReflectionsCount` - Reflexoes pendentes
+- `unreadNudgesCount` - Cutucadas nao lidas
+- `streakShieldsAvailable` - Escudos de sequencia disponiveis
+- `streaksAtRisk` - Metas com sequencias em risco
+
+---
+
+### Perfil do Usuario (`/api/v1/users`)
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| GET | `/profile` | Obter perfil do usuario |
+| PUT | `/profile` | Atualizar perfil (nome) |
+| POST | `/streak-shields/use` | Usar um escudo de sequencia |
+
+**Resposta do perfil inclui:**
+- Info do usuario (id, nome, email, dataEntrada)
+- `totalGoals` / `completedGoals` - Contagem de metas
+- `streakShields` - Escudos de sequencia disponiveis
+
+*Escudos de sequencia sao ganhos nos marcos de 50% e 100%.*
 
 ---
 
@@ -38,8 +72,11 @@ Authorization: Bearer <token>
 | GET | `/{id}` | Buscar por ID |
 | GET | `/status/{status}` | Filtrar por status |
 | GET | `/category/{category}` | Filtrar por categoria |
+| GET | `/archived` | Listar metas arquivadas |
 | PUT | `/{id}` | Atualizar meta |
-| DELETE | `/{id}` | Excluir meta |
+| PUT | `/{id}/archive` | Arquivar meta (exclusao suave) |
+| PUT | `/{id}/unarchive` | Restaurar meta arquivada |
+| DELETE | `/{id}` | Excluir meta permanentemente |
 
 **Categorias:** `HEALTH` (Saude), `CAREER` (Carreira), `EDUCATION` (Educacao), `FINANCE` (Financas), `RELATIONSHIPS` (Relacionamentos), `PERSONAL` (Pessoal), `OTHER` (Outros)
 
@@ -243,6 +280,49 @@ Authorization: Bearer <token>
 
 ---
 
+### Prova Social (`/api/v1/social`)
+
+*Estatisticas agregadas anonimas para motivacao - veja como outros estao progredindo sem comprometer privacidade.*
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| GET | `/stats` | Ver estatisticas globais da plataforma |
+| GET | `/stats/category/{category}` | Ver estatisticas de uma categoria |
+| GET | `/goals/{goalId}/insights` | Ver insights baseados em metas similares |
+| GET | `/goals/{goalId}/milestone-stats` | Comparar seu progresso em marcos |
+
+**Categorias:** `HEALTH`, `FINANCE`, `EDUCATION`, `CAREER`, `RELATIONSHIPS`, `PERSONAL_DEVELOPMENT`, `HOBBIES`, `OTHER`
+
+**Resposta de estatisticas globais:**
+```json
+{
+  "totalActiveUsers": 1247,
+  "totalGoalsCreated": 3456,
+  "totalGoalsCompleted": 892,
+  "overallCompletionRate": 25.8,
+  "goalsByCategory": {"HEALTH": 1200, "FINANCE": 800, ...},
+  "completionRateByCategory": {"HEALTH": 32.5, "FINANCE": 28.1, ...},
+  "averageStreakAcrossUsers": 12,
+  "longestStreakEver": 365
+}
+```
+
+**Resposta de insights da meta:**
+```json
+{
+  "goalId": 1,
+  "category": "HEALTH",
+  "usersWithSimilarGoals": 523,
+  "similarGoalsCompletionRate": 32.5,
+  "averageDaysToComplete": 60,
+  "commonObstacles": ["LACK_OF_TIME", "LACK_OF_MOTIVATION"],
+  "suggestedStrategies": ["Comece com sessoes diarias de 5 minutos", ...],
+  "encouragementMessage": "Voce se juntou a 523 outros nesta jornada!"
+}
+```
+
+---
+
 ## Paginacao
 
 Todos os endpoints paginados aceitam:
@@ -339,7 +419,6 @@ As seguintes funcionalidades estao planejadas para versoes futuras:
 - **Desafios Sazonais** - Desafios mensais tematicos para manter o engajamento
 - **Fotos de Progresso** - Acompanhamento visual antes/depois para metas de fitness, criativas ou de casa
 - **Ranking de Guardioes** - Classificacao dos melhores parceiros de responsabilidade
-- **Prova Social** - Estatisticas como "87% dos usuarios com metas similares atingiram seu marco"
 - **Construcao de Identidade** - Mensagens como "60 dias consistente - voce e um conquistador de metas!"
 
 ---

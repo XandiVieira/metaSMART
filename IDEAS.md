@@ -80,6 +80,89 @@ Accountability Score = (Streak Days × Consistency%) × Guardian Multiplier × E
 - Follow other users for inspiration
 - Goal communities by category
 
+---
+
+## Social Proof System
+
+**Status:** Brainstorming
+
+**Problem:** Users feel isolated when working on goals. Seeing that others are succeeding with similar goals creates motivation and urgency.
+
+### Option 2: Goal Communities (Full Social)
+
+Users can opt-in to join communities based on goal category/type.
+
+**New entities needed:**
+- `GoalCommunity` - Group of users with similar goals
+- `CommunityPost` - Updates shared to community
+- `CommunityMember` - User membership with privacy settings
+
+**Endpoints:**
+```
+GET    /api/v1/communities                    # Browse communities
+POST   /api/v1/communities/{id}/join          # Join community
+GET    /api/v1/communities/{id}/feed          # Community posts
+POST   /api/v1/communities/{id}/posts         # Share progress
+GET    /api/v1/communities/{id}/leaderboard   # Top performers
+```
+
+**Features:**
+- Share milestones to community (opt-in)
+- See anonymized progress of others
+- Leaderboards (streaks, completion %)
+- Community challenges
+
+**Pros:** High engagement, real motivation
+**Cons:** Moderation needed, complexity, privacy considerations
+
+---
+
+### Option 3: Goal Matching (Middle Ground)
+
+Match users with similar goals without full social features.
+
+**Endpoints:**
+```
+GET  /api/v1/goals/{id}/similar-users         # Find matches
+POST /api/v1/goals/{id}/share-milestone       # Broadcast milestone
+GET  /api/v1/feed/milestones                  # See others' milestones
+```
+
+**How it works:**
+1. When user hits milestone, option to "share with community"
+2. Other users with similar goals see: "Someone just hit 50% on their 'Run 5k' goal!"
+3. Can react with encouragement (no direct messaging)
+
+**New entity:**
+```java
+@Entity
+public class SharedMilestone {
+    private Goal goal;           // Reference (not exposed)
+    private String categoryName; // "HEALTH - Running"
+    private Integer percentage;
+    private LocalDateTime sharedAt;
+    private Boolean isAnonymous;
+}
+```
+
+**Pros:**
+- Low complexity - Just a few new tables and endpoints
+- Privacy-safe - Anonymous by default
+- No moderation - No user-generated text beyond preset reactions
+- Motivating - Seeing others succeed creates urgency
+- Extensible - Can evolve into full communities later
+
+**Cons:** Less engaging than full communities
+
+---
+
+### Open Questions for Social Proof
+
+- [ ] Should stats be real-time or cached (daily refresh)?
+- [ ] How to handle categories with few users (statistical significance)?
+- [ ] Should top performers be highlighted (privacy opt-in)?
+- [ ] Integration with Guardian system (social proof from guardians)?
+
 ### Gamification Expansion
 - Daily challenges
 - Achievement unlocks with real rewards

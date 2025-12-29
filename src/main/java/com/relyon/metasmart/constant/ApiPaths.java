@@ -19,4 +19,7 @@ public final class ApiPaths {
     public static final String GUARDIANS = "/guardians";
     public static final String GUARDIAN = API_V1 + "/guardian";
     public static final String NUDGES = "/nudges";
+    public static final String SOCIAL = API_V1 + "/social";
+    public static final String DASHBOARD = API_V1 + "/dashboard";
+    public static final String USERS = API_V1 + "/users";
 }

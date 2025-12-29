@@ -91,4 +91,31 @@ public class GoalController {
         goalService.delete(id, user);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}/archive")
+    public ResponseEntity<GoalResponse> archive(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user
+    ) {
+        log.debug("Received request to archive goal ID: {} for user ID: {}", id, user.getId());
+        return ResponseEntity.ok(goalService.archive(id, user));
+    }
+
+    @PutMapping("/{id}/unarchive")
+    public ResponseEntity<GoalResponse> unarchive(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user
+    ) {
+        log.debug("Received request to unarchive goal ID: {} for user ID: {}", id, user.getId());
+        return ResponseEntity.ok(goalService.unarchive(id, user));
+    }
+
+    @GetMapping("/archived")
+    public ResponseEntity<Page<GoalResponse>> findArchived(
+            @AuthenticationPrincipal User user,
+            @PageableDefault(size = 10, sort = "archivedAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        log.debug("Received request to get archived goals for user ID: {}", user.getId());
+        return ResponseEntity.ok(goalService.findArchived(user, pageable));
+    }
 }

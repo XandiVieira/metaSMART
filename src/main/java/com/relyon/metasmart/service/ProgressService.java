@@ -41,6 +41,7 @@ public class ProgressService {
     private final GoalRepository goalRepository;
     private final ProgressEntryMapper progressEntryMapper;
     private final MilestoneMapper milestoneMapper;
+    private final UserProfileService userProfileService;
 
     @Transactional
     public ProgressEntryResponse addProgress(Long goalId, ProgressEntryRequest request, User user) {
@@ -54,7 +55,7 @@ public class ProgressService {
         log.info("Progress entry created with ID: {} for goal ID: {}", savedEntry.getId(), goalId);
 
         updateGoalProgress(goal);
-        checkAndUpdateMilestones(goal);
+        checkAndUpdateMilestones(goal, user);
 
         return progressEntryMapper.toResponse(savedEntry);
     }
@@ -209,7 +210,7 @@ public class ProgressService {
         }
     }
 
-    private void checkAndUpdateMilestones(Goal goal) {
+    private void checkAndUpdateMilestones(Goal goal, User user) {
         var currentPercentage = calculateProgressPercentage(goal);
         var unachievedMilestones = milestoneRepository.findByGoalAndAchievedFalseOrderByPercentageAsc(goal);
 
@@ -219,6 +220,12 @@ public class ProgressService {
                 milestone.setAchievedAt(LocalDateTime.now());
                 milestoneRepository.save(milestone);
                 log.info("Milestone {}% achieved for goal ID: {}", milestone.getPercentage(), goal.getId());
+
+                // Award streak shield for major milestones (50% and 100%)
+                if (milestone.getPercentage() == 50 || milestone.getPercentage() == 100) {
+                    userProfileService.addStreakShield(user, 1);
+                    log.info("Streak shield awarded to user {} for reaching {}% milestone", user.getEmail(), milestone.getPercentage());
+                }
             }
         }
     }

@@ -147,6 +147,45 @@ public class GoalService {
         log.info("Goal deleted with ID: {}", id);
     }
 
+    @Transactional
+    public GoalResponse archive(Long id, User owner) {
+        log.debug("Archiving goal ID: {} for user ID: {}", id, owner.getId());
+
+        var goal = goalRepository.findByIdAndOwner(id, owner)
+                .orElseThrow(() -> {
+                    log.warn("Goal not found with ID: {} for user ID: {}", id, owner.getId());
+                    return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
+                });
+
+        goal.setArchivedAt(LocalDate.now());
+        var savedGoal = goalRepository.save(goal);
+        log.info("Goal archived with ID: {}", id);
+        return enrichGoalResponse(savedGoal);
+    }
+
+    @Transactional
+    public GoalResponse unarchive(Long id, User owner) {
+        log.debug("Unarchiving goal ID: {} for user ID: {}", id, owner.getId());
+
+        var goal = goalRepository.findByIdAndOwnerAndArchivedAtIsNotNull(id, owner)
+                .orElseThrow(() -> {
+                    log.warn("Archived goal not found with ID: {} for user ID: {}", id, owner.getId());
+                    return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
+                });
+
+        goal.setArchivedAt(null);
+        var savedGoal = goalRepository.save(goal);
+        log.info("Goal unarchived with ID: {}", id);
+        return enrichGoalResponse(savedGoal);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<GoalResponse> findArchived(User owner, Pageable pageable) {
+        log.debug("Finding archived goals for user ID: {}", owner.getId());
+        return goalRepository.findByOwnerAndArchivedAtIsNotNull(owner, pageable)
+                .map(this::enrichGoalResponse);
+    }
+
     private GoalResponse enrichGoalResponse(Goal goal) {
         var response = goalMapper.toResponse(goal);
         response.setSmartPillars(calculateSmartPillars(goal));

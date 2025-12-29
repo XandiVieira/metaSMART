@@ -21,4 +21,16 @@ public interface StrugglingRequestRepository extends JpaRepository<StrugglingReq
     Page<StrugglingRequest> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
 
     List<StrugglingRequest> findByGoalIdAndUserOrderByCreatedAtDesc(Long goalId, User user);
+
+    // Social Proof - common obstacles by category
+    @Query("SELECT sr.strugglingType, COUNT(sr) FROM StrugglingRequest sr " +
+           "WHERE sr.goal.goalCategory = :category " +
+           "GROUP BY sr.strugglingType " +
+           "ORDER BY COUNT(sr) DESC")
+    List<Object[]> findTopStrugglingTypesByCategory(@Param("category") com.relyon.metasmart.entity.goal.GoalCategory category);
+
+    @Query("SELECT sr.strugglingType, COUNT(sr) FROM StrugglingRequest sr " +
+           "GROUP BY sr.strugglingType " +
+           "ORDER BY COUNT(sr) DESC")
+    List<Object[]> findTopStrugglingTypes();
 }

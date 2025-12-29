@@ -1023,7 +1023,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n}"
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"Password123!\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/v1/auth/register",
@@ -1065,6 +1065,92 @@
 							"raw": "{{baseUrl}}/api/v1/auth/login",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "auth", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"description": "Dashboard and statistics endpoints",
+			"item": [
+				{
+					"name": "Get Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "dashboard"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Goal Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/dashboard/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "dashboard", "stats"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Profile",
+			"description": "User profile and streak shield management",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users", "profile"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Updated\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users", "profile"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Use Streak Shield",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/streak-shields/use",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users", "streak-shields", "use"]
 						}
 					},
 					"response": []
@@ -1214,6 +1300,45 @@
 							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "goals", "{{goalId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Archived Goals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/archived",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "archived"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Archive Goal",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/archive",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "archive"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unarchive Goal",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/unarchive",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "unarchive"]
 						}
 					},
 					"response": []
@@ -2396,6 +2521,64 @@
 							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections/{{reflectionId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "goals", "{{goalId}}", "reflections", "{{reflectionId}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Social Proof",
+			"description": "Anonymous aggregate statistics for motivation",
+			"item": [
+				{
+					"name": "Get Global Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/social/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "social", "stats"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/social/stats/category/HEALTH",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "social", "stats", "category", "HEALTH"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Goal Insights",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/social/goals/{{goalId}}/insights",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "social", "goals", "{{goalId}}", "insights"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Milestone Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/social/goals/{{goalId}}/milestone-stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "social", "goals", "{{goalId}}", "milestone-stats"]
 						}
 					},
 					"response": []

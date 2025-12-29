@@ -25,8 +25,42 @@ Authorization: Bearer <token>
 
 **Request body:**
 ```json
-{ "name": "John", "email": "john@example.com", "password": "123456" }
+{ "name": "John", "email": "john@example.com", "password": "Password123!" }
 ```
+
+**Password requirements:** At least 8 characters with uppercase, lowercase, number, and special character (@$!%*?&).
+
+---
+
+### Dashboard (`/api/v1/dashboard`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Get dashboard summary |
+| GET | `/stats` | Get goal statistics |
+
+**Dashboard response includes:**
+- `activeGoalsCount` - Number of active goals
+- `completedGoalsCount` - Number of completed goals
+- `pendingReflectionsCount` - Reflections due
+- `unreadNudgesCount` - Unread nudges from guardians
+- `streakShieldsAvailable` - Available streak shields
+- `streaksAtRisk` - Goals with streaks that may break
+
+---
+
+### User Profile (`/api/v1/users`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/profile` | Get current user profile |
+| PUT | `/profile` | Update profile (name) |
+| POST | `/streak-shields/use` | Use a streak shield |
+
+**Profile response includes:**
+- User info (id, name, email, joinedAt)
+- `totalGoals` / `completedGoals` - Goal counts
+- `streakShields` - Available streak shields
+
+*Streak shields are earned at 50% and 100% milestones.*
 
 ---
 
@@ -38,8 +72,11 @@ Authorization: Bearer <token>
 | GET | `/{id}` | Get by ID |
 | GET | `/status/{status}` | Filter by status |
 | GET | `/category/{category}` | Filter by category |
+| GET | `/archived` | List archived goals |
 | PUT | `/{id}` | Update goal |
-| DELETE | `/{id}` | Delete goal |
+| PUT | `/{id}/archive` | Archive goal (soft delete) |
+| PUT | `/{id}/unarchive` | Restore archived goal |
+| DELETE | `/{id}` | Delete goal permanently |
 
 **Categories:** `HEALTH`, `CAREER`, `EDUCATION`, `FINANCE`, `RELATIONSHIPS`, `PERSONAL`, `OTHER`
 
@@ -234,6 +271,49 @@ Authorization: Bearer <token>
 
 ---
 
+### Social Proof (`/api/v1/social`)
+
+*Anonymous aggregate statistics for motivation - see how others are doing without compromising privacy.*
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/stats` | Get global platform statistics |
+| GET | `/stats/category/{category}` | Get stats for a specific category |
+| GET | `/goals/{goalId}/insights` | Get insights based on similar goals |
+| GET | `/goals/{goalId}/milestone-stats` | Compare your milestone progress |
+
+**Categories:** `HEALTH`, `FINANCE`, `EDUCATION`, `CAREER`, `RELATIONSHIPS`, `PERSONAL_DEVELOPMENT`, `HOBBIES`, `OTHER`
+
+**Global stats response:**
+```json
+{
+  "totalActiveUsers": 1247,
+  "totalGoalsCreated": 3456,
+  "totalGoalsCompleted": 892,
+  "overallCompletionRate": 25.8,
+  "goalsByCategory": {"HEALTH": 1200, "FINANCE": 800, ...},
+  "completionRateByCategory": {"HEALTH": 32.5, "FINANCE": 28.1, ...},
+  "averageStreakAcrossUsers": 12,
+  "longestStreakEver": 365
+}
+```
+
+**Goal insights response:**
+```json
+{
+  "goalId": 1,
+  "category": "HEALTH",
+  "usersWithSimilarGoals": 523,
+  "similarGoalsCompletionRate": 32.5,
+  "averageDaysToComplete": 60,
+  "commonObstacles": ["LACK_OF_TIME", "LACK_OF_MOTIVATION"],
+  "suggestedStrategies": ["Start with 5-minute daily sessions", ...],
+  "encouragementMessage": "You've joined 523 others on this journey!"
+}
+```
+
+---
+
 ## Pagination
 
 All paginated endpoints accept:
@@ -330,7 +410,6 @@ The following features are planned for future releases:
 - **Seasonal Challenges** - Monthly themed challenges to keep engagement fresh
 - **Progress Photos** - Visual before/after tracking for fitness, creative, or home goals
 - **Guardian Leaderboard** - Rankings for best accountability partners
-- **Social Proof** - Stats like "87% of users with similar goals hit their milestone"
 - **Identity Building** - Messages like "60 days consistent - you're a goal achiever!"
 
 ---

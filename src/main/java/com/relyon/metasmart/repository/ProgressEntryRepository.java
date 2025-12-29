@@ -32,4 +32,8 @@ public interface ProgressEntryRepository extends JpaRepository<ProgressEntry, Lo
     void deleteByGoal(Goal goal);
 
     Optional<ProgressEntry> findTopByGoalOrderByCreatedAtDesc(Goal goal);
+
+    // Social Proof - total progress entries count
+    @Query("SELECT COUNT(p) FROM ProgressEntry p")
+    long countAllProgressEntries();
 }
