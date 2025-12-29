@@ -209,3 +209,42 @@ All paginated endpoints accept:
 ## Postman Collection
 
 Import `postman/Metasmart.postman_collection.json` for ready-to-use requests.
+
+### Running E2E Test Sequence
+
+The collection includes an **"E2E Test Sequence"** folder designed to test the entire application flow:
+
+1. Open Postman and import the collection
+2. Click the **"E2E Test Sequence"** folder
+3. Click **"Run"** (or right-click → "Run folder")
+4. In the Collection Runner, click **"Run Metasmart API"**
+
+The sequence will:
+- Register a new user and authenticate
+- Create a goal with full SMART setup
+- Add progress entries and milestones
+- Create action items and obstacles
+- Set up a guardian relationship (register guardian, invite, accept)
+- Send and react to nudges
+- Clean up all created data
+
+All tests include assertions to verify correct API behavior.
+
+---
+
+## Future Features
+
+The following features are planned for future releases:
+
+### Push Notifications
+- **Goal reminders** - Scheduled notifications to remind users about their goals
+- **Progress reminders** - Daily/weekly prompts to log progress
+- **Milestone celebrations** - Notifications when milestones are reached
+- **Streak alerts** - Warnings before losing a streak
+- **Guardian notifications** - Real-time push when guardians send nudges
+
+### WhatsApp Integration
+- **WhatsApp notifications** - Receive reminders and nudges via WhatsApp
+- **Quick progress logging** - Reply to WhatsApp messages to log progress
+- **Guardian nudges via WhatsApp** - Guardians can send encouragement through WhatsApp
+- **Daily/weekly summaries** - Progress summaries delivered to WhatsApp

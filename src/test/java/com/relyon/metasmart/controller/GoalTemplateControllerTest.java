@@ -12,7 +12,7 @@ import com.relyon.metasmart.entity.template.dto.UpdateGoalTemplateRequest;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.GlobalExceptionHandler;
 import com.relyon.metasmart.service.GoalTemplateService;
-import com.relyon.metasmart.service.JwtService;
+import com.relyon.metasmart.config.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

@@ -16,7 +16,7 @@ import com.relyon.metasmart.exception.GlobalExceptionHandler;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
 import com.relyon.metasmart.service.GoalGuardianService;
 import com.relyon.metasmart.service.GuardianNudgeService;
-import com.relyon.metasmart.service.JwtService;
+import com.relyon.metasmart.config.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

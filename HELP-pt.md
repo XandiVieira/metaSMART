@@ -218,3 +218,42 @@ Todos os endpoints paginados aceitam:
 ## Colecao Postman
 
 Importe `postman/Metasmart.postman_collection.json` para requisicoes prontas.
+
+### Executando a Sequencia de Teste E2E
+
+A colecao inclui uma pasta **"E2E Test Sequence"** projetada para testar todo o fluxo da aplicacao:
+
+1. Abra o Postman e importe a colecao
+2. Clique na pasta **"E2E Test Sequence"**
+3. Clique em **"Run"** (ou clique com botao direito → "Run folder")
+4. No Collection Runner, clique em **"Run Metasmart API"**
+
+A sequencia ira:
+- Registrar um novo usuario e autenticar
+- Criar uma meta com configuracao SMART completa
+- Adicionar entradas de progresso e marcos
+- Criar itens de acao e obstaculos
+- Configurar relacionamento de guardiao (registrar guardiao, convidar, aceitar)
+- Enviar e reagir a cutucadas
+- Limpar todos os dados criados
+
+Todos os testes incluem validacoes para verificar o comportamento correto da API.
+
+---
+
+## Funcionalidades Futuras
+
+As seguintes funcionalidades estao planejadas para versoes futuras:
+
+### Notificacoes Push
+- **Lembretes de metas** - Notificacoes agendadas para lembrar usuarios sobre suas metas
+- **Lembretes de progresso** - Alertas diarios/semanais para registrar progresso
+- **Celebracoes de marcos** - Notificacoes quando marcos sao alcancados
+- **Alertas de sequencia** - Avisos antes de perder uma sequencia
+- **Notificacoes de guardiao** - Push em tempo real quando guardioes enviam cutucadas
+
+### Integracao com WhatsApp
+- **Notificacoes via WhatsApp** - Receber lembretes e cutucadas pelo WhatsApp
+- **Registro rapido de progresso** - Responder mensagens do WhatsApp para registrar progresso
+- **Cutucadas de guardiao via WhatsApp** - Guardioes podem enviar encorajamento pelo WhatsApp
+- **Resumos diarios/semanais** - Resumos de progresso entregues no WhatsApp

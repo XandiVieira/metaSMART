@@ -9,7 +9,7 @@ import com.relyon.metasmart.entity.obstacle.dto.ObstacleEntryResponse;
 import com.relyon.metasmart.entity.obstacle.dto.UpdateObstacleEntryRequest;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.GlobalExceptionHandler;
-import com.relyon.metasmart.service.JwtService;
+import com.relyon.metasmart.config.JwtService;
 import com.relyon.metasmart.service.ObstacleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

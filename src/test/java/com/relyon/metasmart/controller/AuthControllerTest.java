@@ -9,7 +9,7 @@ import com.relyon.metasmart.exception.AuthenticationException;
 import com.relyon.metasmart.exception.DuplicateResourceException;
 import com.relyon.metasmart.exception.GlobalExceptionHandler;
 import com.relyon.metasmart.service.AuthService;
-import com.relyon.metasmart.service.JwtService;
+import com.relyon.metasmart.config.JwtService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

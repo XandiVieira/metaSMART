@@ -1,4 +1,4 @@
-package com.relyon.metasmart.service;
+package com.relyon.metasmart.config;
 
 import com.relyon.metasmart.entity.user.User;
 import io.jsonwebtoken.ExpiredJwtException;

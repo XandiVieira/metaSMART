@@ -7,7 +7,7 @@ import com.relyon.metasmart.config.SecurityConfig;
 import com.relyon.metasmart.entity.progress.dto.*;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.GlobalExceptionHandler;
-import com.relyon.metasmart.service.JwtService;
+import com.relyon.metasmart.config.JwtService;
 import com.relyon.metasmart.service.ProgressService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

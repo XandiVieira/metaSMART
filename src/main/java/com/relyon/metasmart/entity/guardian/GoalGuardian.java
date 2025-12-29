@@ -5,6 +5,7 @@ import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -43,12 +44,14 @@ public class GoalGuardian extends AuditableEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private GuardianStatus status = GuardianStatus.PENDING;
 
     @ElementCollection(targetClass = GuardianPermission.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "guardian_permissions", joinColumns = @JoinColumn(name = "goal_guardian_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "permission")
+    @Builder.Default
     private Set<GuardianPermission> permissions = new HashSet<>();
 
     @Column(length = 500)

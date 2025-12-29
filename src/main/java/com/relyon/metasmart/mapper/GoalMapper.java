@@ -28,6 +28,8 @@ public interface GoalMapper {
     Goal toEntity(GoalRequest request);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "currentProgress", ignore = true)
+    @Mapping(target = "goalStatus", ignore = true)
     @Mapping(target = "owner", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

@@ -1,6 +1,5 @@
 package com.relyon.metasmart.config;
 
-import com.relyon.metasmart.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
