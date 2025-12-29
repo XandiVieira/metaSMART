@@ -6,6 +6,7 @@
 - **Prefer functional style** (streams, lambdas, Optional) over imperative loops
 - **Use `var` for local variables** when the type is obvious from the right-hand side
 - **Use meaningful names** for variables, classes, and methods - names should be self-documenting
+  - This applies to **all variables including loop counters** - use `dateIndex`, `userIndex`, `retryCount` instead of `i`, `j`, `k`
 - **Minimal comments** - only add when logic is not self-evident; code should be self-explanatory
 - **Never mention AI, Claude, or any AI assistant** in code, comments, or commit messages
 

@@ -228,17 +228,17 @@ public class GoalService {
         var streak = 1;
         var today = LocalDate.now();
 
-        if (dates.get(0).equals(today) || dates.get(0).equals(today.minusDays(1))) {
+        if (dates.getFirst().equals(today) || dates.getFirst().equals(today.minusDays(1))) {
             currentStreak = 1;
         }
 
-        for (var i = 0; i < dates.size() - 1; i++) {
-            var current = dates.get(i);
-            var next = dates.get(i + 1);
+        for (var dateIndex = 0; dateIndex < dates.size() - 1; dateIndex++) {
+            var current = dates.get(dateIndex);
+            var next = dates.get(dateIndex + 1);
 
             if (current.minusDays(1).equals(next)) {
                 streak++;
-                if (i == 0 || (i > 0 && dates.get(0).equals(today) || dates.get(0).equals(today.minusDays(1)))) {
+                if (dateIndex == 0 || dates.getFirst().equals(today) || dates.getFirst().equals(today.minusDays(1))) {
                     currentStreak = streak;
                 }
             } else {

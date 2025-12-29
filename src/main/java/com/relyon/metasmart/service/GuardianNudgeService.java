@@ -1,7 +1,6 @@
 package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.constant.ErrorMessages;
-import com.relyon.metasmart.entity.guardian.GuardianNudge;
 import com.relyon.metasmart.entity.guardian.GuardianPermission;
 import com.relyon.metasmart.entity.guardian.GuardianStatus;
 import com.relyon.metasmart.entity.guardian.dto.NudgeResponse;

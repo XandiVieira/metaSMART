@@ -4,8 +4,6 @@ import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.goal.GoalStatus;
 import com.relyon.metasmart.entity.progress.Milestone;
-import com.relyon.metasmart.entity.progress.ProgressEntry;
-import com.relyon.metasmart.entity.progress.dto.*;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.DuplicateResourceException;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
@@ -14,13 +12,6 @@ import com.relyon.metasmart.mapper.ProgressEntryMapper;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.MilestoneRepository;
 import com.relyon.metasmart.repository.ProgressEntryRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -28,6 +19,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -76,7 +73,7 @@ public class ProgressService {
         var endDateTime = endDate.atTime(LocalTime.MAX);
 
         return progressEntryRepository.findByGoalAndCreatedAtBetweenOrderByCreatedAtDesc(
-                goal, startDateTime, endDateTime, pageable)
+                        goal, startDateTime, endDateTime, pageable)
                 .map(progressEntryMapper::toResponse);
     }
 
@@ -227,7 +224,7 @@ public class ProgressService {
 
         for (var milestone : milestones) {
             var shouldBeAchieved = currentPercentage.compareTo(BigDecimal.valueOf(milestone.getPercentage())) >= 0;
-            if (milestone.getAchieved() && !shouldBeAchieved) {
+            if (Boolean.TRUE.equals(milestone.getAchieved()) && !shouldBeAchieved) {
                 milestone.setAchieved(false);
                 milestone.setAchievedAt(null);
                 milestoneRepository.save(milestone);

@@ -1,6 +1,7 @@
 package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.constant.ErrorMessages;
+import com.relyon.metasmart.entity.AuditableEntity;
 import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.guardian.GoalGuardian;
 import com.relyon.metasmart.entity.guardian.GuardianPermission;
@@ -228,7 +229,7 @@ public class GoalGuardianService {
             response.setUnit(goal.getUnit());
             response.setProgressPercentage(calculateProgressPercentage(goal));
             response.setLastProgressAt(progressEntryRepository.findTopByGoalOrderByCreatedAtDesc(goal)
-                    .map(entry -> entry.getCreatedAt())
+                    .map(AuditableEntity::getCreatedAt)
                     .orElse(null));
         }
 
@@ -278,17 +279,17 @@ public class GoalGuardianService {
         var streak = 1;
         var today = java.time.LocalDate.now();
 
-        if (dates.get(0).equals(today) || dates.get(0).equals(today.minusDays(1))) {
+        if (dates.getFirst().equals(today) || dates.getFirst().equals(today.minusDays(1))) {
             currentStreak = 1;
         }
 
-        for (var i = 0; i < dates.size() - 1; i++) {
-            var current = dates.get(i);
-            var next = dates.get(i + 1);
+        for (var dateIndex = 0; dateIndex < dates.size() - 1; dateIndex++) {
+            var current = dates.get(dateIndex);
+            var next = dates.get(dateIndex + 1);
 
             if (current.minusDays(1).equals(next)) {
                 streak++;
-                if (i == 0 || (dates.get(0).equals(today) || dates.get(0).equals(today.minusDays(1)))) {
+                if (dateIndex == 0 || (dates.getFirst().equals(today) || dates.getFirst().equals(today.minusDays(1)))) {
                     currentStreak = streak;
                 }
             } else {
