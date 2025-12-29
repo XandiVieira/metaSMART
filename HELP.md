@@ -167,6 +167,73 @@ Authorization: Bearer <token>
 
 ---
 
+### Struggling Help (`/api/v1/goals`)
+
+*Request help when feeling stuck on a goal.*
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/struggling/status` | Get remaining free requests |
+| POST | `/{goalId}/struggling` | Request help for a goal |
+| GET | `/struggling/history` | View help request history |
+| PUT | `/struggling/{requestId}/feedback` | Mark if help was useful |
+
+**Struggling types:** `LACK_OF_TIME`, `LACK_OF_MOTIVATION`, `GOAL_TOO_AMBITIOUS`, `UNCLEAR_NEXT_STEPS`, `EXTERNAL_OBSTACLES`, `LOST_INTEREST`, `OTHER`
+
+**Request body:**
+```json
+{
+  "strugglingType": "LACK_OF_MOTIVATION",
+  "message": "I can't seem to find the energy to continue",
+  "notifyGuardians": true
+}
+```
+
+**Features:**
+- AI-generated suggestions based on struggling type
+- Optional guardian notification
+- Free requests limit (1/month for free tier, unlimited for premium)
+
+---
+
+### Reflections (`/api/v1/goals`)
+
+*Periodic check-ins with smart frequency based on goal duration.*
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/reflections/pending` | Get all pending reflections |
+| GET | `/{goalId}/reflections/status` | Get reflection status for a goal |
+| POST | `/{goalId}/reflections` | Create reflection for current period |
+| GET | `/{goalId}/reflections` | Get reflection history (paginated) |
+| GET | `/{goalId}/reflections/{id}` | Get specific reflection |
+| PUT | `/{goalId}/reflections/{id}` | Update reflection |
+
+**Smart Frequency Calculation:**
+| Goal Duration | Reflection Frequency |
+|---------------|---------------------|
+| 1-14 days | Daily |
+| 15-60 days | Every 3 days |
+| 61-180 days | Weekly |
+| 180+ days | Bi-weekly |
+
+**Ratings:** `TERRIBLE`, `POOR`, `OKAY`, `GOOD`, `EXCELLENT`
+
+**Request body:**
+```json
+{
+  "rating": "GOOD",
+  "wentWell": "Maintained consistency this week",
+  "challenges": "Had trouble finding time on Wednesday",
+  "adjustments": "Will schedule sessions earlier in the day",
+  "moodNote": "Feeling motivated!",
+  "willContinue": true,
+  "motivationLevel": 8
+}
+```
+
+---
+
 ## Pagination
 
 All paginated endpoints accept:
@@ -265,32 +332,6 @@ The following features are planned for future releases:
 - **Guardian Leaderboard** - Rankings for best accountability partners
 - **Social Proof** - Stats like "87% of users with similar goals hit their milestone"
 - **Identity Building** - Messages like "60 days consistent - you're a goal achiever!"
-
-### Struggling Button
-- **Request help** - One-tap button when feeling stuck on a goal
-- **Smart suggestions** - AI-powered recommendations to break down goals or extend deadlines
-- **Guardian alert** - Optionally notify guardians when you're struggling
-
----
-
-### Struggling Help (`/api/v1/goals`)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/struggling/status` | Get remaining free requests |
-| POST | `/{goalId}/struggling` | Request help for a goal |
-| GET | `/struggling/history` | View help request history |
-| PUT | `/struggling/{requestId}/feedback` | Mark if help was useful |
-
-**Struggling types:** `LACK_OF_TIME`, `LACK_OF_MOTIVATION`, `GOAL_TOO_AMBITIOUS`, `UNCLEAR_NEXT_STEPS`, `EXTERNAL_OBSTACLES`, `LOST_INTEREST`, `OTHER`
-
-**Request body:**
-```json
-{
-  "strugglingType": "LACK_OF_MOTIVATION",
-  "message": "I can't seem to find the energy to continue",
-  "notifyGuardians": true
-}
-```
 
 ---
 

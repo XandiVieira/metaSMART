@@ -176,6 +176,73 @@ Authorization: Bearer <token>
 
 ---
 
+### Ajuda com Dificuldades (`/api/v1/goals`)
+
+*Solicite ajuda quando estiver travado em uma meta.*
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| GET | `/struggling/status` | Ver pedidos gratuitos restantes |
+| POST | `/{goalId}/struggling` | Pedir ajuda para uma meta |
+| GET | `/struggling/history` | Ver historico de pedidos |
+| PUT | `/struggling/{requestId}/feedback` | Marcar se a ajuda foi util |
+
+**Tipos de dificuldade:** `LACK_OF_TIME` (Falta de tempo), `LACK_OF_MOTIVATION` (Falta de motivacao), `GOAL_TOO_AMBITIOUS` (Meta muito ambiciosa), `UNCLEAR_NEXT_STEPS` (Proximos passos incertos), `EXTERNAL_OBSTACLES` (Obstaculos externos), `LOST_INTEREST` (Perda de interesse), `OTHER` (Outro)
+
+**Corpo da requisicao:**
+```json
+{
+  "strugglingType": "LACK_OF_MOTIVATION",
+  "message": "Nao consigo encontrar energia para continuar",
+  "notifyGuardians": true
+}
+```
+
+**Funcionalidades:**
+- Sugestoes geradas por IA baseadas no tipo de dificuldade
+- Notificacao opcional aos guardioes
+- Limite de pedidos gratuitos (1/mes para tier gratuito, ilimitado para premium)
+
+---
+
+### Reflexoes (`/api/v1/goals`)
+
+*Check-ins periodicos com frequencia inteligente baseada na duracao da meta.*
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| GET | `/reflections/pending` | Ver todas reflexoes pendentes |
+| GET | `/{goalId}/reflections/status` | Ver status de reflexao de uma meta |
+| POST | `/{goalId}/reflections` | Criar reflexao do periodo atual |
+| GET | `/{goalId}/reflections` | Ver historico de reflexoes (paginado) |
+| GET | `/{goalId}/reflections/{id}` | Ver reflexao especifica |
+| PUT | `/{goalId}/reflections/{id}` | Atualizar reflexao |
+
+**Calculo de Frequencia Inteligente:**
+| Duracao da Meta | Frequencia de Reflexao |
+|-----------------|------------------------|
+| 1-14 dias | Diaria |
+| 15-60 dias | A cada 3 dias |
+| 61-180 dias | Semanal |
+| 180+ dias | Quinzenal |
+
+**Avaliacoes:** `TERRIBLE` (Pessimo), `POOR` (Ruim), `OKAY` (OK), `GOOD` (Bom), `EXCELLENT` (Excelente)
+
+**Corpo da requisicao:**
+```json
+{
+  "rating": "GOOD",
+  "wentWell": "Mantive a consistencia esta semana",
+  "challenges": "Tive dificuldade para encontrar tempo na quarta",
+  "adjustments": "Vou agendar sessoes mais cedo no dia",
+  "moodNote": "Me sentindo motivado!",
+  "willContinue": true,
+  "motivationLevel": 8
+}
+```
+
+---
+
 ## Paginacao
 
 Todos os endpoints paginados aceitam:
@@ -274,32 +341,6 @@ As seguintes funcionalidades estao planejadas para versoes futuras:
 - **Ranking de Guardioes** - Classificacao dos melhores parceiros de responsabilidade
 - **Prova Social** - Estatisticas como "87% dos usuarios com metas similares atingiram seu marco"
 - **Construcao de Identidade** - Mensagens como "60 dias consistente - voce e um conquistador de metas!"
-
-### Botao de Dificuldade
-- **Pedir ajuda** - Botao de um toque quando estiver travado em uma meta
-- **Sugestoes inteligentes** - Recomendacoes por IA para dividir metas ou estender prazos
-- **Alerta ao guardiao** - Opcionalmente notificar guardioes quando estiver com dificuldade
-
----
-
-### Ajuda com Dificuldades (`/api/v1/goals`)
-| Metodo | Endpoint | Descricao |
-|--------|----------|-----------|
-| GET | `/struggling/status` | Ver pedidos gratuitos restantes |
-| POST | `/{goalId}/struggling` | Pedir ajuda para uma meta |
-| GET | `/struggling/history` | Ver historico de pedidos |
-| PUT | `/struggling/{requestId}/feedback` | Marcar se a ajuda foi util |
-
-**Tipos de dificuldade:** `LACK_OF_TIME` (Falta de tempo), `LACK_OF_MOTIVATION` (Falta de motivacao), `GOAL_TOO_AMBITIOUS` (Meta muito ambiciosa), `UNCLEAR_NEXT_STEPS` (Proximos passos incertos), `EXTERNAL_OBSTACLES` (Obstaculos externos), `LOST_INTEREST` (Perda de interesse), `OTHER` (Outro)
-
-**Corpo da requisicao:**
-```json
-{
-  "strugglingType": "LACK_OF_MOTIVATION",
-  "message": "Nao consigo encontrar energia para continuar",
-  "notifyGuardians": true
-}
-```
 
 ---
 

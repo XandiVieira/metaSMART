@@ -36,4 +36,8 @@ public final class ErrorMessages {
     // Struggling related
     public static final String STRUGGLING_LIMIT_REACHED = "You have reached your monthly limit for help requests. Upgrade to premium for unlimited access.";
     public static final String STRUGGLING_REQUEST_NOT_FOUND = "Help request not found";
+
+    // Reflection related
+    public static final String REFLECTION_NOT_FOUND = "Reflection not found";
+    public static final String REFLECTION_ALREADY_EXISTS = "Reflection for this period already exists";
 }

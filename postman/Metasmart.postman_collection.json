@@ -70,6 +70,11 @@
 			"key": "e2eGuardianEmail",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "reflectionId",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"item": [
@@ -2265,6 +2270,132 @@
 							"raw": "{{baseUrl}}/api/v1/guardian/nudges/unread-count",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "guardian", "nudges", "unread-count"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reflections",
+			"description": "Periodic check-ins with smart frequency based on goal duration",
+			"item": [
+				{
+					"name": "Get All Pending Reflections",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/reflections/pending",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "reflections", "pending"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Reflection Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "reflections", "status"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Reflection",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('reflectionId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": \"GOOD\",\n    \"wentWell\": \"Maintained consistency this week\",\n    \"challenges\": \"Had trouble finding time on Wednesday\",\n    \"adjustments\": \"Will schedule sessions earlier in the day\",\n    \"moodNote\": \"Feeling motivated!\",\n    \"willContinue\": true,\n    \"motivationLevel\": 8\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "reflections"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Reflection History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "reflections"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Reflection by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections/{{reflectionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "reflections", "{{reflectionId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Reflection",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": \"EXCELLENT\",\n    \"wentWell\": \"Updated - exceeded my expectations!\",\n    \"motivationLevel\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections/{{reflectionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "goals", "{{goalId}}", "reflections", "{{reflectionId}}"]
 						}
 					},
 					"response": []

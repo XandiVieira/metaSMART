@@ -19,4 +19,6 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
     Page<Goal> findByOwnerAndGoalCategory(User owner, GoalCategory goalCategory, Pageable pageable);
 
     Optional<Goal> findByIdAndOwner(Long id, User owner);
+
+    java.util.List<Goal> findByOwnerAndGoalStatus(User owner, GoalStatus goalStatus);
 }
