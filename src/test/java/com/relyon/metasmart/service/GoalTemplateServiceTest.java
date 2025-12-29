@@ -145,7 +145,7 @@ class GoalTemplateServiceTest {
         }
 
         @Test
-        @DisplayName("Should find available templates")
+        @DisplayName("Should find available templates without category")
         void shouldFindAvailableTemplates() {
             var pageable = Pageable.unpaged();
             var templates = new PageImpl<>(List.of(template));
@@ -153,13 +153,29 @@ class GoalTemplateServiceTest {
             when(goalTemplateRepository.findAvailableTemplates(user, pageable)).thenReturn(templates);
             when(goalTemplateMapper.toResponse(template)).thenReturn(response);
 
-            var result = goalTemplateService.findAvailable(user, pageable);
+            var result = goalTemplateService.findAvailable(user, null, pageable);
 
             assertThat(result.getContent()).hasSize(1);
+            verify(goalTemplateRepository).findAvailableTemplates(user, pageable);
         }
 
         @Test
-        @DisplayName("Should find public templates")
+        @DisplayName("Should find available templates filtered by category")
+        void shouldFindAvailableTemplatesFilteredByCategory() {
+            var pageable = Pageable.unpaged();
+            var templates = new PageImpl<>(List.of(template));
+
+            when(goalTemplateRepository.findAvailableTemplatesByCategory(user, GoalCategory.HEALTH, pageable)).thenReturn(templates);
+            when(goalTemplateMapper.toResponse(template)).thenReturn(response);
+
+            var result = goalTemplateService.findAvailable(user, GoalCategory.HEALTH, pageable);
+
+            assertThat(result.getContent()).hasSize(1);
+            verify(goalTemplateRepository).findAvailableTemplatesByCategory(user, GoalCategory.HEALTH, pageable);
+        }
+
+        @Test
+        @DisplayName("Should find public templates without category")
         void shouldFindPublicTemplates() {
             var pageable = Pageable.unpaged();
             var templates = new PageImpl<>(List.of(template));
@@ -167,9 +183,25 @@ class GoalTemplateServiceTest {
             when(goalTemplateRepository.findByIsPublicTrueOrderByCreatedAtDesc(pageable)).thenReturn(templates);
             when(goalTemplateMapper.toResponse(template)).thenReturn(response);
 
-            var result = goalTemplateService.findPublic(pageable);
+            var result = goalTemplateService.findPublic(null, pageable);
 
             assertThat(result.getContent()).hasSize(1);
+            verify(goalTemplateRepository).findByIsPublicTrueOrderByCreatedAtDesc(pageable);
+        }
+
+        @Test
+        @DisplayName("Should find public templates filtered by category")
+        void shouldFindPublicTemplatesFilteredByCategory() {
+            var pageable = Pageable.unpaged();
+            var templates = new PageImpl<>(List.of(template));
+
+            when(goalTemplateRepository.findByIsPublicTrueAndDefaultCategoryOrderByCreatedAtDesc(GoalCategory.HEALTH, pageable)).thenReturn(templates);
+            when(goalTemplateMapper.toResponse(template)).thenReturn(response);
+
+            var result = goalTemplateService.findPublic(GoalCategory.HEALTH, pageable);
+
+            assertThat(result.getContent()).hasSize(1);
+            verify(goalTemplateRepository).findByIsPublicTrueAndDefaultCategoryOrderByCreatedAtDesc(GoalCategory.HEALTH, pageable);
         }
 
         @Test

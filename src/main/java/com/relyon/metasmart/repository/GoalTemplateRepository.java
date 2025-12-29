@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.relyon.metasmart.entity.goal.GoalCategory;
+
 import java.util.Optional;
 
 public interface GoalTemplateRepository extends JpaRepository<GoalTemplate, Long> {
@@ -19,5 +21,10 @@ public interface GoalTemplateRepository extends JpaRepository<GoalTemplate, Long
     @Query("SELECT t FROM GoalTemplate t WHERE t.isPublic = true OR t.owner = :user ORDER BY t.createdAt DESC")
     Page<GoalTemplate> findAvailableTemplates(@Param("user") User user, Pageable pageable);
 
+    @Query("SELECT t FROM GoalTemplate t WHERE (t.isPublic = true OR t.owner = :user) AND t.defaultCategory = :category ORDER BY t.createdAt DESC")
+    Page<GoalTemplate> findAvailableTemplatesByCategory(@Param("user") User user, @Param("category") GoalCategory category, Pageable pageable);
+
     Page<GoalTemplate> findByIsPublicTrueOrderByCreatedAtDesc(Pageable pageable);
+
+    Page<GoalTemplate> findByIsPublicTrueAndDefaultCategoryOrderByCreatedAtDesc(GoalCategory category, Pageable pageable);
 }

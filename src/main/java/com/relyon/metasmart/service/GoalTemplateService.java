@@ -1,6 +1,7 @@
 package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.constant.ErrorMessages;
+import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.goal.dto.GoalRequest;
 import com.relyon.metasmart.entity.template.dto.GoalTemplateRequest;
 import com.relyon.metasmart.entity.template.dto.GoalTemplateResponse;
@@ -55,15 +56,23 @@ public class GoalTemplateService {
     }
 
     @Transactional(readOnly = true)
-    public Page<GoalTemplateResponse> findAvailable(User user, Pageable pageable) {
-        log.debug("Fetching available goal templates for user ID: {}", user.getId());
+    public Page<GoalTemplateResponse> findAvailable(User user, GoalCategory category, Pageable pageable) {
+        log.debug("Fetching available goal templates for user ID: {} with category: {}", user.getId(), category);
+        if (category != null) {
+            return goalTemplateRepository.findAvailableTemplatesByCategory(user, category, pageable)
+                    .map(goalTemplateMapper::toResponse);
+        }
         return goalTemplateRepository.findAvailableTemplates(user, pageable)
                 .map(goalTemplateMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
-    public Page<GoalTemplateResponse> findPublic(Pageable pageable) {
-        log.debug("Fetching public goal templates");
+    public Page<GoalTemplateResponse> findPublic(GoalCategory category, Pageable pageable) {
+        log.debug("Fetching public goal templates with category: {}", category);
+        if (category != null) {
+            return goalTemplateRepository.findByIsPublicTrueAndDefaultCategoryOrderByCreatedAtDesc(category, pageable)
+                    .map(goalTemplateMapper::toResponse);
+        }
         return goalTemplateRepository.findByIsPublicTrueOrderByCreatedAtDesc(pageable)
                 .map(goalTemplateMapper::toResponse);
     }

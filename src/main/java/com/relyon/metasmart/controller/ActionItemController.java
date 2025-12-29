@@ -44,6 +44,16 @@ public class ActionItemController {
         return ResponseEntity.ok(actionItemService.findByGoal(goalId, user));
     }
 
+    @GetMapping("/{itemId}")
+    public ResponseEntity<ActionItemResponse> findById(
+            @PathVariable Long goalId,
+            @PathVariable Long itemId,
+            @AuthenticationPrincipal User user
+    ) {
+        log.debug("Received request to get action item ID: {} for goal ID: {}", itemId, goalId);
+        return ResponseEntity.ok(actionItemService.findById(goalId, itemId, user));
+    }
+
     @PutMapping("/{itemId}")
     public ResponseEntity<ActionItemResponse> update(
             @PathVariable Long goalId,

@@ -1,6 +1,7 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
+import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.goal.dto.GoalRequest;
 import com.relyon.metasmart.entity.template.dto.GoalTemplateRequest;
 import com.relyon.metasmart.entity.template.dto.GoalTemplateResponse;
@@ -49,18 +50,20 @@ public class GoalTemplateController {
     @GetMapping("/available")
     public ResponseEntity<Page<GoalTemplateResponse>> findAvailable(
             @AuthenticationPrincipal User user,
+            @RequestParam(required = false) GoalCategory category,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        log.debug("Received request to get available goal templates for user ID: {}", user.getId());
-        return ResponseEntity.ok(goalTemplateService.findAvailable(user, pageable));
+        log.debug("Received request to get available goal templates for user ID: {} with category: {}", user.getId(), category);
+        return ResponseEntity.ok(goalTemplateService.findAvailable(user, category, pageable));
     }
 
     @GetMapping("/public")
     public ResponseEntity<Page<GoalTemplateResponse>> findPublic(
+            @RequestParam(required = false) GoalCategory category,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        log.debug("Received request to get public goal templates");
-        return ResponseEntity.ok(goalTemplateService.findPublic(pageable));
+        log.debug("Received request to get public goal templates with category: {}", category);
+        return ResponseEntity.ok(goalTemplateService.findPublic(category, pageable));
     }
 
     @GetMapping("/{id}")

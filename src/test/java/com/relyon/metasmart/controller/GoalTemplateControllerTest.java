@@ -126,7 +126,7 @@ class GoalTemplateControllerTest {
         @DisplayName("Should get available templates")
         void shouldGetAvailableTemplates() throws Exception {
             var page = new PageImpl<>(List.of(templateResponse));
-            when(goalTemplateService.findAvailable(any(User.class), any(Pageable.class)))
+            when(goalTemplateService.findAvailable(any(User.class), any(), any(Pageable.class)))
                     .thenReturn(page);
 
             mockMvc.perform(get("/api/v1/goal-templates/available")
@@ -135,13 +135,39 @@ class GoalTemplateControllerTest {
         }
 
         @Test
+        @DisplayName("Should get available templates filtered by category")
+        void shouldGetAvailableTemplatesFilteredByCategory() throws Exception {
+            var page = new PageImpl<>(List.of(templateResponse));
+            when(goalTemplateService.findAvailable(any(User.class), eq(GoalCategory.HEALTH), any(Pageable.class)))
+                    .thenReturn(page);
+
+            mockMvc.perform(get("/api/v1/goal-templates/available")
+                            .param("category", "HEALTH")
+                            .with(user(user)))
+                    .andExpect(status().isOk());
+        }
+
+        @Test
         @DisplayName("Should get public templates")
         void shouldGetPublicTemplates() throws Exception {
             var page = new PageImpl<>(List.of(templateResponse));
-            when(goalTemplateService.findPublic(any(Pageable.class)))
+            when(goalTemplateService.findPublic(any(), any(Pageable.class)))
                     .thenReturn(page);
 
             mockMvc.perform(get("/api/v1/goal-templates/public")
+                            .with(user(user)))
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("Should get public templates filtered by category")
+        void shouldGetPublicTemplatesFilteredByCategory() throws Exception {
+            var page = new PageImpl<>(List.of(templateResponse));
+            when(goalTemplateService.findPublic(eq(GoalCategory.HEALTH), any(Pageable.class)))
+                    .thenReturn(page);
+
+            mockMvc.perform(get("/api/v1/goal-templates/public")
+                            .param("category", "HEALTH")
                             .with(user(user)))
                     .andExpect(status().isOk());
         }
