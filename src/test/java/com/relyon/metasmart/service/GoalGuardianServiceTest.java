@@ -70,6 +70,9 @@ class GoalGuardianServiceTest {
     @Mock
     private GoalGuardianMapper goalGuardianMapper;
 
+    @Mock
+    private UsageLimitService usageLimitService;
+
     @InjectMocks
     private GoalGuardianService goalGuardianService;
 

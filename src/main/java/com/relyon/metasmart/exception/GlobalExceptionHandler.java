@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.stream.Collectors;
 
+import static org.springframework.http.HttpStatus.PAYMENT_REQUIRED;
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -52,6 +54,22 @@ public class GlobalExceptionHandler {
         log.warn("Access denied: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(SubscriptionRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleSubscriptionRequired(SubscriptionRequiredException ex) {
+        log.warn("Subscription required: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.PAYMENT_REQUIRED)
+                .body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(UsageLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleUsageLimitExceeded(UsageLimitExceededException ex) {
+        log.warn("Usage limit exceeded: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.PAYMENT_REQUIRED)
                 .body(new ErrorResponse(ex.getMessage()));
     }
 

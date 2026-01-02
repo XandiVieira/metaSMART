@@ -1,6 +1,7 @@
 package com.relyon.metasmart.entity.notification.dto;
 
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,6 +30,7 @@ public class NotificationPreferencesRequest {
     // WhatsApp
     private Boolean whatsappEnabled;
 
+    @Size(max = 20, message = "Phone number must be at most 20 characters")
     @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Invalid phone number format")
     private String whatsappNumber;
 

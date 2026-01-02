@@ -44,6 +44,7 @@ public class GoalGuardianService {
     private final ActionItemRepository actionItemRepository;
     private final ObstacleEntryRepository obstacleEntryRepository;
     private final GoalGuardianMapper goalGuardianMapper;
+    private final UsageLimitService usageLimitService;
 
     @Transactional
     public GoalGuardianResponse inviteGuardian(Long goalId, InviteGuardianRequest request, User owner) {
@@ -54,6 +55,8 @@ public class GoalGuardianService {
                     log.warn("Goal not found with ID: {} for user ID: {}", goalId, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
+
+        usageLimitService.enforceGuardianLimit(owner, goalId);
 
         var guardian = userRepository.findByEmail(request.getGuardianEmail())
                 .orElseThrow(() -> {

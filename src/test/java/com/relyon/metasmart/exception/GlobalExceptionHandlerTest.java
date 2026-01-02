@@ -149,4 +149,55 @@ class GlobalExceptionHandlerTest {
         // Should keep the first error for duplicate fields
         assertThat(response.getBody().getErrors()).containsEntry("field", "first error");
     }
+
+    @Test
+    @DisplayName("Should handle SubscriptionRequiredException")
+    void shouldHandleSubscriptionRequiredException() {
+        var exception = new SubscriptionRequiredException("Premium subscription required");
+
+        var response = exceptionHandler.handleSubscriptionRequired(exception);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.PAYMENT_REQUIRED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("Premium subscription required");
+    }
+
+    @Test
+    @DisplayName("Should handle SubscriptionRequiredException with feature and tier")
+    void shouldHandleSubscriptionRequiredExceptionWithFeatureAndTier() {
+        var exception = new SubscriptionRequiredException("aiInsights", "Premium");
+
+        var response = exceptionHandler.handleSubscriptionRequired(exception);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.PAYMENT_REQUIRED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).contains("aiInsights");
+        assertThat(response.getBody().getMessage()).contains("Premium");
+    }
+
+    @Test
+    @DisplayName("Should handle UsageLimitExceededException")
+    void shouldHandleUsageLimitExceededException() {
+        var exception = new UsageLimitExceededException("active goals", 3, 3);
+
+        var response = exceptionHandler.handleUsageLimitExceeded(exception);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.PAYMENT_REQUIRED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).contains("active goals");
+        assertThat(response.getBody().getMessage()).contains("3/3");
+    }
+
+    @Test
+    @DisplayName("Should handle UsageLimitExceededException for guardians")
+    void shouldHandleUsageLimitExceededExceptionForGuardians() {
+        var exception = new UsageLimitExceededException("guardians per goal", 1, 1);
+
+        var response = exceptionHandler.handleUsageLimitExceeded(exception);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.PAYMENT_REQUIRED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).contains("guardians per goal");
+        assertThat(response.getBody().getMessage()).contains("Upgrade to Premium");
+    }
 }

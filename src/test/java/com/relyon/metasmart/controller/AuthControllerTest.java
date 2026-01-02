@@ -1,6 +1,8 @@
 package com.relyon.metasmart.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.relyon.metasmart.config.CorsConfig;
+import com.relyon.metasmart.config.RateLimitConfig;
 import com.relyon.metasmart.config.SecurityConfig;
 import com.relyon.metasmart.entity.user.dto.AuthResponse;
 import com.relyon.metasmart.entity.user.dto.LoginRequest;
@@ -27,7 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class})
+@Import({SecurityConfig.class, CorsConfig.class, RateLimitConfig.class, GlobalExceptionHandler.class})
 class AuthControllerTest {
 
     @Autowired

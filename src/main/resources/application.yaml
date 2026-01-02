@@ -15,16 +15,64 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO:update}
+      ddl-auto: ${JPA_DDL_AUTO:validate}
     show-sql: ${JPA_SHOW_SQL:false}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
 jwt:
   secret: ${JWT_SECRET:bWV0YXNtYXJ0LXNlY3JldC1rZXktZm9yLWp3dC10b2tlbi1zaWduaW5nLTI1Ni1iaXRz}
   expiration: ${JWT_EXPIRATION:86400000}
+
+metasmart:
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+    from: ${MAIL_FROM:noreply@metasmart.app}
+    frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: Authorization,Content-Type,X-Requested-With
+    allow-credentials: true
+    max-age: 3600
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    auth:
+      capacity: 10
+      refill-tokens: 10
+      refill-duration-seconds: 60
+
+stripe:
+  api-key: ${STRIPE_API_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  prices:
+    premium-monthly: ${STRIPE_PRICE_PREMIUM_MONTHLY:}
+    premium-yearly: ${STRIPE_PRICE_PREMIUM_YEARLY:}
+    streak-shield: ${STRIPE_PRICE_STREAK_SHIELD:}
+    struggling-assist: ${STRIPE_PRICE_STRUGGLING_ASSIST:}
+    goal-boost: ${STRIPE_PRICE_GOAL_BOOST:}
+    guardian-slot: ${STRIPE_PRICE_GUARDIAN_SLOT:}
 
 springdoc:
   api-docs:

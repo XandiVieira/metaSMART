@@ -42,10 +42,13 @@ public class GoalService {
     private final ObstacleEntryRepository obstacleEntryRepository;
     private final GoalMapper goalMapper;
     private final UserProfileService userProfileService;
+    private final UsageLimitService usageLimitService;
 
     @Transactional
     public GoalResponse create(GoalRequest request, User owner) {
         log.debug("Creating goal for user ID: {}", owner.getId());
+
+        usageLimitService.enforceGoalLimit(owner);
 
         var goal = goalMapper.toEntity(request);
         goal.setOwner(owner);
@@ -213,6 +216,8 @@ public class GoalService {
     @Transactional
     public GoalResponse duplicate(Long id, User owner) {
         log.debug("Duplicating goal ID: {} for user ID: {}", id, owner.getId());
+
+        usageLimitService.enforceGoalLimit(owner);
 
         var original = goalRepository.findByIdAndOwner(id, owner)
                 .orElseThrow(() -> {

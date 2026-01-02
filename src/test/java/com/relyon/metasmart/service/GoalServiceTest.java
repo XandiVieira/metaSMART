@@ -63,6 +63,9 @@ class GoalServiceTest {
     @Mock
     private UserProfileService userProfileService;
 
+    @Mock
+    private UsageLimitService usageLimitService;
+
     @InjectMocks
     private GoalService goalService;
 

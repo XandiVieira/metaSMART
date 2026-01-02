@@ -2,10 +2,12 @@ package com.relyon.metasmart.service.impl;
 
 import com.relyon.metasmart.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@ConditionalOnProperty(name = "metasmart.mail.enabled", havingValue = "false", matchIfMissing = true)
 public class LoggingEmailService implements EmailService {
 
     private static final String EMAIL_BANNER = """

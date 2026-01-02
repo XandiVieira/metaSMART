@@ -3174,6 +3174,163 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Payments",
+			"description": "Stripe payment integration for subscriptions and one-time purchases",
+			"item": [
+				{
+					"name": "Create Checkout - Premium Monthly",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has checkout URL', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('sessionId');",
+									"    pm.expect(jsonData).to.have.property('url');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productType\": \"PREMIUM_SUBSCRIPTION\",\n    \"billingPeriod\": \"MONTHLY\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/payments/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "payments", "checkout"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Checkout - Premium Yearly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productType\": \"PREMIUM_SUBSCRIPTION\",\n    \"billingPeriod\": \"YEARLY\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/payments/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "payments", "checkout"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Checkout - Streak Shield",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productType\": \"STREAK_SHIELD\",\n    \"quantity\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/payments/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "payments", "checkout"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Checkout - Struggling Assist",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productType\": \"STRUGGLING_ASSIST\",\n    \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/payments/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "payments", "checkout"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Checkout - Goal Boost",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productType\": \"GOAL_BOOST\",\n    \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/payments/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "payments", "checkout"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Checkout - Guardian Slot",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productType\": \"GUARDIAN_SLOT\",\n    \"quantity\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/payments/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "payments", "checkout"]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {

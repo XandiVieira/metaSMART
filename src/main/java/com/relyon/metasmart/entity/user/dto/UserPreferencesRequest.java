@@ -1,6 +1,7 @@
 package com.relyon.metasmart.entity.user.dto;
 
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,8 +13,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserPreferencesRequest {
 
+    @Size(max = 100, message = "Timezone must be at most 100 characters")
     private String timezone;
 
+    @Size(min = 2, max = 10, message = "Language code must be between 2 and 10 characters")
     private String language;
 
     private Boolean emailNotifications;

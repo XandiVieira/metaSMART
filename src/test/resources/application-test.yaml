@@ -13,6 +13,13 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
 
+  flyway:
+    enabled: false
+
 jwt:
   secret: dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tc2lnbmluZy0yNTYtYml0cw==
   expiration: 86400000
+
+metasmart:
+  rate-limit:
+    enabled: false
