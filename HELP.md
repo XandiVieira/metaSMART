@@ -10,44 +10,148 @@
 
 **Health Check:** `http://localhost:8080/relyon/metasmart/actuator/health`
 
-**Authentication:** All endpoints (except `/api/v1/auth/*` and `/actuator/*`) require JWT token in header:
+**Authentication:** All endpoints (except `/api/v1/auth/*`, `/api/v1/payments/webhook`, and `/actuator/*`) require JWT token in header:
 ```
 Authorization: Bearer <token>
 ```
 
 ---
 
-## Running with Docker
+## Running Locally
+
+### Prerequisites
+- Java 21+
+- Maven 3.9+ (or use included `./mvnw`)
+- PostgreSQL 16+ (or Docker)
+
+### 1. Start PostgreSQL
+
+**Option A: Docker (recommended)**
+```bash
+docker run -d \
+  --name metasmart-db \
+  -e POSTGRES_DB=metasmart \
+  -e POSTGRES_USER=metasmart \
+  -e POSTGRES_PASSWORD=localdev123 \
+  -p 5432:5432 \
+  postgres:16-alpine
+```
+
+**Option B: Local PostgreSQL**
+```sql
+CREATE DATABASE metasmart;
+CREATE USER metasmart WITH PASSWORD 'localdev123';
+GRANT ALL PRIVILEGES ON DATABASE metasmart TO metasmart;
+```
+
+### 2. Configure Environment
+
+Create a `.env` file in the project root:
+```bash
+DB_URL=jdbc:postgresql://localhost:5432/metasmart
+DB_USERNAME=metasmart
+DB_PASSWORD=localdev123
+JWT_SECRET=local-dev-secret-key-for-testing-only-32
+```
+
+Or export variables directly:
+```bash
+export DB_PASSWORD=localdev123
+export JWT_SECRET=local-dev-secret-key-for-testing-only-32
+```
+
+### 3. Run the Application
+
+```bash
+./mvnw spring-boot:run
+```
+
+### 4. Verify
+
+- API: http://localhost:8080/relyon/metasmart/actuator/health
+- Swagger: http://localhost:8080/relyon/metasmart/swagger-ui.html
+
+---
+
+## Running with Docker Compose
 
 ### Production (Full Stack)
 ```bash
 # Copy and configure environment
 cp .env.example .env
-# Edit .env with your secrets
+# Edit .env with your secrets (DB_PASSWORD, JWT_SECRET required)
 
 # Build and run
-docker-compose up -d
+docker compose up -d
 
 # View logs
-docker-compose logs -f app
+docker compose logs -f app
 ```
 
 ### Development (Database Only)
 ```bash
 # Start only PostgreSQL
-docker-compose -f docker-compose.dev.yml up -d
+docker run -d --name metasmart-db -e POSTGRES_DB=metasmart -e POSTGRES_USER=metasmart -e POSTGRES_PASSWORD=localdev123 -p 5432:5432 postgres:16-alpine
 
-# Run app with IDE or Maven
+# Run app with Maven
 ./mvnw spring-boot:run
 ```
 
-### Environment Variables
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DB_PASSWORD` | PostgreSQL password | Yes |
-| `JWT_SECRET` | JWT signing secret (256-bit) | Yes |
-| `DB_URL` | Database connection URL | No (default provided) |
-| `SWAGGER_ENABLED` | Enable Swagger UI | No (default: false) |
+---
+
+## Environment Variables
+
+### Required
+| Variable | Description |
+|----------|-------------|
+| `DB_PASSWORD` | PostgreSQL password |
+| `JWT_SECRET` | JWT signing secret (min 32 chars). Generate: `openssl rand -base64 32` |
+
+### Optional (with defaults)
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_URL` | `jdbc:postgresql://localhost:5432/metasmart` | Database URL |
+| `DB_USERNAME` | `metasmart` | Database user |
+| `JWT_EXPIRATION` | `86400000` | Token expiration (ms) |
+| `SWAGGER_ENABLED` | `true` (dev), `false` (prod) | Enable Swagger UI |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:3000,http://localhost:5173` | Allowed frontend origins |
+| `RATE_LIMIT_ENABLED` | `true` | Enable rate limiting |
+
+### Email (for password reset)
+| Variable | Description |
+|----------|-------------|
+| `MAIL_ENABLED` | `true` to enable SMTP |
+| `MAIL_HOST` | SMTP host (e.g., `smtp.gmail.com`) |
+| `MAIL_PORT` | SMTP port (e.g., `587`) |
+| `MAIL_USERNAME` | Email username |
+| `MAIL_PASSWORD` | Email password/app password |
+| `FRONTEND_URL` | Frontend URL for reset links |
+
+### Stripe (for payments)
+| Variable | Description |
+|----------|-------------|
+| `STRIPE_API_KEY` | Stripe secret key (`sk_...`) |
+| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret (`whsec_...`) |
+| `STRIPE_PRICE_PREMIUM_MONTHLY` | Price ID for monthly subscription |
+| `STRIPE_PRICE_PREMIUM_YEARLY` | Price ID for yearly subscription |
+
+---
+
+## Running Tests
+
+```bash
+# Run all tests
+./mvnw test
+
+# Run with coverage report
+./mvnw test jacoco:report
+# Report at: target/site/jacoco/index.html
+
+# Run specific test class
+./mvnw test -Dtest=GoalServiceTest
+```
+
+**Current Coverage:** 66% (355 tests)
 
 ---
 
@@ -586,13 +690,6 @@ The following features are planned for future releases:
 - **Guardian nudges via WhatsApp** - Guardians can send encouragement through WhatsApp
 - **Daily/weekly summaries** - Progress summaries delivered to WhatsApp
 
-### Stripe Payment Integration
-- **Subscription management** - Premium tier with Stripe Checkout
-- **One-time purchases** - Consumables (streak shields, goal boosts) via Stripe
-- **Customer portal** - Self-service subscription management
-- **Webhook handling** - Real-time subscription status updates
-- **Mobile support** - Stripe API integration for iOS/Android
-
 ### Engagement & Retention Features
 - **Weekly Reflections** - Prompts to rate your week, adjust goals, and celebrate wins
 - **Achievements/Badges** - Gamification with badges like "30-Day Streak", "First Milestone", "Guardian Hero"
@@ -613,7 +710,47 @@ The following features are planned for future releases:
 
 ---
 
-## Premium Features (Planned)
+### Payments (`/api/v1/payments`)
+
+*Stripe integration for subscriptions and one-time purchases.*
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/checkout` | Create Stripe checkout session |
+| POST | `/webhook` | Handle Stripe webhooks (no auth) |
+
+**Checkout request:**
+```json
+{
+  "productType": "PREMIUM_SUBSCRIPTION",
+  "billingPeriod": "MONTHLY"
+}
+```
+
+**Product types:**
+- `PREMIUM_SUBSCRIPTION` - Monthly/yearly subscription
+- `STREAK_SHIELD` - Single streak shield
+- `STREAK_SHIELD_PACK` - Pack of streak shields
+- `AI_INSIGHTS` - AI insights add-on
+- `GUARDIAN_SLOT` - Additional guardian slot
+
+**Billing periods (for subscriptions):**
+- `MONTHLY`
+- `YEARLY`
+
+**Checkout response:**
+```json
+{
+  "sessionId": "cs_test_...",
+  "url": "https://checkout.stripe.com/pay/cs_test_..."
+}
+```
+
+Redirect user to the `url` to complete payment.
+
+---
+
+## Premium Features
 
 ### Subscription Tiers
 
