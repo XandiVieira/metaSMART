@@ -1,22 +1,33 @@
 package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.constant.ErrorMessages;
+import com.relyon.metasmart.entity.actionplan.ActionItem;
 import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.goal.GoalStatus;
+import com.relyon.metasmart.entity.goal.dto.ActionPlanDto;
+import com.relyon.metasmart.entity.goal.dto.CheckinDto;
 import com.relyon.metasmart.entity.goal.dto.GoalRequest;
 import com.relyon.metasmart.entity.goal.dto.GoalResponse;
+import com.relyon.metasmart.entity.goal.dto.MilestoneDto;
 import com.relyon.metasmart.entity.goal.dto.SmartPillarsDto;
+import com.relyon.metasmart.entity.goal.dto.SupportSystemDto;
 import com.relyon.metasmart.entity.goal.dto.UpdateGoalRequest;
+import com.relyon.metasmart.entity.guardian.GuardianStatus;
 import com.relyon.metasmart.entity.progress.Milestone;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
+import com.relyon.metasmart.mapper.ActionItemMapper;
 import com.relyon.metasmart.mapper.GoalMapper;
+import com.relyon.metasmart.mapper.ScheduledTaskMapper;
 import com.relyon.metasmart.repository.ActionItemRepository;
+import com.relyon.metasmart.repository.GoalGuardianRepository;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.MilestoneRepository;
 import com.relyon.metasmart.repository.ObstacleEntryRepository;
 import com.relyon.metasmart.repository.ProgressEntryRepository;
+import com.relyon.metasmart.repository.ScheduledTaskRepository;
+import com.relyon.metasmart.repository.TaskCompletionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -40,7 +51,12 @@ public class GoalService {
     private final ProgressEntryRepository progressEntryRepository;
     private final ActionItemRepository actionItemRepository;
     private final ObstacleEntryRepository obstacleEntryRepository;
+    private final ScheduledTaskRepository scheduledTaskRepository;
+    private final GoalGuardianRepository goalGuardianRepository;
+    private final TaskCompletionRepository taskCompletionRepository;
     private final GoalMapper goalMapper;
+    private final ActionItemMapper actionItemMapper;
+    private final ScheduledTaskMapper scheduledTaskMapper;
     private final UserProfileService userProfileService;
     private final UsageLimitService usageLimitService;
 
@@ -285,7 +301,91 @@ public class GoalService {
         response.setCurrentStreak(streaks[0]);
         response.setLongestStreak(streaks[1]);
 
+        // Populate checkins from progress entries
+        response.setCheckins(buildCheckins(goal));
+
+        // Populate action plan with tasks and scheduled tasks
+        response.setActionPlan(buildActionPlan(goal));
+
+        // Populate milestones
+        response.setMilestones(buildMilestones(goal));
+
+        // Populate support system (guardians as accountability partners)
+        response.setSupportSystem(buildSupportSystem(goal));
+
         return response;
+    }
+
+    private List<CheckinDto> buildCheckins(Goal goal) {
+        return progressEntryRepository.findByGoalOrderByCreatedAtDesc(goal, Pageable.ofSize(50))
+                .getContent()
+                .stream()
+                .map(entry -> CheckinDto.builder()
+                        .id(entry.getId())
+                        .createdAt(entry.getCreatedAt())
+                        .note(entry.getNote())
+                        .progressDelta(entry.getProgressValue())
+                        .build())
+                .toList();
+    }
+
+    private ActionPlanDto buildActionPlan(Goal goal) {
+        var actionItems = actionItemRepository.findByGoalOrderByOrderIndexAscCreatedAtAsc(goal);
+        var scheduledTasks = scheduledTaskRepository.findByGoalOrderByScheduledDateAsc(goal);
+
+        var taskResponses = actionItems.stream()
+                .map(this::enrichActionItemWithCompletionHistory)
+                .toList();
+
+        var scheduledTaskDtos = scheduledTasks.stream()
+                .map(scheduledTaskMapper::toDto)
+                .toList();
+
+        return ActionPlanDto.builder()
+                .overview(goal.getActionPlanOverview())
+                .tasks(taskResponses)
+                .scheduledTasks(scheduledTaskDtos)
+                .build();
+    }
+
+    private com.relyon.metasmart.entity.actionplan.dto.ActionItemResponse enrichActionItemWithCompletionHistory(ActionItem actionItem) {
+        var response = actionItemMapper.toResponse(actionItem);
+        var completions = taskCompletionRepository.findByActionItemOrderByCompletedAtDesc(actionItem);
+        var completionDtos = completions.stream()
+                .map(completion -> com.relyon.metasmart.entity.actionplan.dto.TaskCompletionDto.builder()
+                        .id(completion.getId())
+                        .date(completion.getDate())
+                        .completedAt(completion.getCompletedAt())
+                        .note(completion.getNote())
+                        .build())
+                .toList();
+        response.setCompletionHistory(completionDtos);
+        return response;
+    }
+
+    private List<MilestoneDto> buildMilestones(Goal goal) {
+        return milestoneRepository.findByGoalOrderByPercentageAsc(goal)
+                .stream()
+                .map(milestone -> MilestoneDto.builder()
+                        .value(BigDecimal.valueOf(milestone.getPercentage()))
+                        .label(milestone.getDescription())
+                        .achieved(milestone.getAchieved())
+                        .build())
+                .toList();
+    }
+
+    private SupportSystemDto buildSupportSystem(Goal goal) {
+        var guardians = goalGuardianRepository.findByGoalAndStatus(goal, GuardianStatus.ACTIVE);
+        var partners = guardians.stream()
+                .map(guardian -> SupportSystemDto.AccountabilityPartnerDto.builder()
+                        .name(guardian.getGuardian().getName())
+                        .contact(guardian.getGuardian().getEmail())
+                        .relation("Guardian")
+                        .build())
+                .toList();
+        return SupportSystemDto.builder()
+                .accountabilityPartners(partners)
+                .build();
     }
 
     private SmartPillarsDto calculateSmartPillars(Goal goal) {

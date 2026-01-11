@@ -10,12 +10,17 @@ import com.relyon.metasmart.entity.goal.dto.SmartPillarsDto;
 import com.relyon.metasmart.entity.goal.dto.UpdateGoalRequest;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
+import com.relyon.metasmart.mapper.ActionItemMapper;
 import com.relyon.metasmart.mapper.GoalMapper;
+import com.relyon.metasmart.mapper.ScheduledTaskMapper;
 import com.relyon.metasmart.repository.ActionItemRepository;
+import com.relyon.metasmart.repository.GoalGuardianRepository;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.MilestoneRepository;
 import com.relyon.metasmart.repository.ObstacleEntryRepository;
 import com.relyon.metasmart.repository.ProgressEntryRepository;
+import com.relyon.metasmart.repository.ScheduledTaskRepository;
+import com.relyon.metasmart.repository.TaskCompletionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class GoalServiceTest {
@@ -58,7 +64,22 @@ class GoalServiceTest {
     private ObstacleEntryRepository obstacleEntryRepository;
 
     @Mock
+    private ScheduledTaskRepository scheduledTaskRepository;
+
+    @Mock
+    private GoalGuardianRepository goalGuardianRepository;
+
+    @Mock
+    private TaskCompletionRepository taskCompletionRepository;
+
+    @Mock
     private GoalMapper goalMapper;
+
+    @Mock
+    private ActionItemMapper actionItemMapper;
+
+    @Mock
+    private ScheduledTaskMapper scheduledTaskMapper;
 
     @Mock
     private UserProfileService userProfileService;
@@ -121,6 +142,18 @@ class GoalServiceTest {
                 .targetDate(LocalDate.now().plusMonths(3))
                 .goalStatus(GoalStatus.ACTIVE)
                 .build();
+
+        // Default stubs for enrichGoalResponse dependencies
+        lenient().when(progressEntryRepository.findByGoalOrderByCreatedAtDesc(any(Goal.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(Collections.emptyList()));
+        lenient().when(actionItemRepository.findByGoalOrderByOrderIndexAscCreatedAtAsc(any(Goal.class)))
+                .thenReturn(Collections.emptyList());
+        lenient().when(scheduledTaskRepository.findByGoalOrderByScheduledDateAsc(any(Goal.class)))
+                .thenReturn(Collections.emptyList());
+        lenient().when(milestoneRepository.findByGoalOrderByPercentageAsc(any(Goal.class)))
+                .thenReturn(Collections.emptyList());
+        lenient().when(goalGuardianRepository.findByGoalAndStatus(any(Goal.class), any()))
+                .thenReturn(Collections.emptyList());
     }
 
     @Nested
