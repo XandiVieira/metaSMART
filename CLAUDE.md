@@ -189,6 +189,40 @@ public interface GoalMapper {
 ./mvnw clean package
 ```
 
+## Automated API Testing (Newman)
+
+Newman is used to automate Postman collection tests for CI/CD.
+
+### Local Execution
+
+```bash
+# Install Newman (one-time)
+npm install -g newman newman-reporter-htmlextra
+
+# Run API tests against local server
+newman run postman/Metasmart.postman_collection.json \
+  --environment postman/test-environment.json \
+  --reporters cli,htmlextra \
+  --reporter-htmlextra-export newman-report.html
+
+# Run specific folder only
+newman run postman/Metasmart.postman_collection.json \
+  --environment postman/test-environment.json \
+  --folder "Authentication"
+```
+
+### Environment Files
+
+- `postman/Metasmart.postman_collection.json` - Main API collection
+- `postman/test-environment.json` - Test environment variables
+
+### CI/CD
+
+GitHub Actions automatically runs:
+1. Unit tests with Maven
+2. API tests with Newman (against running app)
+3. Reports uploaded as artifacts
+
 ## Production Readiness
 
 **Before every push to remote**, ensure the application is production ready:

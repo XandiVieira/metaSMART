@@ -1,0 +1,109 @@
+{
+  "id": "test-env",
+  "name": "Test Environment",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/relyon/metasmart",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "goalId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "progressEntryId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "milestoneId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "actionItemId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "obstacleEntryId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "templateId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "guardianshipId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "nudgeId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "guardianToken",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "e2eUserEmail",
+      "value": "e2e-test@example.com",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "e2eGuardianEmail",
+      "value": "e2e-guardian@example.com",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "reflectionId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "resetToken",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "taskCompletionId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "scheduledTaskId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}
