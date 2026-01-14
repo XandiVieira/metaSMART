@@ -1,77 +1,219 @@
-# Production Configuration
-# All sensitive values should be provided via environment variables
+# =============================================================================
+# PRODUCTION CONFIGURATION - Metasmart
+# =============================================================================
+# All sensitive values MUST be provided via environment variables.
+# This file should NOT contain any secrets or credentials.
+# =============================================================================
 
 server:
   servlet:
     context-path: ${SERVER_CONTEXT_PATH:/relyon/metasmart}
   port: ${SERVER_PORT:8080}
+  # Enable response compression for better performance
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
+    min-response-size: 1024
+  # Tomcat settings for production
+  tomcat:
+    max-threads: ${SERVER_MAX_THREADS:200}
+    accept-count: ${SERVER_ACCEPT_COUNT:100}
+    connection-timeout: 20000
+    max-connections: 10000
 
 spring:
   application:
     name: metasmart
 
+  # ==========================================================================
+  # DATABASE CONFIGURATION
+  # ==========================================================================
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
+      pool-name: MetasmartHikariCP
       maximum-pool-size: ${DB_POOL_SIZE:10}
       minimum-idle: ${DB_MIN_IDLE:2}
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      # Validation query to ensure connections are alive
+      connection-test-query: SELECT 1
 
   jpa:
     hibernate:
-      ddl-auto: update
+      # IMPORTANT: Use 'validate' in production - only Flyway manages schema
+      ddl-auto: validate
     show-sql: false
+    open-in-view: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
+        # Performance settings
+        jdbc:
+          batch_size: 25
+          fetch_size: 50
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
 
+  # ==========================================================================
+  # DATABASE MIGRATIONS (Flyway)
+  # ==========================================================================
   flyway:
     enabled: true
     baseline-on-migrate: true
     baseline-version: 0
     locations: classpath:db/migration
+    # Validate migrations on startup
+    validate-on-migrate: true
+    # Clean is disabled in production for safety
+    clean-disabled: true
 
+  # ==========================================================================
+  # EMAIL CONFIGURATION
+  # ==========================================================================
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+# =============================================================================
+# JWT CONFIGURATION
+# =============================================================================
 jwt:
+  # REQUIRED: Must be set via environment variable (minimum 256 bits / 32 chars)
   secret: ${JWT_SECRET}
+  # Token expiration: 24 hours (in milliseconds)
   expiration: ${JWT_EXPIRATION:86400000}
 
+# =============================================================================
+# APPLICATION-SPECIFIC SETTINGS
+# =============================================================================
+metasmart:
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+    from: ${MAIL_FROM:noreply@metasmart.app}
+    frontend-url: ${FRONTEND_URL:https://metasmart.app}
+  cors:
+    # REQUIRED: Set your production frontend URL(s)
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://metasmart.app}
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: Authorization,Content-Type,X-Requested-With
+    allow-credentials: true
+    max-age: 3600
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    auth:
+      # 10 attempts per minute for auth endpoints
+      capacity: 10
+      refill-tokens: 10
+      refill-duration-seconds: 60
+
+# =============================================================================
+# STRIPE PAYMENT CONFIGURATION
+# =============================================================================
+stripe:
+  api-key: ${STRIPE_API_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  prices:
+    premium-monthly: ${STRIPE_PRICE_PREMIUM_MONTHLY:}
+    premium-yearly: ${STRIPE_PRICE_PREMIUM_YEARLY:}
+    streak-shield: ${STRIPE_PRICE_STREAK_SHIELD:}
+    struggling-assist: ${STRIPE_PRICE_STRUGGLING_ASSIST:}
+    goal-boost: ${STRIPE_PRICE_GOAL_BOOST:}
+    guardian-slot: ${STRIPE_PRICE_GUARDIAN_SLOT:}
+
+# =============================================================================
+# API DOCUMENTATION (Swagger/OpenAPI)
+# =============================================================================
 springdoc:
   api-docs:
     path: /v3/api-docs
+    # DISABLED by default in production
     enabled: ${SWAGGER_ENABLED:false}
   swagger-ui:
     path: /swagger-ui.html
     enabled: ${SWAGGER_ENABLED:false}
 
+# =============================================================================
+# ACTUATOR / HEALTH CHECKS
+# =============================================================================
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        # Only expose essential endpoints in production
+        include: health,info,metrics,prometheus
       base-path: /actuator
   endpoint:
     health:
       show-details: when-authorized
+      show-components: when-authorized
+      probes:
+        enabled: true
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
   info:
     env:
       enabled: true
+  # Prometheus metrics (if using monitoring)
+  prometheus:
+    metrics:
+      export:
+        enabled: ${PROMETHEUS_ENABLED:false}
 
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
 logging:
   level:
+    # Root level: Only warnings and errors
     root: WARN
+    # Application logging: Info level for business events
     com.relyon.metasmart: INFO
+    # Security: Warn only (no debug info leaked)
     org.springframework.security: WARN
+    # Database: Warn only (no SQL queries logged)
     org.hibernate.SQL: WARN
-    org.flywaydb: DEBUG
+    org.hibernate.type.descriptor.sql: WARN
+    # Flyway: Info for migration events
+    org.flywaydb: INFO
+    # HikariCP: Info for connection pool events
+    com.zaxxer.hikari: INFO
+    # Stripe: Warn only
+    com.stripe: WARN
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  # File logging for production (if not using centralized logging)
+  file:
+    name: ${LOG_FILE:/var/log/metasmart/application.log}
+    max-size: 100MB
+    max-history: 30
+    total-size-cap: 3GB
 
+# =============================================================================
+# APPLICATION INFO
+# =============================================================================
 info:
   app:
     name: ${spring.application.name}
