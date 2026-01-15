@@ -2,13 +2,12 @@ package com.relyon.metasmart.entity.guardian;
 
 import com.relyon.metasmart.entity.AuditableEntity;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "guardian_nudges")

@@ -6,14 +6,16 @@
 - **Prefer functional style** (streams, lambdas, Optional) over imperative loops
 - **Use `var` for local variables** when the type is obvious from the right-hand side
 - **Use meaningful names** for variables, classes, and methods - names should be self-documenting
-  - This applies to **all variables including loop counters** - use `dateIndex`, `userIndex`, `retryCount` instead of `i`, `j`, `k`
+    - This applies to **all variables including loop counters** - use `dateIndex`, `userIndex`, `retryCount` instead of
+      `i`, `j`, `k`
 - **Minimal comments** - only add when logic is not self-evident; code should be self-explanatory
 - **Never mention AI, Claude, or any AI assistant** in code, comments, or commit messages
 
 ## Logging
 
 - Use **SLF4J with Lombok's @Slf4j annotation** at the top of classes
-- Log at appropriate levels: ERROR for exceptions, WARN for recoverable issues, INFO for key events, DEBUG for development
+- Log at appropriate levels: ERROR for exceptions, WARN for recoverable issues, INFO for key events, DEBUG for
+  development
 
 ```java
 @Slf4j
@@ -165,11 +167,11 @@ public interface GoalMapper {
 ## API Testing (Postman)
 
 - **ALWAYS update the Postman collection** whenever:
-  - Adding new endpoints
-  - Modifying existing endpoints (URL, method, request/response body)
-  - Adding new request/response fields
-  - Changing authentication requirements
-  - Adding new API folders/features
+    - Adding new endpoints
+    - Modifying existing endpoints (URL, method, request/response body)
+    - Adding new request/response fields
+    - Changing authentication requirements
+    - Adding new API folders/features
 - Collection location: `postman/Metasmart.postman_collection.json`
 - Keep requests organized in folders by feature/domain
 - Include test scripts to auto-save tokens on successful auth responses
@@ -219,6 +221,7 @@ newman run postman/Metasmart.postman_collection.json \
 ### CI/CD
 
 GitHub Actions automatically runs:
+
 1. Unit tests with Maven
 2. API tests with Newman (against running app)
 3. Reports uploaded as artifacts

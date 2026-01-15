@@ -5,12 +5,11 @@ import com.relyon.metasmart.entity.notification.dto.NotificationPreferencesReque
 import com.relyon.metasmart.entity.notification.dto.NotificationPreferencesResponse;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.repository.NotificationPreferencesRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Slf4j
 @Service

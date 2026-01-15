@@ -1,17 +1,16 @@
 package com.relyon.metasmart.repository;
 
-import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.goal.Goal;
+import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.goal.GoalStatus;
 import com.relyon.metasmart.entity.user.User;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
-import java.util.Optional;
 
 public interface GoalRepository extends JpaRepository<Goal, Long> {
 
@@ -38,14 +37,14 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     // Search
     @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL " +
-           "AND (LOWER(g.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(g.description) LIKE LOWER(CONCAT('%', :query, '%')))")
+            "AND (LOWER(g.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "OR LOWER(g.description) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Goal> searchByOwner(@Param("owner") User owner, @Param("query") String query, Pageable pageable);
 
     // Combined filters
     @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL " +
-           "AND (:status IS NULL OR g.goalStatus = :status) " +
-           "AND (:category IS NULL OR g.goalCategory = :category)")
+            "AND (:status IS NULL OR g.goalStatus = :status) " +
+            "AND (:category IS NULL OR g.goalCategory = :category)")
     Page<Goal> findByOwnerWithFilters(
             @Param("owner") User owner,
             @Param("status") GoalStatus status,
@@ -54,8 +53,8 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     // Goals due soon (within days)
     @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL " +
-           "AND g.goalStatus = 'ACTIVE' " +
-           "AND g.targetDate <= :dueDate ORDER BY g.targetDate ASC")
+            "AND g.goalStatus = 'ACTIVE' " +
+            "AND g.targetDate <= :dueDate ORDER BY g.targetDate ASC")
     List<Goal> findGoalsDueSoon(@Param("owner") User owner, @Param("dueDate") java.time.LocalDate dueDate);
 
     // Legacy methods (keeping for backward compatibility)

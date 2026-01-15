@@ -1,5 +1,12 @@
 package com.relyon.metasmart.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.template.GoalTemplate;
@@ -10,6 +17,8 @@ import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
 import com.relyon.metasmart.mapper.GoalTemplateMapper;
 import com.relyon.metasmart.repository.GoalTemplateRepository;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,14 +29,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class GoalTemplateServiceTest {
@@ -121,7 +122,7 @@ class GoalTemplateServiceTest {
             goalTemplateService.create(request, user);
 
             verify(goalTemplateRepository).save(argThat(t ->
-                t.getDefaultDurationDays() == 90 && !t.getIsPublic()
+                    t.getDefaultDurationDays() == 90 && !t.getIsPublic()
             ));
         }
     }

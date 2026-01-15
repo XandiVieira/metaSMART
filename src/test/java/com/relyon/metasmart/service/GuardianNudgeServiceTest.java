@@ -1,14 +1,19 @@
 package com.relyon.metasmart.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.goal.GoalStatus;
-import com.relyon.metasmart.entity.guardian.GoalGuardian;
-import com.relyon.metasmart.entity.guardian.GuardianNudge;
-import com.relyon.metasmart.entity.guardian.GuardianPermission;
-import com.relyon.metasmart.entity.guardian.GuardianStatus;
-import com.relyon.metasmart.entity.guardian.NudgeType;
+import com.relyon.metasmart.entity.guardian.*;
 import com.relyon.metasmart.entity.guardian.dto.NudgeResponse;
 import com.relyon.metasmart.entity.guardian.dto.ReactToNudgeRequest;
 import com.relyon.metasmart.entity.guardian.dto.SendNudgeRequest;
@@ -19,6 +24,12 @@ import com.relyon.metasmart.mapper.GuardianNudgeMapper;
 import com.relyon.metasmart.repository.GoalGuardianRepository;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.GuardianNudgeRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,19 +41,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class GuardianNudgeServiceTest {
@@ -304,7 +302,7 @@ class GuardianNudgeServiceTest {
 
             assertThat(result).isNotNull();
             verify(guardianNudgeRepository).save(argThat(n ->
-                "THANKS".equals(n.getReaction()) && n.getReadAt() != null
+                    "THANKS".equals(n.getReaction()) && n.getReadAt() != null
             ));
         }
 
@@ -363,7 +361,7 @@ class GuardianNudgeServiceTest {
             guardianNudgeService.reactToNudge(1L, 1L, reactRequest, owner);
 
             verify(guardianNudgeRepository).save(argThat(n ->
-                "THANKS".equals(n.getReaction()) && n.getReadAt().equals(originalReadAt)
+                    "THANKS".equals(n.getReaction()) && n.getReadAt().equals(originalReadAt)
             ));
         }
     }

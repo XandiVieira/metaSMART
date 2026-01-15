@@ -3,15 +3,10 @@ package com.relyon.metasmart.entity.subscription;
 import com.relyon.metasmart.entity.AuditableEntity;
 import com.relyon.metasmart.entity.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "user_purchases")

@@ -47,7 +47,7 @@ spring:
   jpa:
     hibernate:
       # IMPORTANT: Use 'validate' in production - only Flyway manages schema
-      ddl-auto: validate
+      ddl-auto: ${JPA_DDL_AUTO:validate}
     show-sql: false
     open-in-view: false
     properties:

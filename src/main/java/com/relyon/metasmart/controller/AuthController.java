@@ -1,22 +1,17 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
-import com.relyon.metasmart.entity.user.dto.AuthResponse;
-import com.relyon.metasmart.entity.user.dto.ForgotPasswordRequest;
-import com.relyon.metasmart.entity.user.dto.LoginRequest;
-import com.relyon.metasmart.entity.user.dto.RegisterRequest;
-import com.relyon.metasmart.entity.user.dto.ResetPasswordRequest;
+import com.relyon.metasmart.entity.user.dto.*;
 import com.relyon.metasmart.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -30,12 +25,14 @@ public class AuthController {
     @PostMapping(ApiPaths.REGISTER)
     @Operation(summary = "Register a new user")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        log.debug("Register request for email: {}", request.getEmail());
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
     @PostMapping(ApiPaths.LOGIN)
     @Operation(summary = "Login with email and password")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        log.debug("Login request for email: {}", request.getEmail());
         return ResponseEntity.ok(authService.login(request));
     }
 

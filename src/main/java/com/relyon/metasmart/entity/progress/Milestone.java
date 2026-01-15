@@ -3,10 +3,9 @@ package com.relyon.metasmart.entity.progress;
 import com.relyon.metasmart.entity.AuditableEntity;
 import com.relyon.metasmart.entity.goal.Goal;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "milestones")
@@ -28,7 +27,7 @@ public class Milestone extends AuditableEntity {
     @Column(nullable = false)
     private Integer percentage;
 
-    @Column(length = 255)
+    @Column
     private String description;
 
     @Column

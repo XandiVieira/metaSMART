@@ -8,7 +8,10 @@ import com.relyon.metasmart.service.TaskCompletionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,9 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.List;
-
+@Slf4j
 @RestController
 @RequestMapping(ApiPaths.GOALS + "/{goalId}" + ApiPaths.ACTION_ITEMS + "/{actionItemId}" + ApiPaths.COMPLETIONS)
 @RequiredArgsConstructor
@@ -35,6 +36,9 @@ public class TaskCompletionController {
             @PathVariable Long actionItemId,
             @Valid @RequestBody(required = false) TaskCompletionRequest request,
             @AuthenticationPrincipal User user) {
+
+        log.debug("Recording task completion for action item: {} in goal: {} by user: {}",
+                actionItemId, goalId, user.getEmail());
 
         TaskCompletionDto result;
         if (request != null && request.getDate() != null) {
@@ -55,6 +59,8 @@ public class TaskCompletionController {
             @PathVariable Long actionItemId,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Retrieving completion history for action item: {} in goal: {} by user: {}",
+                actionItemId, goalId, user.getEmail());
         var history = taskCompletionService.getCompletionHistory(goalId, actionItemId, user);
         return ResponseEntity.ok(history);
     }
@@ -67,6 +73,8 @@ public class TaskCompletionController {
             @AuthenticationPrincipal User user,
             Pageable pageable) {
 
+        log.debug("Retrieving paginated completion history for action item: {} in goal: {} by user: {}",
+                actionItemId, goalId, user.getEmail());
         var history = taskCompletionService.getCompletionHistoryPaginated(goalId, actionItemId, user, pageable);
         return ResponseEntity.ok(history);
     }
@@ -80,6 +88,8 @@ public class TaskCompletionController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Retrieving completions for action item: {} in goal: {} from {} to {} by user: {}",
+                actionItemId, goalId, startDate, endDate, user.getEmail());
         var completions = taskCompletionService.getCompletionsByDateRange(goalId, actionItemId, startDate, endDate, user);
         return ResponseEntity.ok(completions);
     }
@@ -91,6 +101,8 @@ public class TaskCompletionController {
             @PathVariable Long actionItemId,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Counting completions for action item: {} in goal: {} by user: {}",
+                actionItemId, goalId, user.getEmail());
         var count = taskCompletionService.countCompletions(goalId, actionItemId, user);
         return ResponseEntity.ok(count);
     }
@@ -104,6 +116,8 @@ public class TaskCompletionController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Counting completions for action item: {} in goal: {} from {} to {} by user: {}",
+                actionItemId, goalId, startDate, endDate, user.getEmail());
         var count = taskCompletionService.countCompletionsInPeriod(goalId, actionItemId, startDate, endDate, user);
         return ResponseEntity.ok(count);
     }
@@ -116,6 +130,8 @@ public class TaskCompletionController {
             @PathVariable Long completionId,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Deleting completion: {} for action item: {} in goal: {} by user: {}",
+                completionId, actionItemId, goalId, user.getEmail());
         taskCompletionService.deleteCompletion(goalId, actionItemId, completionId, user);
         return ResponseEntity.noContent().build();
     }

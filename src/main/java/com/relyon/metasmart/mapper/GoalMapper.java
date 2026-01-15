@@ -2,17 +2,16 @@ package com.relyon.metasmart.mapper;
 
 import com.relyon.metasmart.entity.goal.*;
 import com.relyon.metasmart.entity.goal.dto.*;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.Named;
-import org.springframework.lang.NonNull;
-
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
+import org.springframework.lang.NonNull;
 
 @Mapper(config = MapperConfig.class)
 public interface GoalMapper {

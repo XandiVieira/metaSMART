@@ -1,6 +1,7 @@
 package com.relyon.metasmart.exception;
 
 import com.relyon.metasmart.constant.ErrorMessages;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,10 +9,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.stream.Collectors;
-
-import static org.springframework.http.HttpStatus.PAYMENT_REQUIRED;
 
 @Slf4j
 @RestControllerAdvice
@@ -70,6 +67,14 @@ public class GlobalExceptionHandler {
         log.warn("Usage limit exceeded: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.PAYMENT_REQUIRED)
+                .body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentProcessingException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentProcessing(PaymentProcessingException ex) {
+        log.error("Payment processing error: {}", ex.getMessage(), ex);
+        return ResponseEntity
+                .status(HttpStatus.BAD_GATEWAY)
                 .body(new ErrorResponse(ex.getMessage()));
     }
 

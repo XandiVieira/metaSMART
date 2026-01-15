@@ -15,7 +15,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO:validate}
+      ddl-auto: ${JPA_DDL_AUTO:create}
     show-sql: ${JPA_SHOW_SQL:false}
     properties:
       hibernate:
@@ -23,7 +23,7 @@ spring:
         format_sql: true
 
   flyway:
-    enabled: ${FLYWAY_ENABLED:true}
+    enabled: ${FLYWAY_ENABLED:false}
     baseline-on-migrate: true
     baseline-version: 0
     locations: classpath:db/migration

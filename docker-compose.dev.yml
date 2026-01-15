@@ -17,7 +17,7 @@ services:
       - "5432:5432"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d metasmart"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d metasmart" ]
       interval: 10s
       timeout: 5s
       retries: 5

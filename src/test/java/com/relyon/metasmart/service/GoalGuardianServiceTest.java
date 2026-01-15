@@ -1,5 +1,10 @@
 package com.relyon.metasmart.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.goal.GoalCategory;
@@ -8,19 +13,20 @@ import com.relyon.metasmart.entity.guardian.GoalGuardian;
 import com.relyon.metasmart.entity.guardian.GuardianPermission;
 import com.relyon.metasmart.entity.guardian.GuardianStatus;
 import com.relyon.metasmart.entity.guardian.dto.GoalGuardianResponse;
-import com.relyon.metasmart.entity.guardian.dto.GuardedGoalResponse;
 import com.relyon.metasmart.entity.guardian.dto.InviteGuardianRequest;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.AccessDeniedException;
 import com.relyon.metasmart.exception.BadRequestException;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
 import com.relyon.metasmart.mapper.GoalGuardianMapper;
-import com.relyon.metasmart.repository.ActionItemRepository;
-import com.relyon.metasmart.repository.GoalGuardianRepository;
-import com.relyon.metasmart.repository.GoalRepository;
-import com.relyon.metasmart.repository.ObstacleEntryRepository;
-import com.relyon.metasmart.repository.ProgressEntryRepository;
-import com.relyon.metasmart.repository.UserRepository;
+import com.relyon.metasmart.repository.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -32,19 +38,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class GoalGuardianServiceTest {
@@ -226,7 +219,7 @@ class GoalGuardianServiceTest {
 
             assertThat(result).isNotNull();
             verify(goalGuardianRepository).save(argThat(gg ->
-                gg.getStatus() == GuardianStatus.ACTIVE && gg.getAcceptedAt() != null
+                    gg.getStatus() == GuardianStatus.ACTIVE && gg.getAcceptedAt() != null
             ));
         }
 
@@ -278,7 +271,7 @@ class GoalGuardianServiceTest {
 
             assertThat(result).isNotNull();
             verify(goalGuardianRepository).save(argThat(gg ->
-                gg.getStatus() == GuardianStatus.DECLINED && gg.getDeclinedAt() != null
+                    gg.getStatus() == GuardianStatus.DECLINED && gg.getDeclinedAt() != null
             ));
         }
 
@@ -375,7 +368,7 @@ class GoalGuardianServiceTest {
             goalGuardianService.removeGuardian(1L, 1L, owner);
 
             verify(goalGuardianRepository).save(argThat(gg ->
-                gg.getStatus() == GuardianStatus.REVOKED && gg.getRevokedAt() != null
+                    gg.getStatus() == GuardianStatus.REVOKED && gg.getRevokedAt() != null
             ));
         }
 

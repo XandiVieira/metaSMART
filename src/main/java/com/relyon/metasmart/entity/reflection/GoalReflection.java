@@ -4,13 +4,12 @@ import com.relyon.metasmart.entity.AuditableEntity;
 import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.user.User;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "goal_reflections")

@@ -4,6 +4,7 @@ import com.relyon.metasmart.entity.subscription.SubscriptionTier;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.SubscriptionRequiredException;
 import com.relyon.metasmart.service.SubscriptionService;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -11,8 +12,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
 
 @Slf4j
 @Aspect

@@ -10,15 +10,14 @@ import com.relyon.metasmart.exception.ResourceNotFoundException;
 import com.relyon.metasmart.mapper.ObstacleEntryMapper;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.ObstacleEntryRepository;
+import java.time.LocalDate;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -63,7 +62,7 @@ public class ObstacleService {
 
         var goal = findGoalByIdAndOwner(goalId, user);
         return obstacleEntryRepository.findByGoalAndEntryDateBetweenOrderByEntryDateDesc(
-                goal, startDate, endDate, pageable)
+                        goal, startDate, endDate, pageable)
                 .map(obstacleEntryMapper::toResponse);
     }
 

@@ -1,12 +1,11 @@
 package com.relyon.metasmart.entity.reflection.dto;
 
 import com.relyon.metasmart.entity.reflection.ReflectionFrequency;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 @Data
 @Builder

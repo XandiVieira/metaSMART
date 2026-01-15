@@ -8,16 +8,17 @@ import com.relyon.metasmart.service.ScheduledTaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.List;
-
+@Slf4j
 @RestController
 @RequestMapping(ApiPaths.GOALS + "/{goalId}" + ApiPaths.SCHEDULED_TASKS)
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class ScheduledTaskController {
             @Valid @RequestBody ScheduledTaskRequest request,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Creating scheduled task for goal: {} by user: {}", goalId, user.getEmail());
         var result = scheduledTaskService.createScheduledTask(goalId, request, user);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
@@ -46,6 +48,8 @@ public class ScheduledTaskController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Generating schedule for action item: {} in goal: {} from {} to {} by user: {}",
+                actionItemId, goalId, startDate, endDate, user.getEmail());
         var result = scheduledTaskService.generateScheduleForFrequencyTask(goalId, actionItemId, startDate, endDate, user);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
@@ -60,8 +64,11 @@ public class ScheduledTaskController {
 
         List<ScheduledTaskDto> result;
         if (startDate != null && endDate != null) {
+            log.debug("Retrieving scheduled tasks for goal: {} from {} to {} by user: {}",
+                    goalId, startDate, endDate, user.getEmail());
             result = scheduledTaskService.getScheduledTasksByDateRange(goalId, startDate, endDate, user);
         } else {
+            log.debug("Retrieving all scheduled tasks for goal: {} by user: {}", goalId, user.getEmail());
             result = scheduledTaskService.getScheduledTasksByGoal(goalId, user);
         }
 
@@ -75,6 +82,8 @@ public class ScheduledTaskController {
             @PathVariable Long actionItemId,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Retrieving scheduled tasks for action item: {} in goal: {} by user: {}",
+                actionItemId, goalId, user.getEmail());
         var result = scheduledTaskService.getScheduledTasksByActionItem(goalId, actionItemId, user);
         return ResponseEntity.ok(result);
     }
@@ -85,6 +94,7 @@ public class ScheduledTaskController {
             @PathVariable Long goalId,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Retrieving pending tasks for goal: {} by user: {}", goalId, user.getEmail());
         var result = scheduledTaskService.getPendingTasks(goalId, user);
         return ResponseEntity.ok(result);
     }
@@ -96,6 +106,8 @@ public class ScheduledTaskController {
             @PathVariable Long scheduledTaskId,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Marking scheduled task: {} as completed in goal: {} by user: {}",
+                scheduledTaskId, goalId, user.getEmail());
         var result = scheduledTaskService.markAsCompleted(goalId, scheduledTaskId, user);
         return ResponseEntity.ok(result);
     }
@@ -107,6 +119,8 @@ public class ScheduledTaskController {
             @PathVariable Long scheduledTaskId,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Marking scheduled task: {} as incomplete in goal: {} by user: {}",
+                scheduledTaskId, goalId, user.getEmail());
         var result = scheduledTaskService.markAsIncomplete(goalId, scheduledTaskId, user);
         return ResponseEntity.ok(result);
     }
@@ -118,6 +132,8 @@ public class ScheduledTaskController {
             @PathVariable Long scheduledTaskId,
             @AuthenticationPrincipal User user) {
 
+        log.debug("Deleting scheduled task: {} from goal: {} by user: {}",
+                scheduledTaskId, goalId, user.getEmail());
         scheduledTaskService.deleteScheduledTask(goalId, scheduledTaskId, user);
         return ResponseEntity.noContent().build();
     }

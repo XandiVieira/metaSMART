@@ -1,8 +1,12 @@
 package com.relyon.metasmart.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.goal.Goal;
-import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.goal.GoalStatus;
 import com.relyon.metasmart.entity.progress.Milestone;
 import com.relyon.metasmart.entity.progress.ProgressEntry;
@@ -15,6 +19,12 @@ import com.relyon.metasmart.mapper.ProgressEntryMapper;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.MilestoneRepository;
 import com.relyon.metasmart.repository.ProgressEntryRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,18 +35,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProgressServiceTest {
@@ -55,6 +53,9 @@ class ProgressServiceTest {
 
     @Mock
     private MilestoneMapper milestoneMapper;
+
+    @Mock
+    private UserProfileService userProfileService;
 
     @InjectMocks
     private ProgressService progressService;
@@ -128,6 +129,190 @@ class ProgressServiceTest {
             assertThatThrownBy(() -> progressService.addProgress(1L, progressRequest, user))
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessage(ErrorMessages.GOAL_NOT_FOUND);
+        }
+    }
+
+    @Nested
+    @DisplayName("Add bulk progress tests")
+    class AddBulkProgressTests {
+
+        @Test
+        @DisplayName("Should add bulk progress entries successfully")
+        void shouldAddBulkProgressSuccessfully() {
+            var item1 = BulkProgressRequest.ProgressItem.builder()
+                    .date(LocalDate.now())
+                    .progressValue(BigDecimal.ONE)
+                    .note("First entry")
+                    .build();
+
+            var item2 = BulkProgressRequest.ProgressItem.builder()
+                    .date(LocalDate.now().minusDays(1))
+                    .progressValue(BigDecimal.valueOf(2))
+                    .note("Second entry")
+                    .build();
+
+            var bulkRequest = BulkProgressRequest.builder()
+                    .entries(List.of(item1, item2))
+                    .build();
+
+            var savedEntry1 = ProgressEntry.builder()
+                    .id(1L)
+                    .goal(goal)
+                    .progressValue(BigDecimal.ONE)
+                    .note("First entry")
+                    .build();
+
+            var savedEntry2 = ProgressEntry.builder()
+                    .id(2L)
+                    .goal(goal)
+                    .progressValue(BigDecimal.valueOf(2))
+                    .note("Second entry")
+                    .build();
+
+            var response1 = ProgressEntryResponse.builder()
+                    .id(1L)
+                    .progressValue(BigDecimal.ONE)
+                    .note("First entry")
+                    .build();
+
+            var response2 = ProgressEntryResponse.builder()
+                    .id(2L)
+                    .progressValue(BigDecimal.valueOf(2))
+                    .note("Second entry")
+                    .build();
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(progressEntryRepository.save(any(ProgressEntry.class)))
+                    .thenReturn(savedEntry1)
+                    .thenReturn(savedEntry2);
+            when(progressEntryMapper.toResponse(savedEntry1)).thenReturn(response1);
+            when(progressEntryMapper.toResponse(savedEntry2)).thenReturn(response2);
+            when(progressEntryRepository.sumValueByGoal(goal)).thenReturn(BigDecimal.valueOf(3));
+            when(milestoneRepository.findByGoalAndAchievedFalseOrderByPercentageAsc(goal)).thenReturn(Collections.emptyList());
+
+            var responses = progressService.addBulkProgress(1L, bulkRequest, user);
+
+            assertThat(responses).hasSize(2);
+            assertThat(responses.get(0).getProgressValue()).isEqualTo(BigDecimal.ONE);
+            assertThat(responses.get(1).getProgressValue()).isEqualTo(BigDecimal.valueOf(2));
+            verify(progressEntryRepository, times(2)).save(any(ProgressEntry.class));
+            verify(goalRepository).save(any(Goal.class));
+        }
+
+        @Test
+        @DisplayName("Should throw exception when goal not found for bulk progress")
+        void shouldThrowExceptionWhenGoalNotFoundForBulkProgress() {
+            var bulkRequest = BulkProgressRequest.builder()
+                    .entries(List.of(
+                            BulkProgressRequest.ProgressItem.builder()
+                                    .date(LocalDate.now())
+                                    .progressValue(BigDecimal.ONE)
+                                    .build()
+                    ))
+                    .build();
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> progressService.addBulkProgress(1L, bulkRequest, user))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.GOAL_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("Should update goal progress after bulk add")
+        void shouldUpdateGoalProgressAfterBulkAdd() {
+            var item = BulkProgressRequest.ProgressItem.builder()
+                    .date(LocalDate.now())
+                    .progressValue(BigDecimal.valueOf(5))
+                    .note("Complete goal")
+                    .build();
+
+            var bulkRequest = BulkProgressRequest.builder()
+                    .entries(List.of(item))
+                    .build();
+
+            var savedEntry = ProgressEntry.builder()
+                    .id(1L)
+                    .goal(goal)
+                    .progressValue(BigDecimal.valueOf(5))
+                    .build();
+
+            var response = ProgressEntryResponse.builder()
+                    .id(1L)
+                    .progressValue(BigDecimal.valueOf(5))
+                    .build();
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(progressEntryRepository.save(any(ProgressEntry.class))).thenReturn(savedEntry);
+            when(progressEntryMapper.toResponse(savedEntry)).thenReturn(response);
+            when(progressEntryRepository.sumValueByGoal(goal)).thenReturn(BigDecimal.valueOf(5));
+            when(milestoneRepository.findByGoalAndAchievedFalseOrderByPercentageAsc(goal)).thenReturn(Collections.emptyList());
+
+            progressService.addBulkProgress(1L, bulkRequest, user);
+
+            verify(goalRepository, times(2)).save(argThat(g ->
+                    g.getGoalStatus() == GoalStatus.COMPLETED
+            ));
+        }
+
+        @Test
+        @DisplayName("Should achieve milestones during bulk progress add")
+        void shouldAchieveMilestonesDuringBulkAdd() {
+            var item = BulkProgressRequest.ProgressItem.builder()
+                    .date(LocalDate.now())
+                    .progressValue(BigDecimal.valueOf(3))
+                    .build();
+
+            var bulkRequest = BulkProgressRequest.builder()
+                    .entries(List.of(item))
+                    .build();
+
+            var milestone = Milestone.builder()
+                    .id(1L)
+                    .goal(goal)
+                    .percentage(50)
+                    .achieved(false)
+                    .build();
+
+            var savedEntry = ProgressEntry.builder()
+                    .id(1L)
+                    .goal(goal)
+                    .progressValue(BigDecimal.valueOf(3))
+                    .build();
+
+            var response = ProgressEntryResponse.builder()
+                    .id(1L)
+                    .progressValue(BigDecimal.valueOf(3))
+                    .build();
+
+            goal.setCurrentProgress(BigDecimal.valueOf(3));
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(progressEntryRepository.save(any(ProgressEntry.class))).thenReturn(savedEntry);
+            when(progressEntryMapper.toResponse(savedEntry)).thenReturn(response);
+            when(progressEntryRepository.sumValueByGoal(goal)).thenReturn(BigDecimal.valueOf(3));
+            when(milestoneRepository.findByGoalAndAchievedFalseOrderByPercentageAsc(goal)).thenReturn(List.of(milestone));
+
+            progressService.addBulkProgress(1L, bulkRequest, user);
+
+            verify(milestoneRepository).save(argThat(m -> m.getAchieved() && m.getAchievedAt() != null));
+        }
+
+        @Test
+        @DisplayName("Should handle empty entries in bulk progress")
+        void shouldHandleEmptyEntriesInBulkProgress() {
+            var bulkRequest = BulkProgressRequest.builder()
+                    .entries(Collections.emptyList())
+                    .build();
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(progressEntryRepository.sumValueByGoal(goal)).thenReturn(BigDecimal.ZERO);
+            when(milestoneRepository.findByGoalAndAchievedFalseOrderByPercentageAsc(goal)).thenReturn(Collections.emptyList());
+
+            var responses = progressService.addBulkProgress(1L, bulkRequest, user);
+
+            assertThat(responses).isEmpty();
+            verify(progressEntryRepository, never()).save(any(ProgressEntry.class));
         }
     }
 

@@ -2,11 +2,10 @@ package com.relyon.metasmart.repository;
 
 import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.goal.GoalNote;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.Optional;
 
 public interface GoalNoteRepository extends JpaRepository<GoalNote, Long> {
 

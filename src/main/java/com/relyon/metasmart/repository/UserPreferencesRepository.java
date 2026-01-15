@@ -2,9 +2,8 @@ package com.relyon.metasmart.repository;
 
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.entity.user.UserPreferences;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserPreferencesRepository extends JpaRepository<UserPreferences, Long> {
 

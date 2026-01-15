@@ -1,12 +1,11 @@
 package com.relyon.metasmart.entity.goal.dto;
 
 import com.relyon.metasmart.entity.goal.GoalNote;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder

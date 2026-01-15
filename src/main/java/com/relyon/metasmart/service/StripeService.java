@@ -1,30 +1,35 @@
 package com.relyon.metasmart.service;
 
+import static com.relyon.metasmart.constant.ErrorMessages.*;
+
 import com.relyon.metasmart.config.StripeConfig;
 import com.relyon.metasmart.entity.subscription.*;
 import com.relyon.metasmart.entity.subscription.dto.CheckoutResponse;
 import com.relyon.metasmart.entity.subscription.dto.CreateCheckoutRequest;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.BadRequestException;
+import com.relyon.metasmart.exception.PaymentProcessingException;
 import com.relyon.metasmart.repository.UserPurchaseRepository;
 import com.relyon.metasmart.repository.UserSubscriptionRepository;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
-import com.stripe.model.*;
+import com.stripe.model.Event;
+import com.stripe.model.Invoice;
+import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -86,7 +91,7 @@ public class StripeService {
 
         } catch (StripeException e) {
             log.error("Failed to create checkout session for user ID: {}", user.getId(), e);
-            throw new RuntimeException("Failed to create payment session", e);
+            throw new PaymentProcessingException(FAILED_TO_CREATE_PAYMENT_SESSION, e);
         }
     }
 
@@ -117,7 +122,7 @@ public class StripeService {
     private void handleCheckoutCompleted(Event event) {
         var session = (Session) event.getDataObjectDeserializer()
                 .getObject()
-                .orElseThrow(() -> new RuntimeException("Failed to deserialize session"));
+                .orElseThrow(() -> new PaymentProcessingException(FAILED_TO_DESERIALIZE_SESSION));
 
         var metadata = session.getMetadata();
         var userId = Long.parseLong(metadata.get(METADATA_USER_ID));
@@ -149,7 +154,7 @@ public class StripeService {
                 .quantity(quantity)
                 .quantityRemaining(quantity)
                 .priceAmount(session.getAmountTotal() != null
-                        ? BigDecimal.valueOf(session.getAmountTotal()).divide(BigDecimal.valueOf(100))
+                        ? BigDecimal.valueOf(session.getAmountTotal()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
                         : null)
                 .priceCurrency(session.getCurrency())
                 .externalTransactionId(session.getPaymentIntent() != null ? session.getPaymentIntent() : session.getId())
@@ -163,23 +168,17 @@ public class StripeService {
     }
 
     private void handleSubscriptionCreated(Event event) {
-        var subscription = (Subscription) event.getDataObjectDeserializer()
-                .getObject()
-                .orElseThrow(() -> new RuntimeException("Failed to deserialize subscription"));
-
-        var userId = extractUserIdFromSubscription(subscription);
-        if (userId.isEmpty()) {
-            log.warn("No user ID found in subscription metadata: {}", subscription.getId());
-            return;
-        }
-
-        createOrUpdateSubscription(userId.get(), subscription);
+        handleSubscriptionChange(event);
     }
 
     private void handleSubscriptionUpdated(Event event) {
+        handleSubscriptionChange(event);
+    }
+
+    private void handleSubscriptionChange(Event event) {
         var subscription = (Subscription) event.getDataObjectDeserializer()
                 .getObject()
-                .orElseThrow(() -> new RuntimeException("Failed to deserialize subscription"));
+                .orElseThrow(() -> new PaymentProcessingException(FAILED_TO_DESERIALIZE_SUBSCRIPTION));
 
         var userId = extractUserIdFromSubscription(subscription);
         if (userId.isEmpty()) {
@@ -193,7 +192,7 @@ public class StripeService {
     private void handleSubscriptionDeleted(Event event) {
         var subscription = (Subscription) event.getDataObjectDeserializer()
                 .getObject()
-                .orElseThrow(() -> new RuntimeException("Failed to deserialize subscription"));
+                .orElseThrow(() -> new PaymentProcessingException(FAILED_TO_DESERIALIZE_SUBSCRIPTION));
 
         subscriptionRepository.findByExternalSubscriptionId(subscription.getId())
                 .ifPresent(userSubscription -> {
@@ -207,7 +206,7 @@ public class StripeService {
     private void handleInvoicePaymentSucceeded(Event event) {
         var invoice = (Invoice) event.getDataObjectDeserializer()
                 .getObject()
-                .orElseThrow(() -> new RuntimeException("Failed to deserialize invoice"));
+                .orElseThrow(() -> new PaymentProcessingException(FAILED_TO_DESERIALIZE_INVOICE));
 
         if (invoice.getSubscription() == null) {
             return;
@@ -226,7 +225,7 @@ public class StripeService {
     private void handleInvoicePaymentFailed(Event event) {
         var invoice = (Invoice) event.getDataObjectDeserializer()
                 .getObject()
-                .orElseThrow(() -> new RuntimeException("Failed to deserialize invoice"));
+                .orElseThrow(() -> new PaymentProcessingException(FAILED_TO_DESERIALIZE_INVOICE));
 
         if (invoice.getSubscription() == null) {
             return;
@@ -268,7 +267,7 @@ public class StripeService {
         var items = stripeSubscription.getItems().getData();
         if (!items.isEmpty()) {
             var price = items.getFirst().getPrice();
-            userSubscription.setPriceAmount(BigDecimal.valueOf(price.getUnitAmount()).divide(BigDecimal.valueOf(100)));
+            userSubscription.setPriceAmount(BigDecimal.valueOf(price.getUnitAmount()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
             userSubscription.setPriceCurrency(price.getCurrency());
             userSubscription.setBillingPeriod(price.getRecurring() != null ? price.getRecurring().getInterval() : null);
         }

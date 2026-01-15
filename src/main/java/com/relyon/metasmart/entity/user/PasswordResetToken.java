@@ -1,9 +1,8 @@
 package com.relyon.metasmart.entity.user;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "password_reset_tokens")

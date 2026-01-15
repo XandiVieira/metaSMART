@@ -3,10 +3,12 @@ package com.relyon.metasmart.entity.progress;
 import com.relyon.metasmart.entity.AuditableEntity;
 import com.relyon.metasmart.entity.goal.Goal;
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "progress_entries")

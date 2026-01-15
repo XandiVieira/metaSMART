@@ -5,12 +5,11 @@ import com.relyon.metasmart.entity.user.UserPreferences;
 import com.relyon.metasmart.entity.user.dto.UserPreferencesRequest;
 import com.relyon.metasmart.entity.user.dto.UserPreferencesResponse;
 import com.relyon.metasmart.repository.UserPreferencesRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -19,7 +18,7 @@ public class UserPreferencesService {
 
     private final UserPreferencesRepository userPreferencesRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public UserPreferencesResponse getPreferences(User user) {
         log.debug("Getting preferences for user: {}", user.getEmail());
 

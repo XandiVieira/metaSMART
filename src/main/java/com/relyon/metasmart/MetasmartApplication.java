@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 public class MetasmartApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MetasmartApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(MetasmartApplication.class, args);
+    }
 
 }

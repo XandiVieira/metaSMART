@@ -1,3370 +1,2756 @@
 {
-	"info": {
-		"_postman_id": "metasmart-api-collection",
-		"name": "Metasmart API",
-		"description": "API collection for Metasmart - Goal Management Platform",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:8080/relyon/metasmart",
-			"type": "string"
-		},
-		{
-			"key": "token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "goalId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "progressEntryId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "milestoneId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "actionItemId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "obstacleEntryId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "templateId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "guardianshipId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "nudgeId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "guardianToken",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "e2eUserEmail",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "e2eGuardianEmail",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "reflectionId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "resetToken",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "taskCompletionId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "scheduledTaskId",
-			"value": "",
-			"type": "string"
-		}
-	],
-	"item": [
-		{
-			"name": "E2E Test Sequence",
-			"description": "Complete end-to-end test sequence. Run this folder with Postman Collection Runner to test the entire application flow.",
-			"item": [
-				{
-					"name": "01. Register Main User",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const timestamp = Date.now();",
-									"const email = `e2e.user.${timestamp}@test.com`;",
-									"pm.collectionVariables.set('e2eUserEmail', email);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Response has token', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('token');",
-									"    pm.collectionVariables.set('token', jsonData.token);",
-									"});",
-									"",
-									"pm.test('Response has user name', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.name).to.eql('E2E Test User');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"E2E Test User\",\n    \"email\": \"{{e2eUserEmail}}\",\n    \"password\": \"password123\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/register",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "auth", "register"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "02. Create Goal",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Goal created with correct data', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('id');",
-									"    pm.expect(jsonData.title).to.eql('E2E Test Goal - Run 10km');",
-									"    pm.expect(jsonData.goalCategory).to.eql('HEALTH');",
-									"    pm.collectionVariables.set('goalId', jsonData.id);",
-									"});",
-									"",
-									"pm.test('Goal has SMART pillars', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('smartPillars');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"title\": \"E2E Test Goal - Run 10km\",\n    \"description\": \"Build endurance to run 10km continuously\",\n    \"goalCategory\": \"HEALTH\",\n    \"targetValue\": \"10\",\n    \"unit\": \"km\",\n    \"motivation\": \"I want to complete a 10km race\",\n    \"startDate\": \"2025-01-01\",\n    \"targetDate\": \"2025-12-31\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "03. Get Goal by ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Goal retrieved correctly', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get('goalId'));",
-									"    pm.expect(jsonData.title).to.include('E2E Test Goal');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "04. Add Progress Entry",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Progress entry created', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('id');",
-									"    pm.expect(jsonData.progressValue).to.eql(2);",
-									"    pm.collectionVariables.set('progressEntryId', jsonData.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"progressValue\": 2,\n    \"note\": \"E2E test - First run of 2km!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "progress"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "05. Get Progress History",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Progress history returned', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('content');",
-									"    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "progress"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "06. Add Custom Milestone",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Milestone created', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('id');",
-									"    pm.expect(jsonData.percentage).to.eql(10);",
-									"    pm.collectionVariables.set('milestoneId', jsonData.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"percentage\": 10,\n    \"description\": \"E2E test - First 10% milestone!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/milestones",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "milestones"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "07. Get Milestones",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Milestones returned (including defaults)', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.length).to.be.greaterThan(0);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/milestones",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "milestones"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "08. Create Action Item",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Action item created', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('id');",
-									"    pm.expect(jsonData.title).to.eql('E2E - Buy running shoes');",
-									"    pm.collectionVariables.set('actionItemId', jsonData.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"title\": \"E2E - Buy running shoes\",\n    \"description\": \"Get proper running shoes for training\",\n    \"dueDate\": \"2025-02-01\",\n    \"orderIndex\": 1\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "09. Complete Action Item",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Action item marked as completed', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.completed).to.be.true;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"completed\": true\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "10. Create Obstacle Entry",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Obstacle created', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('id');",
-									"    pm.expect(jsonData.obstacle).to.include('knee pain');",
-									"    pm.collectionVariables.set('obstacleEntryId', jsonData.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"obstacle\": \"E2E - Experiencing knee pain after running\",\n    \"solution\": \"Will do stretching and use knee brace\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "11. Resolve Obstacle",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Obstacle marked as resolved', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.resolved).to.be.true;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"resolved\": true,\n    \"solution\": \"Knee brace and proper warm-up routine solved the issue\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles/{{obstacleEntryId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles", "{{obstacleEntryId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "12. Create Goal Template",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Template created', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('id');",
-									"    pm.expect(jsonData.name).to.include('E2E');",
-									"    pm.collectionVariables.set('templateId', jsonData.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"E2E Running Template\",\n    \"description\": \"Template for running goals\",\n    \"defaultTitle\": \"Run [distance]\",\n    \"defaultDescription\": \"Build running endurance\",\n    \"defaultCategory\": \"HEALTH\",\n    \"defaultTargetValue\": \"5\",\n    \"defaultUnit\": \"km\",\n    \"defaultMotivation\": \"Improve health\",\n    \"defaultDurationDays\": 90,\n    \"isPublic\": false\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goal-templates",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goal-templates"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "13. Register Guardian User",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const timestamp = Date.now();",
-									"const email = `e2e.guardian.${timestamp}@test.com`;",
-									"pm.collectionVariables.set('e2eGuardianEmail', email);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Guardian registered and token saved', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('token');",
-									"    pm.collectionVariables.set('guardianToken', jsonData.token);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"E2E Guardian User\",\n    \"email\": \"{{e2eGuardianEmail}}\",\n    \"password\": \"password123\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/register",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "auth", "register"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "14. Invite Guardian (as Owner)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Guardian invitation created', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('id');",
-									"    pm.expect(jsonData.status).to.eql('PENDING');",
-									"    pm.collectionVariables.set('guardianshipId', jsonData.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"guardianEmail\": \"{{e2eGuardianEmail}}\",\n    \"permissions\": [\"VIEW_PROGRESS\", \"VIEW_STREAK\", \"SEND_NUDGE\"],\n    \"inviteMessage\": \"E2E Test - Please be my accountability partner!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "guardians"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "15. Get Pending Invitations (as Guardian)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Has pending invitation', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{guardianToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/invitations",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "invitations"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "16. Accept Invitation (as Guardian)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Invitation accepted', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.status).to.eql('ACTIVE');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{guardianToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/invitations/{{guardianshipId}}/accept",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "invitations", "{{guardianshipId}}", "accept"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "17. View Goal as Guardian",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Can view goal progress', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('progressPercentage');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{guardianToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/goals/{{goalId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "goals", "{{goalId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "18. Send Nudge (as Guardian)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Nudge sent successfully', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('id');",
-									"    pm.expect(jsonData.nudgeType).to.eql('ENCOURAGEMENT');",
-									"    pm.collectionVariables.set('nudgeId', jsonData.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{guardianToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"message\": \"E2E Test - Keep up the great work on your running goal!\",\n    \"nudgeType\": \"ENCOURAGEMENT\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/goals/{{goalId}}/nudges",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "goals", "{{goalId}}", "nudges"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "19. Get Nudges (as Owner)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Nudge received', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians/nudges",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "guardians", "nudges"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "20. React to Nudge (as Owner)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Reaction saved', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.reaction).to.eql('THANKS');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"reaction\": \"THANKS\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians/nudges/{{nudgeId}}/react",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "guardians", "nudges", "{{nudgeId}}", "react"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "21. Update Goal",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Goal updated', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.title).to.include('Updated');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"title\": \"E2E Test Goal - Updated - Run 10km in 60 minutes\",\n    \"motivation\": \"Updated motivation - feeling great about progress!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "22. Get All Goals (Verify)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Goals list returned', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('content');",
-									"    pm.expect(jsonData.totalElements).to.be.greaterThan(0);",
-									"});",
-									"",
-									"console.log('E2E Test Sequence completed successfully!');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Auth",
-			"item": [
-				{
-					"name": "Register",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Response has token, email and name', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('token');",
-									"    pm.expect(jsonData).to.have.property('email');",
-									"    pm.expect(jsonData).to.have.property('name');",
-									"    pm.expect(jsonData.email).to.eql('john@example.com');",
-									"    pm.expect(jsonData.name).to.eql('John Doe');",
-									"});",
-									"",
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('token', jsonData.token);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"Password123!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/register",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "auth", "register"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Response has token, email and name', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('token');",
-									"    pm.expect(jsonData).to.have.property('email');",
-									"    pm.expect(jsonData).to.have.property('name');",
-									"});",
-									"",
-									"if (pm.response.code === 200) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('token', jsonData.token);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/login",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "auth", "login"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Forgot Password",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"john@example.com\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/forgot-password",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "auth", "forgot-password"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Validate Reset Token",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/validate-reset-token?token={{resetToken}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "auth", "validate-reset-token"],
-							"query": [
-								{
-									"key": "token",
-									"value": "{{resetToken}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Reset Password",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{resetToken}}\",\n    \"newPassword\": \"NewPassword123!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/reset-password",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "auth", "reset-password"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Dashboard",
-			"description": "Dashboard and statistics endpoints",
-			"item": [
-				{
-					"name": "Get Dashboard",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/dashboard",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "dashboard"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Goal Stats",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/dashboard/stats",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "dashboard", "stats"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "User Profile",
-			"description": "User profile and streak shield management",
-			"item": [
-				{
-					"name": "Get Profile",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/profile",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "users", "profile"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Profile",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"John Updated\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/profile",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "users", "profile"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Use Streak Shield",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/streak-shields/use",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "users", "streak-shields", "use"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get User Preferences",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/preferences",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "users", "preferences"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update User Preferences",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"timezone\": \"America/Sao_Paulo\",\n    \"language\": \"pt\",\n    \"emailNotifications\": true,\n    \"pushNotifications\": true,\n    \"weeklyDigest\": true,\n    \"streakReminders\": true,\n    \"guardianNudges\": true,\n    \"preferredReminderTime\": \"09:00\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/preferences",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "users", "preferences"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Notification Preferences",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/notifications/preferences",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "users", "notifications", "preferences"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Notification Preferences",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"pushEnabled\": true,\n    \"pushGoalReminders\": true,\n    \"pushProgressReminders\": true,\n    \"pushMilestones\": true,\n    \"pushStreakAlerts\": true,\n    \"pushGuardianNudges\": true,\n    \"emailEnabled\": true,\n    \"emailWeeklyDigest\": true,\n    \"emailMilestones\": true,\n    \"emailStreakAtRisk\": true,\n    \"whatsappEnabled\": false,\n    \"quietHoursEnabled\": true,\n    \"quietHoursStart\": \"22:00\",\n    \"quietHoursEnd\": \"08:00\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/notifications/preferences",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "users", "notifications", "preferences"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Goals",
-			"item": [
-				{
-					"name": "Create Goal",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('goalId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"title\": \"Run 5km without stopping\",\n    \"description\": \"Build endurance to run 5km continuously\",\n    \"goalCategory\": \"HEALTH\",\n    \"targetValue\": \"5\",\n    \"unit\": \"km\",\n    \"motivation\": \"I want to improve my cardiovascular health\",\n    \"startDate\": \"2025-01-01\",\n    \"targetDate\": \"2025-06-30\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Goals",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals?page=0&size=10&sort=createdAt,desc",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								},
-								{
-									"key": "sort",
-									"value": "createdAt,desc"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Goal by ID",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Goals by Status",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/status/ACTIVE?page=0&size=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "status", "ACTIVE"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Goals by Category",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/category/HEALTH?page=0&size=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "category", "HEALTH"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Goal",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"title\": \"Run 5km in under 30 minutes\",\n    \"motivation\": \"Updated motivation - feeling great about my progress!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Archived Goals",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/archived",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "archived"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Archive Goal",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/archive",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "archive"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Unarchive Goal",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/unarchive",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "unarchive"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Goal",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Search Goals",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/search?query=run",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "search"],
-							"query": [
-								{
-									"key": "query",
-									"value": "run"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Filter Goals",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/filter?status=ACTIVE&category=HEALTH",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "filter"],
-							"query": [
-								{
-									"key": "status",
-									"value": "ACTIVE"
-								},
-								{
-									"key": "category",
-									"value": "HEALTH"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Goals Due Soon",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/due-soon?days=7",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "due-soon"],
-							"query": [
-								{
-									"key": "days",
-									"value": "7"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Duplicate Goal",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/duplicate",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "duplicate"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Use Streak Shield for Goal",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/use-streak-shield",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "use-streak-shield"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Goal Notes",
-			"item": [
-				{
-					"name": "Create Note",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"content\": \"Feeling great about my progress today!\",\n    \"noteType\": \"REFLECTION\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/notes",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "notes"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Notes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/notes",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "notes"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Notes by Type",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/notes?noteType=REFLECTION",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "notes"],
-							"query": [
-								{
-									"key": "noteType",
-									"value": "REFLECTION"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Progress",
-			"item": [
-				{
-					"name": "Add Progress Entry",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('progressEntryId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"progressValue\": 1,\n    \"note\": \"Ran in the park, it was cold but I pushed through!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "progress"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add Bulk Progress",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"entries\": [\n        { \"progressValue\": 1, \"note\": \"Day 1\" },\n        { \"progressValue\": 2, \"note\": \"Day 2\" },\n        { \"progressValue\": 1.5, \"note\": \"Day 3\" }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress/bulk",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "progress", "bulk"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add Progress (+1 Quick)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('progressEntryId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"progressValue\": 1\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "progress"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add Progress (+5 Quick)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"progressValue\": 5\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "progress"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Progress History",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress?page=0&size=20",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "progress"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "20"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Progress History (Date Range)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress?startDate=2025-01-01&endDate=2025-12-31&page=0&size=20",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "progress"],
-							"query": [
-								{
-									"key": "startDate",
-									"value": "2025-01-01"
-								},
-								{
-									"key": "endDate",
-									"value": "2025-12-31"
-								},
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "20"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Progress Entry",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"progressValue\": 2,\n    \"note\": \"Updated note - actually ran 2km today!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress/{{progressEntryId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "progress", "{{progressEntryId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Progress Entry",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress/{{progressEntryId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "progress", "{{progressEntryId}}"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Milestones",
-			"item": [
-				{
-					"name": "Add Milestone",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('milestoneId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"percentage\": 10,\n    \"description\": \"First 10% - Great start!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/milestones",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "milestones"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Milestones",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/milestones",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "milestones"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Milestone",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/milestones/{{milestoneId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "milestones", "{{milestoneId}}"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Action Items",
-			"item": [
-				{
-					"name": "Create Action Item",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('actionItemId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"title\": \"Buy running shoes\",\n    \"description\": \"Get proper running shoes from the sports store\",\n    \"dueDate\": \"2025-01-15\",\n    \"orderIndex\": 1\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Action Items",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Action Item",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"title\": \"Buy running shoes - Nike Air Zoom\",\n    \"completed\": true\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Action Item",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Task Completions",
-			"description": "Track completions for recurring tasks",
-			"item": [
-				{
-					"name": "Record Task Completion",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('taskCompletionId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"note\": \"Completed morning run!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Record Completion for Specific Date",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"date\": \"2025-01-15\",\n    \"note\": \"Completed afternoon session\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Completion History",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Completions by Date Range",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions/range?startDate=2025-01-01&endDate=2025-01-31",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions", "range"],
-							"query": [
-								{"key": "startDate", "value": "2025-01-01"},
-								{"key": "endDate", "value": "2025-01-31"}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Count Completions",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions/count",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions", "count"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Completion",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions/{{taskCompletionId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "action-items", "{{actionItemId}}", "completions", "{{taskCompletionId}}"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Scheduled Tasks (Flight Plan)",
-			"description": "Schedule and manage task instances for recurring and frequency-based tasks",
-			"item": [
-				{
-					"name": "Create Scheduled Task",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('scheduledTaskId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"taskId\": {{actionItemId}},\n    \"scheduledDate\": \"2025-01-20\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Generate Schedule for Frequency Task",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/generate/{{actionItemId}}?startDate=2025-01-01&endDate=2025-01-31",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "generate", "{{actionItemId}}"],
-							"query": [
-								{"key": "startDate", "value": "2025-01-01"},
-								{"key": "endDate", "value": "2025-01-31"}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Scheduled Tasks",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Scheduled Tasks by Date Range",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks?startDate=2025-01-01&endDate=2025-01-31",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks"],
-							"query": [
-								{"key": "startDate", "value": "2025-01-01"},
-								{"key": "endDate", "value": "2025-01-31"}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Scheduled Tasks for Action Item",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/action-item/{{actionItemId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "action-item", "{{actionItemId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Pending Tasks",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/pending",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "pending"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Mark Scheduled Task Complete",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/{{scheduledTaskId}}/complete",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "{{scheduledTaskId}}", "complete"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Mark Scheduled Task Incomplete",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/{{scheduledTaskId}}/incomplete",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "{{scheduledTaskId}}", "incomplete"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Scheduled Task",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/{{scheduledTaskId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "scheduled-tasks", "{{scheduledTaskId}}"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Obstacles",
-			"item": [
-				{
-					"name": "Create Obstacle Entry",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('obstacleEntryId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"obstacle\": \"Knee pain after running\",\n    \"solution\": \"Will do stretching before and after running\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Obstacles",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles?page=0&size=20",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "20"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Obstacles (Date Range)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles?startDate=2025-01-01&endDate=2025-12-31&page=0&size=20",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles"],
-							"query": [
-								{
-									"key": "startDate",
-									"value": "2025-01-01"
-								},
-								{
-									"key": "endDate",
-									"value": "2025-12-31"
-								},
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "20"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Obstacle Entry",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"solution\": \"Bought knee brace and doing proper warm-up routine\",\n    \"resolved\": true\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles/{{obstacleEntryId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles", "{{obstacleEntryId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Obstacle Entry",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles/{{obstacleEntryId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "obstacles", "{{obstacleEntryId}}"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Goal Templates",
-			"item": [
-				{
-					"name": "Create Template",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('templateId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Running Goal Template\",\n    \"description\": \"Template for running-related goals\",\n    \"defaultTitle\": \"Run [distance] in [time]\",\n    \"defaultDescription\": \"Build endurance to run consistently\",\n    \"defaultCategory\": \"HEALTH\",\n    \"defaultTargetValue\": \"5\",\n    \"defaultUnit\": \"km\",\n    \"defaultMotivation\": \"Improve cardiovascular health\",\n    \"defaultDurationDays\": 90,\n    \"isPublic\": false\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goal-templates",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goal-templates"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get My Templates",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goal-templates?page=0&size=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goal-templates"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Available Templates",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goal-templates/available?page=0&size=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goal-templates", "available"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Public Templates",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goal-templates/public?page=0&size=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goal-templates", "public"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Template by ID",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goal-templates/{{templateId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goal-templates", "{{templateId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Goal from Template",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goal-templates/{{templateId}}/goal",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goal-templates", "{{templateId}}", "goal"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Template",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Updated Running Template\",\n    \"isPublic\": true\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goal-templates/{{templateId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goal-templates", "{{templateId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Template",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goal-templates/{{templateId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goal-templates", "{{templateId}}"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Goal Guardians (Owner)",
-			"description": "Endpoints for goal owners to manage guardians on their goals",
-			"item": [
-				{
-					"name": "Register Guardian User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('guardianToken', jsonData.token);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Jane Guardian\",\n    \"email\": \"jane.guardian@example.com\",\n    \"password\": \"password123\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/register",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "auth", "register"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Invite Guardian",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('guardianshipId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"guardianEmail\": \"jane.guardian@example.com\",\n    \"permissions\": [\"VIEW_PROGRESS\", \"VIEW_STREAK\", \"SEND_NUDGE\"],\n    \"inviteMessage\": \"Hey Jane! Would you like to be my accountability partner for this goal?\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "guardians"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Guardians for Goal",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "guardians"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Remove Guardian",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians/{{guardianshipId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "guardians", "{{guardianshipId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Nudges for My Goal",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians/nudges?page=0&size=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "guardians", "nudges"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Mark Nudge as Read",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians/nudges/{{nudgeId}}/read",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "guardians", "nudges", "{{nudgeId}}", "read"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "React to Nudge",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"reaction\": \"THANKS\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians/nudges/{{nudgeId}}/react",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "guardians", "nudges", "{{nudgeId}}", "react"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Guardian (As Guardian)",
-			"description": "Endpoints for users acting as guardians for others' goals",
-			"item": [
-				{
-					"name": "Get Pending Invitations",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{guardianToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/invitations?page=0&size=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "invitations"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Accept Invitation",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{guardianToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/invitations/{{guardianshipId}}/accept",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "invitations", "{{guardianshipId}}", "accept"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Decline Invitation",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{guardianToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/invitations/{{guardianshipId}}/decline",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "invitations", "{{guardianshipId}}", "decline"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Goals I'm Guarding",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{guardianToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/goals?page=0&size=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "goals"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Guarded Goal Details",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{guardianToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/goals/{{goalId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "goals", "{{goalId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Send Nudge",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('nudgeId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{guardianToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"message\": \"Hey! How's your progress going? You've got this!\",\n    \"nudgeType\": \"ENCOURAGEMENT\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/goals/{{goalId}}/nudges",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "goals", "{{goalId}}", "nudges"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Sent Nudges",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{guardianToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/nudges/sent?page=0&size=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "nudges", "sent"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Unread Nudges Count",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/guardian/nudges/unread-count",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "guardian", "nudges", "unread-count"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Reflections",
-			"description": "Periodic check-ins with smart frequency based on goal duration",
-			"item": [
-				{
-					"name": "Get All Pending Reflections",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/reflections/pending",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "reflections", "pending"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Reflection Status",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections/status",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "reflections", "status"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Reflection",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('reflectionId', jsonData.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"rating\": \"GOOD\",\n    \"wentWell\": \"Maintained consistency this week\",\n    \"challenges\": \"Had trouble finding time on Wednesday\",\n    \"adjustments\": \"Will schedule sessions earlier in the day\",\n    \"moodNote\": \"Feeling motivated!\",\n    \"willContinue\": true,\n    \"motivationLevel\": 8\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "reflections"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Reflection History",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections?page=0&size=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "reflections"],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Reflection by ID",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections/{{reflectionId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "reflections", "{{reflectionId}}"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Reflection",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"rating\": \"EXCELLENT\",\n    \"wentWell\": \"Updated - exceeded my expectations!\",\n    \"motivationLevel\": 10\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections/{{reflectionId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "goals", "{{goalId}}", "reflections", "{{reflectionId}}"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Social Proof",
-			"description": "Anonymous aggregate statistics for motivation",
-			"item": [
-				{
-					"name": "Get Global Stats",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/social/stats",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "social", "stats"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Category Stats",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/social/stats/category/HEALTH",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "social", "stats", "category", "HEALTH"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Goal Insights",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/social/goals/{{goalId}}/insights",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "social", "goals", "{{goalId}}", "insights"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Milestone Stats",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/social/goals/{{goalId}}/milestone-stats",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "social", "goals", "{{goalId}}", "milestone-stats"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Payments",
-			"description": "Stripe payment integration for subscriptions and one-time purchases",
-			"item": [
-				{
-					"name": "Create Checkout - Premium Monthly",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Response has checkout URL', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('sessionId');",
-									"    pm.expect(jsonData).to.have.property('url');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"productType\": \"PREMIUM_SUBSCRIPTION\",\n    \"billingPeriod\": \"MONTHLY\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/payments/checkout",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "payments", "checkout"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Checkout - Premium Yearly",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"productType\": \"PREMIUM_SUBSCRIPTION\",\n    \"billingPeriod\": \"YEARLY\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/payments/checkout",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "payments", "checkout"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Checkout - Streak Shield",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"productType\": \"STREAK_SHIELD\",\n    \"quantity\": 3\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/payments/checkout",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "payments", "checkout"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Checkout - Struggling Assist",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"productType\": \"STRUGGLING_ASSIST\",\n    \"quantity\": 1\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/payments/checkout",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "payments", "checkout"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Checkout - Goal Boost",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"productType\": \"GOAL_BOOST\",\n    \"quantity\": 1\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/payments/checkout",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "payments", "checkout"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Checkout - Guardian Slot",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"productType\": \"GUARDIAN_SLOT\",\n    \"quantity\": 2\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/payments/checkout",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "payments", "checkout"]
-						}
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{token}}",
-				"type": "string"
-			}
-		]
-	}
+  "info": {
+    "_postman_id": "metasmart-api-collection",
+    "name": "Metasmart API",
+    "description": "API collection for Metasmart - Goal Management Platform. Run the 'E2E Test Sequence' folder to test all endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/relyon/metasmart",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "goalId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "progressEntryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "milestoneId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "actionItemId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "obstacleEntryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "templateId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "guardianshipId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "nudgeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "guardianToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "e2eUserEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "e2eGuardianEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reflectionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "noteId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "scheduledTaskId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "taskCompletionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "frequencyActionItemId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "strugglingRequestId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "E2E Test Sequence",
+      "description": "Complete end-to-end test sequence covering all major endpoints. Run this folder with Postman Collection Runner to test the entire application flow.",
+      "item": [
+        {
+          "name": "01. Register Main User",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const timestamp = Date.now();",
+                  "const email = `e2e.user.${timestamp}@test.com`;",
+                  "pm.collectionVariables.set('e2eUserEmail', email);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has token, email and name', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.expect(jsonData).to.have.property('email');",
+                  "    pm.expect(jsonData).to.have.property('name');",
+                  "    pm.expect(jsonData.name).to.eql('E2E Test User');",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"E2E Test User\",\n    \"email\": \"{{e2eUserEmail}}\",\n    \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "02. Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has token', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{e2eUserEmail}}\",\n    \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "03. Get User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Profile has user data', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('name');",
+                  "    pm.expect(jsonData).to.have.property('email');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "04. Update User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Profile updated', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.name).to.eql('E2E Updated User');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"E2E Updated User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "05. Get User Preferences",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Preferences returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('timezone');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "preferences"
+              ]
+            }
+          }
+        },
+        {
+          "name": "06. Update User Preferences",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Preferences updated', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.timezone).to.eql('America/Sao_Paulo');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"timezone\": \"America/Sao_Paulo\",\n    \"language\": \"pt\",\n    \"emailNotifications\": true,\n    \"pushNotifications\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "preferences"
+              ]
+            }
+          }
+        },
+        {
+          "name": "07. Get Dashboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Dashboard data returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dashboard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "08. Get Dashboard Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dashboard",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "09. Create Goal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Goal created with correct data', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData.title).to.eql('E2E Test Goal - Run 10km');",
+                  "    pm.collectionVariables.set('goalId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"E2E Test Goal - Run 10km\",\n    \"description\": \"Build endurance to run 10km continuously\",\n    \"goalCategory\": \"HEALTH\",\n    \"targetValue\": \"10\",\n    \"unit\": \"km\",\n    \"motivation\": \"I want to complete a 10km race\",\n    \"startDate\": \"2025-01-01\",\n    \"targetDate\": \"2026-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals"
+              ]
+            }
+          }
+        },
+        {
+          "name": "10. Get Goal by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Goal retrieved correctly', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.title).to.include('E2E Test Goal');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "11. Get All Goals",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Goals list returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('content');",
+                  "    pm.expect(jsonData.totalElements).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals"
+              ]
+            }
+          }
+        },
+        {
+          "name": "12. Update Goal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Goal updated', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.motivation).to.include('Updated');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"motivation\": \"Updated motivation - feeling great!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "13. Add Progress Entry",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Progress entry created', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData.progressValue).to.eql(2);",
+                  "    pm.collectionVariables.set('progressEntryId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"progressValue\": 2,\n    \"note\": \"E2E test - First run of 2km!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "progress"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14. Get Progress History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Progress history returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('content');",
+                  "    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "progress"
+              ]
+            }
+          }
+        },
+        {
+          "name": "15. Add Milestone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Milestone created', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('milestoneId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"percentage\": 33,\n    \"description\": \"E2E - One third milestone!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/milestones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "milestones"
+              ]
+            }
+          }
+        },
+        {
+          "name": "16. Get Milestones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Milestones returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/milestones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "milestones"
+              ]
+            }
+          }
+        },
+        {
+          "name": "17. Create Action Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Action item created', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('actionItemId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"E2E - Buy running shoes\",\n    \"description\": \"Get proper running shoes for training\",\n    \"taskType\": \"ONE_TIME\",\n    \"priority\": \"HIGH\",\n    \"orderIndex\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items"
+              ]
+            }
+          }
+        },
+        {
+          "name": "18. Get Action Items",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Action items returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items"
+              ]
+            }
+          }
+        },
+        {
+          "name": "19. Complete Action Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Action item completed', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.completed).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"completed\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{actionItemId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "20. Create Recurring Action Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Frequency action item created', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData.taskType).to.eql('FREQUENCY_BASED');",
+                  "    pm.collectionVariables.set('frequencyActionItemId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"E2E - Daily stretching routine\",\n    \"description\": \"10 minutes of stretching every day\",\n    \"taskType\": \"FREQUENCY_BASED\",\n    \"priority\": \"MEDIUM\",\n    \"orderIndex\": 2,\n    \"frequencyPerWeek\": 7\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items"
+              ]
+            }
+          }
+        },
+        {
+          "name": "21. Create Scheduled Task",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const today = new Date().toISOString().split('T')[0];",
+                  "pm.collectionVariables.set('scheduledDate', today);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Scheduled task created', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('scheduledTaskId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"taskId\": {{frequencyActionItemId}},\n    \"scheduledDate\": \"{{scheduledDate}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "scheduled-tasks"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22. Get Scheduled Tasks",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Scheduled tasks returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "scheduled-tasks"
+              ]
+            }
+          }
+        },
+        {
+          "name": "23. Complete Scheduled Task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Task marked completed', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.completed).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/scheduled-tasks/{{scheduledTaskId}}/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "scheduled-tasks",
+                "{{scheduledTaskId}}",
+                "complete"
+              ]
+            }
+          }
+        },
+        {
+          "name": "24. Record Task Completion",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const today = new Date().toISOString().split('T')[0];",
+                  "pm.collectionVariables.set('completionDate', today);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Completion recorded', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('taskCompletionId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"date\": \"{{completionDate}}\",\n    \"note\": \"E2E test - completed stretching routine!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{frequencyActionItemId}}/completions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{frequencyActionItemId}}",
+                "completions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "25. Get Completion History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Completion history returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{frequencyActionItemId}}/completions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{frequencyActionItemId}}",
+                "completions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "26. Create Goal Note",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Note created', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('noteId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"E2E Test Note - Remember to warm up before running!\",\n    \"noteType\": \"GENERAL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/notes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "notes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "27. Get Goal Notes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Notes returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/notes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "notes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "28. Create Obstacle Entry",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Obstacle created', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('obstacleEntryId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"obstacle\": \"E2E - Experiencing knee pain after running\",\n    \"solution\": \"Will do stretching and use knee brace\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "obstacles"
+              ]
+            }
+          }
+        },
+        {
+          "name": "29. Get Obstacles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Obstacles returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "obstacles"
+              ]
+            }
+          }
+        },
+        {
+          "name": "30. Resolve Obstacle",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Obstacle resolved', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.resolved).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"resolved\": true,\n    \"solution\": \"Knee brace and proper warm-up solved the issue\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/obstacles/{{obstacleEntryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "obstacles",
+                "{{obstacleEntryId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "31. Create Reflection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Reflection created', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('reflectionId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"periodStart\": \"2025-01-01\",\n    \"periodEnd\": \"2025-01-07\",\n    \"rating\": \"GOOD\",\n    \"wentWell\": \"Started running consistently\",\n    \"challenges\": \"Finding time in the morning\",\n    \"adjustments\": \"Will try evening runs instead\",\n    \"motivationLevel\": 8\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "reflections"
+              ]
+            }
+          }
+        },
+        {
+          "name": "32. Get Reflections",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Reflections returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/reflections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "reflections"
+              ]
+            }
+          }
+        },
+        {
+          "name": "33. Get Struggling Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Struggling status returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('freeRequestsRemaining');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/struggling/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "struggling",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "34. Request Struggling Help",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Struggling help response received', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('strugglingRequestId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"strugglingType\": \"LACK_OF_MOTIVATION\",\n    \"message\": \"E2E Test - Feeling unmotivated to continue with my goal\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/struggling",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "struggling"
+              ]
+            }
+          }
+        },
+        {
+          "name": "35. Get Struggling History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Struggling history returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('content');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/struggling/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "struggling",
+                "history"
+              ]
+            }
+          }
+        },
+        {
+          "name": "36. Mark Help Useful",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/struggling/{{strugglingRequestId}}/feedback?wasHelpful=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "struggling",
+                "{{strugglingRequestId}}",
+                "feedback"
+              ],
+              "query": [
+                {
+                  "key": "wasHelpful",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "37. Create Goal Template",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Template created', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('templateId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"E2E Running Template\",\n    \"description\": \"Template for running goals\",\n    \"defaultTitle\": \"Run [distance]\",\n    \"defaultDescription\": \"Build running endurance\",\n    \"defaultCategory\": \"HEALTH\",\n    \"defaultTargetValue\": \"5\",\n    \"defaultUnit\": \"km\",\n    \"defaultMotivation\": \"Improve health\",\n    \"defaultDurationDays\": 90,\n    \"isPublic\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goal-templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goal-templates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "38. Get My Templates",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Templates returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goal-templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goal-templates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "39. Get Subscription Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Subscription data returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('tier');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/subscription",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "subscription"
+              ]
+            }
+          }
+        },
+        {
+          "name": "40. Get Social Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/social/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "social",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "41. Register Guardian User",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const timestamp = Date.now();",
+                  "const email = `e2e.guardian.${timestamp}@test.com`;",
+                  "pm.collectionVariables.set('e2eGuardianEmail', email);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Guardian registered', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.collectionVariables.set('guardianToken', jsonData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"E2E Guardian User\",\n    \"email\": \"{{e2eGuardianEmail}}\",\n    \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "42. Invite Guardian (as Owner)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Guardian invitation created', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData.status).to.eql('PENDING');",
+                  "    pm.collectionVariables.set('guardianshipId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"guardianEmail\": \"{{e2eGuardianEmail}}\",\n    \"permissions\": [\"VIEW_PROGRESS\", \"VIEW_STREAK\", \"SEND_NUDGE\"],\n    \"inviteMessage\": \"E2E Test - Please be my accountability partner!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "guardians"
+              ]
+            }
+          }
+        },
+        {
+          "name": "43. Get Pending Invitations (Guardian)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Has pending invitation', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{guardianToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/guardian/invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "guardian",
+                "invitations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "44. Accept Invitation (Guardian)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Invitation accepted', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql('ACTIVE');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{guardianToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/guardian/invitations/{{guardianshipId}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "guardian",
+                "invitations",
+                "{{guardianshipId}}",
+                "accept"
+              ]
+            }
+          }
+        },
+        {
+          "name": "45. View Goal as Guardian",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Can view goal', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('title');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{guardianToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/guardian/goals/{{goalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "guardian",
+                "goals",
+                "{{goalId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "46. Send Nudge (Guardian)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Nudge sent', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('nudgeId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{guardianToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"message\": \"E2E Test - Keep up the great work!\",\n    \"nudgeType\": \"ENCOURAGEMENT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/guardian/goals/{{goalId}}/nudges",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "guardian",
+                "goals",
+                "{{goalId}}",
+                "nudges"
+              ]
+            }
+          }
+        },
+        {
+          "name": "47. Get Nudges (Owner)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Nudges received', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians/nudges",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "guardians",
+                "nudges"
+              ]
+            }
+          }
+        },
+        {
+          "name": "48. React to Nudge (Owner)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Reaction saved', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.reaction).to.eql('THANKS');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reaction\": \"THANKS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/guardians/nudges/{{nudgeId}}/react",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "guardians",
+                "nudges",
+                "{{nudgeId}}",
+                "react"
+              ]
+            }
+          }
+        },
+        {
+          "name": "49. Archive Goal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/archive",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "archive"
+              ]
+            }
+          }
+        },
+        {
+          "name": "50. Get Archived Goals",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Archived goals returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+                  "});",
+                  "",
+                  "console.log('E2E Test Sequence (50 tests) completed successfully!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/archived",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "archived"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forgot-password"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Goals",
+      "item": [
+        {
+          "name": "Create Goal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('goalId', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Run 5km without stopping\",\n    \"description\": \"Build endurance to run 5km continuously\",\n    \"goalCategory\": \"HEALTH\",\n    \"targetValue\": \"5\",\n    \"unit\": \"km\",\n    \"motivation\": \"I want to improve my cardiovascular health\",\n    \"startDate\": \"2025-01-01\",\n    \"targetDate\": \"2026-06-30\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Goals",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Goal by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Goal",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Run 5km in under 30 minutes\",\n    \"motivation\": \"Updated motivation!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Goal",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "item": [
+        {
+          "name": "Add Progress",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('progressEntryId', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"progressValue\": 2,\n    \"note\": \"First run of 2km!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "progress"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Progress History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/progress",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "progress"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dashboard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Stats",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dashboard",
+                "stats"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Profile",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"John Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Preferences",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "preferences"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"timezone\": \"America/Sao_Paulo\",\n    \"language\": \"pt\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "preferences"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
 }

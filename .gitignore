@@ -33,5 +33,4 @@ build/
 
 ### Environment files (secrets) ###
 .env
-.env.*
-!.env.example
+!.env

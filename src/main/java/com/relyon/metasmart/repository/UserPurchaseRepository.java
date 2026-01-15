@@ -3,13 +3,12 @@ package com.relyon.metasmart.repository;
 import com.relyon.metasmart.entity.subscription.PurchaseType;
 import com.relyon.metasmart.entity.subscription.UserPurchase;
 import com.relyon.metasmart.entity.user.User;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Repository
 public interface UserPurchaseRepository extends JpaRepository<UserPurchase, Long> {

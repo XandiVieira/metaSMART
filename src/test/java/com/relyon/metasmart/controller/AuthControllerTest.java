@@ -1,35 +1,45 @@
 package com.relyon.metasmart.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.relyon.metasmart.config.CorsConfig;
+import com.relyon.metasmart.config.JwtService;
 import com.relyon.metasmart.config.RateLimitConfig;
 import com.relyon.metasmart.config.SecurityConfig;
 import com.relyon.metasmart.entity.user.dto.AuthResponse;
+import com.relyon.metasmart.entity.user.dto.ForgotPasswordRequest;
 import com.relyon.metasmart.entity.user.dto.LoginRequest;
 import com.relyon.metasmart.entity.user.dto.RegisterRequest;
+import com.relyon.metasmart.entity.user.dto.ResetPasswordRequest;
 import com.relyon.metasmart.exception.AuthenticationException;
+import com.relyon.metasmart.exception.BadRequestException;
 import com.relyon.metasmart.exception.DuplicateResourceException;
 import com.relyon.metasmart.exception.GlobalExceptionHandler;
 import com.relyon.metasmart.service.AuthService;
-import com.relyon.metasmart.config.JwtService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
 @Import({SecurityConfig.class, CorsConfig.class, RateLimitConfig.class, GlobalExceptionHandler.class})
+@ActiveProfiles("test")
 class AuthControllerTest {
 
     @Autowired
@@ -153,6 +163,109 @@ class AuthControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
+        }
+    }
+
+    @Nested
+    @DisplayName("Forgot password endpoint tests")
+    class ForgotPasswordTests {
+
+        @Test
+        @DisplayName("Should request password reset successfully")
+        void shouldRequestPasswordResetSuccessfully() throws Exception {
+            var request = ForgotPasswordRequest.builder()
+                    .email("john@example.com")
+                    .build();
+
+            doNothing().when(authService).forgotPassword(any(ForgotPasswordRequest.class));
+
+            mockMvc.perform(post("/api/v1/auth/forgot-password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("If an account exists with this email, a password reset link has been sent"));
+
+            verify(authService).forgotPassword(any(ForgotPasswordRequest.class));
+        }
+
+        @Test
+        @DisplayName("Should return 200 even when email does not exist")
+        void shouldReturn200EvenWhenEmailDoesNotExist() throws Exception {
+            var request = ForgotPasswordRequest.builder()
+                    .email("nonexistent@example.com")
+                    .build();
+
+            doNothing().when(authService).forgotPassword(any(ForgotPasswordRequest.class));
+
+            mockMvc.perform(post("/api/v1/auth/forgot-password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").exists());
+        }
+    }
+
+    @Nested
+    @DisplayName("Reset password endpoint tests")
+    class ResetPasswordTests {
+
+        @Test
+        @DisplayName("Should reset password successfully")
+        void shouldResetPasswordSuccessfully() throws Exception {
+            var request = ResetPasswordRequest.builder()
+                    .token("valid-token")
+                    .newPassword("NewPassword123!")
+                    .build();
+
+            doNothing().when(authService).resetPassword(any(ResetPasswordRequest.class));
+
+            mockMvc.perform(post("/api/v1/auth/reset-password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("Password has been reset successfully"));
+
+            verify(authService).resetPassword(any(ResetPasswordRequest.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("Validate reset token endpoint tests")
+    class ValidateResetTokenTests {
+
+        @Test
+        @DisplayName("Should return true for valid token")
+        void shouldReturnTrueForValidToken() throws Exception {
+            when(authService.validateResetToken("valid-token")).thenReturn(true);
+
+            mockMvc.perform(get("/api/v1/auth/validate-reset-token")
+                            .param("token", "valid-token"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.valid").value(true));
+
+            verify(authService).validateResetToken("valid-token");
+        }
+
+        @Test
+        @DisplayName("Should return false for invalid token")
+        void shouldReturnFalseForInvalidToken() throws Exception {
+            when(authService.validateResetToken("invalid-token")).thenReturn(false);
+
+            mockMvc.perform(get("/api/v1/auth/validate-reset-token")
+                            .param("token", "invalid-token"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.valid").value(false));
+        }
+
+        @Test
+        @DisplayName("Should return false for expired token")
+        void shouldReturnFalseForExpiredToken() throws Exception {
+            when(authService.validateResetToken("expired-token")).thenReturn(false);
+
+            mockMvc.perform(get("/api/v1/auth/validate-reset-token")
+                            .param("token", "expired-token"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.valid").value(false));
         }
     }
 }

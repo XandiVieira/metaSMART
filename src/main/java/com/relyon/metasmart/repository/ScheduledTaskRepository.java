@@ -3,15 +3,14 @@ package com.relyon.metasmart.repository;
 import com.relyon.metasmart.entity.actionplan.ActionItem;
 import com.relyon.metasmart.entity.actionplan.ScheduledTask;
 import com.relyon.metasmart.entity.goal.Goal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 public interface ScheduledTaskRepository extends JpaRepository<ScheduledTask, Long> {
 

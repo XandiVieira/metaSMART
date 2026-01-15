@@ -1,9 +1,23 @@
 package com.relyon.metasmart.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.relyon.metasmart.config.CorsConfig;
+import com.relyon.metasmart.config.JwtService;
 import com.relyon.metasmart.config.RateLimitConfig;
 import com.relyon.metasmart.config.SecurityConfig;
 import com.relyon.metasmart.entity.guardian.GuardianPermission;
@@ -15,10 +29,11 @@ import com.relyon.metasmart.entity.guardian.dto.NudgeResponse;
 import com.relyon.metasmart.entity.guardian.dto.ReactToNudgeRequest;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.GlobalExceptionHandler;
-import com.relyon.metasmart.exception.ResourceNotFoundException;
 import com.relyon.metasmart.service.GoalGuardianService;
 import com.relyon.metasmart.service.GuardianNudgeService;
-import com.relyon.metasmart.config.JwtService;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -32,17 +47,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(GoalGuardianController.class)
 @Import({SecurityConfig.class, CorsConfig.class, RateLimitConfig.class, GlobalExceptionHandler.class})

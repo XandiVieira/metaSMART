@@ -51,6 +51,7 @@ public class GoalController {
             @AuthenticationPrincipal User user,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
+        log.debug("Received request to get all goals for user ID: {}", user.getId());
         return ResponseEntity.ok(goalService.findAll(user, pageable));
     }
 
@@ -60,6 +61,7 @@ public class GoalController {
             @AuthenticationPrincipal User user,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
+        log.debug("Received request to get goals by status: {} for user ID: {}", goalStatus, user.getId());
         return ResponseEntity.ok(goalService.findByStatus(user, goalStatus, pageable));
     }
 
@@ -69,6 +71,7 @@ public class GoalController {
             @AuthenticationPrincipal User user,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
+        log.debug("Received request to get goals by category: {} for user ID: {}", goalCategory, user.getId());
         return ResponseEntity.ok(goalService.findByCategory(user, goalCategory, pageable));
     }
 

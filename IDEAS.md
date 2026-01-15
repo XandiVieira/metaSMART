@@ -1,6 +1,7 @@
 # Metasmart - Ideas in Progress
 
-> This file contains brainstorming ideas and concepts under consideration. These are not yet implemented and may change significantly.
+> This file contains brainstorming ideas and concepts under consideration. These are not yet implemented and may change
+> significantly.
 
 ---
 
@@ -20,16 +21,17 @@ Instead of ranking raw progress, rank **validated, accountable progress**:
 Accountability Score = (Streak Days × Consistency%) × Guardian Multiplier × Engagement Bonus
 ```
 
-| Factor | Calculation |
-|--------|-------------|
-| **Streak Days** | Current streak (comparable across all goal types) |
-| **Consistency %** | Days with progress / Days since goal started |
+| Factor                  | Calculation                                              |
+|-------------------------|----------------------------------------------------------|
+| **Streak Days**         | Current streak (comparable across all goal types)        |
+| **Consistency %**       | Days with progress / Days since goal started             |
 | **Guardian Multiplier** | 1 + (0.2 × active guardians) — max 2.0x with 5 guardians |
-| **Engagement Bonus** | +10% per guardian nudge received this week |
+| **Engagement Bonus**    | +10% per guardian nudge received this week               |
 
 ### Guardian Validation Ideas
 
-1. **Verified Progress** — Guardian can "confirm" a progress entry (saw you at the gym, watched you study). Verified entries worth 2x points.
+1. **Verified Progress** — Guardian can "confirm" a progress entry (saw you at the gym, watched you study). Verified
+   entries worth 2x points.
 
 2. **Guardian Check-ins** — Weekly prompt to guardians: "Did [user] make progress this week?" Yes/no affects score.
 
@@ -37,13 +39,13 @@ Accountability Score = (Streak Days × Consistency%) × Guardian Multiplier × E
 
 ### Potential Leaderboards
 
-| Leaderboard | What it measures |
-|-------------|------------------|
-| **Most Accountable** | Highest accountability score |
-| **Longest Verified Streak** | Streak with guardian confirmations |
-| **Best Guardian** | Nudge frequency, response rate, goals helped complete |
-| **Most Supported** | Most guardian interactions received |
-| **Rising Star** | Biggest score improvement this week |
+| Leaderboard                 | What it measures                                      |
+|-----------------------------|-------------------------------------------------------|
+| **Most Accountable**        | Highest accountability score                          |
+| **Longest Verified Streak** | Streak with guardian confirmations                    |
+| **Best Guardian**           | Nudge frequency, response rate, goals helped complete |
+| **Most Supported**          | Most guardian interactions received                   |
+| **Rising Star**             | Biggest score improvement this week                   |
 
 ### Competition Formats
 
@@ -71,11 +73,13 @@ Accountability Score = (Streak Days × Consistency%) × Guardian Multiplier × E
 ## Other Ideas to Explore
 
 ### AI Coach Integration
+
 - Personalized suggestions based on progress patterns
 - Predict when user might abandon goal
 - Suggest optimal times for progress logging
 
 ### Social Features
+
 - Public goal feed (opt-in)
 - Follow other users for inspiration
 - Goal communities by category
@@ -86,18 +90,21 @@ Accountability Score = (Streak Days × Consistency%) × Guardian Multiplier × E
 
 **Status:** Brainstorming
 
-**Problem:** Users feel isolated when working on goals. Seeing that others are succeeding with similar goals creates motivation and urgency.
+**Problem:** Users feel isolated when working on goals. Seeing that others are succeeding with similar goals creates
+motivation and urgency.
 
 ### Option 2: Goal Communities (Full Social)
 
 Users can opt-in to join communities based on goal category/type.
 
 **New entities needed:**
+
 - `GoalCommunity` - Group of users with similar goals
 - `CommunityPost` - Updates shared to community
 - `CommunityMember` - User membership with privacy settings
 
 **Endpoints:**
+
 ```
 GET    /api/v1/communities                    # Browse communities
 POST   /api/v1/communities/{id}/join          # Join community
@@ -107,6 +114,7 @@ GET    /api/v1/communities/{id}/leaderboard   # Top performers
 ```
 
 **Features:**
+
 - Share milestones to community (opt-in)
 - See anonymized progress of others
 - Leaderboards (streaks, completion %)
@@ -122,6 +130,7 @@ GET    /api/v1/communities/{id}/leaderboard   # Top performers
 Match users with similar goals without full social features.
 
 **Endpoints:**
+
 ```
 GET  /api/v1/goals/{id}/similar-users         # Find matches
 POST /api/v1/goals/{id}/share-milestone       # Broadcast milestone
@@ -129,11 +138,13 @@ GET  /api/v1/feed/milestones                  # See others' milestones
 ```
 
 **How it works:**
+
 1. When user hits milestone, option to "share with community"
 2. Other users with similar goals see: "Someone just hit 50% on their 'Run 5k' goal!"
 3. Can react with encouragement (no direct messaging)
 
 **New entity:**
+
 ```java
 @Entity
 public class SharedMilestone {
@@ -146,6 +157,7 @@ public class SharedMilestone {
 ```
 
 **Pros:**
+
 - Low complexity - Just a few new tables and endpoints
 - Privacy-safe - Anonymous by default
 - No moderation - No user-generated text beyond preset reactions
@@ -164,6 +176,7 @@ public class SharedMilestone {
 - [ ] Integration with Guardian system (social proof from guardians)?
 
 ### Gamification Expansion
+
 - Daily challenges
 - Achievement unlocks with real rewards
 - Seasonal events (New Year challenge, Summer fitness, etc.)

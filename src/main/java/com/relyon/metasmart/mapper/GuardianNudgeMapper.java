@@ -3,11 +3,10 @@ package com.relyon.metasmart.mapper;
 import com.relyon.metasmart.entity.guardian.GuardianNudge;
 import com.relyon.metasmart.entity.guardian.dto.NudgeResponse;
 import com.relyon.metasmart.entity.guardian.dto.SendNudgeRequest;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.lang.NonNull;
-
-import java.util.List;
 
 @Mapper(config = MapperConfig.class)
 public interface GuardianNudgeMapper {

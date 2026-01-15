@@ -2,14 +2,13 @@ package com.relyon.metasmart.entity.user;
 
 import com.relyon.metasmart.entity.AuditableEntity;
 import jakarta.persistence.*;
+import java.util.Collection;
+import java.util.List;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Table(name = "users")

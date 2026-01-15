@@ -23,7 +23,7 @@ services:
     networks:
       - metasmart-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/relyon/metasmart/actuator/health"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/relyon/metasmart/actuator/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -44,7 +44,7 @@ services:
     networks:
       - metasmart-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U metasmart -d metasmart"]
+      test: [ "CMD-SHELL", "pg_isready -U metasmart -d metasmart" ]
       interval: 10s
       timeout: 5s
       retries: 5

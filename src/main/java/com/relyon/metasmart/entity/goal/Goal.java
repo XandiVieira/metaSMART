@@ -1,13 +1,12 @@
 package com.relyon.metasmart.entity.goal;
 
-import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.entity.AuditableEntity;
+import com.relyon.metasmart.entity.user.User;
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "goals")

@@ -2,12 +2,11 @@ package com.relyon.metasmart.repository;
 
 import com.relyon.metasmart.entity.actionplan.ActionItem;
 import com.relyon.metasmart.entity.actionplan.TaskCompletion;
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.time.LocalDate;
-import java.util.List;
 
 public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, Long> {
 

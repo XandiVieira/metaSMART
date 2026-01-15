@@ -3,10 +3,9 @@ package com.relyon.metasmart.entity.obstacle;
 import com.relyon.metasmart.entity.AuditableEntity;
 import com.relyon.metasmart.entity.goal.Goal;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "obstacle_entries")
