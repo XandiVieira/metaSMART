@@ -99,6 +99,43 @@ docker run -d --name metasmart-db -e POSTGRES_DB=metasmart -e POSTGRES_USER=meta
 
 ---
 
+## Connecting to Production Database (Render)
+
+To connect to the Render PostgreSQL database using pgAdmin or another database client:
+
+### pgAdmin Settings
+
+| Field | Value |
+|-------|-------|
+| **Host name/address** | `dpg-xxxxx.oregon-postgres.render.com` (External hostname from Render) |
+| **Port** | `5432` |
+| **Maintenance database** | `metasmart` |
+| **Username** | `metasmart_user` |
+| **Password** | Your database password from Render |
+
+### How to Find Connection Details
+
+1. Go to [Render Dashboard](https://dashboard.render.com)
+2. Click on your PostgreSQL database
+3. Look for **External Database URL** in the Connections section
+4. Parse the URL: `postgresql://USERNAME:PASSWORD@HOSTNAME/DATABASE`
+
+**Example URL:**
+```
+postgresql://metasmart_user:abc123@dpg-xxxxx.oregon-postgres.render.com/metasmart
+```
+
+**Parsed values:**
+- Host: `dpg-xxxxx.oregon-postgres.render.com`
+- Port: `5432` (default)
+- Database: `metasmart`
+- Username: `metasmart_user`
+- Password: `abc123`
+
+> **Note:** Do NOT paste the entire connection URL into the Host field. Enter each field separately.
+
+---
+
 ## Environment Variables
 
 ### Required

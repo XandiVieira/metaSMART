@@ -25,6 +25,43 @@ A aplicacao expoe endpoints de saude do Spring Boot Actuator:
 
 ---
 
+## Conectando ao Banco de Dados de Producao (Render)
+
+Para conectar ao banco PostgreSQL no Render usando pgAdmin ou outro cliente de banco de dados:
+
+### Configuracoes do pgAdmin
+
+| Campo | Valor |
+|-------|-------|
+| **Host name/address** | `dpg-xxxxx.oregon-postgres.render.com` (Hostname externo do Render) |
+| **Port** | `5432` |
+| **Maintenance database** | `metasmart` |
+| **Username** | `metasmart_user` |
+| **Password** | Sua senha do banco de dados do Render |
+
+### Como Encontrar os Detalhes de Conexao
+
+1. Acesse o [Render Dashboard](https://dashboard.render.com)
+2. Clique no seu banco de dados PostgreSQL
+3. Procure por **External Database URL** na secao Connections
+4. Analise a URL: `postgresql://USUARIO:SENHA@HOSTNAME/DATABASE`
+
+**Exemplo de URL:**
+```
+postgresql://metasmart_user:abc123@dpg-xxxxx.oregon-postgres.render.com/metasmart
+```
+
+**Valores extraidos:**
+- Host: `dpg-xxxxx.oregon-postgres.render.com`
+- Port: `5432` (padrao)
+- Database: `metasmart`
+- Username: `metasmart_user`
+- Password: `abc123`
+
+> **Nota:** NAO cole a URL de conexao inteira no campo Host. Insira cada campo separadamente.
+
+---
+
 ## Resumo dos Endpoints
 
 ### Autenticacao (`/api/v1/auth`)
