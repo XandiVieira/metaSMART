@@ -1,6 +1,7 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.relyon.metasmart.entity.obstacle.dto.ObstacleEntryRequest;
 import com.relyon.metasmart.entity.obstacle.dto.ObstacleEntryResponse;
 import com.relyon.metasmart.entity.obstacle.dto.UpdateObstacleEntryRequest;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(ApiPaths.GOALS + "/{goalId}" + ApiPaths.OBSTACLES)
 @RequiredArgsConstructor
+@Tag(name = "Obstacles")
 public class ObstacleController {
 
     private final ObstacleService obstacleService;

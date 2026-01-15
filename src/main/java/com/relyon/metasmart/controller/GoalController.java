@@ -1,6 +1,7 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.goal.GoalStatus;
 import com.relyon.metasmart.entity.goal.dto.GoalRequest;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(ApiPaths.GOALS)
 @RequiredArgsConstructor
+@Tag(name = "Goals")
 public class GoalController {
 
     private final GoalService goalService;

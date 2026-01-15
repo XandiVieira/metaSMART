@@ -1,6 +1,7 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.relyon.metasmart.entity.guardian.dto.GoalGuardianResponse;
 import com.relyon.metasmart.entity.guardian.dto.GuardedGoalResponse;
 import com.relyon.metasmart.entity.guardian.dto.NudgeResponse;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(ApiPaths.GUARDIAN)
 @RequiredArgsConstructor
+@Tag(name = "Guardian")
 public class GuardianController {
 
     private final GoalGuardianService goalGuardianService;

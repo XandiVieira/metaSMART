@@ -1,6 +1,7 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.relyon.metasmart.entity.actionplan.dto.ActionItemRequest;
 import com.relyon.metasmart.entity.actionplan.dto.ActionItemResponse;
 import com.relyon.metasmart.entity.actionplan.dto.UpdateActionItemRequest;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(ApiPaths.GOALS + "/{goalId}" + ApiPaths.ACTION_ITEMS)
 @RequiredArgsConstructor
+@Tag(name = "Action Items")
 public class ActionItemController {
 
     private final ActionItemService actionItemService;
