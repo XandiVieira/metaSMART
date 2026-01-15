@@ -1,7 +1,6 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.goal.dto.GoalRequest;
 import com.relyon.metasmart.entity.template.dto.GoalTemplateRequest;
@@ -9,6 +8,7 @@ import com.relyon.metasmart.entity.template.dto.GoalTemplateResponse;
 import com.relyon.metasmart.entity.template.dto.UpdateGoalTemplateRequest;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.service.GoalTemplateService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

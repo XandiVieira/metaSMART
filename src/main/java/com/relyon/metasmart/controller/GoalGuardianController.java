@@ -1,7 +1,6 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import com.relyon.metasmart.entity.guardian.dto.GoalGuardianResponse;
 import com.relyon.metasmart.entity.guardian.dto.InviteGuardianRequest;
 import com.relyon.metasmart.entity.guardian.dto.NudgeResponse;
@@ -9,6 +8,7 @@ import com.relyon.metasmart.entity.guardian.dto.ReactToNudgeRequest;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.service.GoalGuardianService;
 import com.relyon.metasmart.service.GuardianNudgeService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

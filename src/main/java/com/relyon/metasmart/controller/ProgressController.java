@@ -1,10 +1,10 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import com.relyon.metasmart.entity.progress.dto.*;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.service.ProgressService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;

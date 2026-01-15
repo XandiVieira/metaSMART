@@ -1,12 +1,12 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import com.relyon.metasmart.entity.obstacle.dto.ObstacleEntryRequest;
 import com.relyon.metasmart.entity.obstacle.dto.ObstacleEntryResponse;
 import com.relyon.metasmart.entity.obstacle.dto.UpdateObstacleEntryRequest;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.service.ObstacleService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
