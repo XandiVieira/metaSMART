@@ -13,18 +13,18 @@ import com.relyon.metasmart.exception.ResourceNotFoundException;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.ProgressEntryRepository;
 import com.relyon.metasmart.repository.StrugglingRequestRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -34,6 +34,9 @@ public class SocialProofService {
     private final GoalRepository goalRepository;
     private final ProgressEntryRepository progressEntryRepository;
     private final StrugglingRequestRepository strugglingRequestRepository;
+
+    @Setter(onMethod_ = {@Autowired, @Lazy})
+    private SocialProofService self;
 
     @Transactional(readOnly = true)
     public GlobalStatsResponse getGlobalStats() {
@@ -49,9 +52,9 @@ public class SocialProofService {
 
         var completionRate = totalGoals > 0
                 ? BigDecimal.valueOf(completedGoals)
-                    .divide(BigDecimal.valueOf(totalGoals), 4, RoundingMode.HALF_UP)
-                    .multiply(BigDecimal.valueOf(100))
-                    .doubleValue()
+                .divide(BigDecimal.valueOf(totalGoals), 4, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .doubleValue()
                 : 0.0;
 
         Map<String, Long> goalsByCategory = new LinkedHashMap<>();
@@ -65,9 +68,9 @@ public class SocialProofService {
 
             var categoryRate = categoryCount > 0
                     ? BigDecimal.valueOf(categoryCompleted)
-                        .divide(BigDecimal.valueOf(categoryCount), 4, RoundingMode.HALF_UP)
-                        .multiply(BigDecimal.valueOf(100))
-                        .doubleValue()
+                    .divide(BigDecimal.valueOf(categoryCount), 4, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100))
+                    .doubleValue()
                     : 0.0;
             completionByCategory.put(category.name(), categoryRate);
         }
@@ -96,9 +99,9 @@ public class SocialProofService {
 
         var completionRate = totalGoals > 0
                 ? BigDecimal.valueOf(completedGoals)
-                    .divide(BigDecimal.valueOf(totalGoals), 4, RoundingMode.HALF_UP)
-                    .multiply(BigDecimal.valueOf(100))
-                    .doubleValue()
+                .divide(BigDecimal.valueOf(totalGoals), 4, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .doubleValue()
                 : 0.0;
 
         // Streaks are calculated dynamically per goal, not stored
@@ -131,7 +134,7 @@ public class SocialProofService {
 
         var category = goal.getGoalCategory();
         var similarUsers = goalRepository.countUsersWithSimilarGoals(category);
-        var categoryStats = getCategoryStats(category);
+        var categoryStats = self.getCategoryStats(category);
         var commonObstacles = getCommonObstaclesByCategory(category);
         var strategies = getStrategiesForCategory(category);
 
@@ -164,9 +167,9 @@ public class SocialProofService {
         var estimatedAtMilestone = estimateUsersAtMilestone(similarUsers, currentMilestone);
         var percentageAtPoint = similarUsers > 0
                 ? BigDecimal.valueOf(estimatedAtMilestone)
-                    .divide(BigDecimal.valueOf(similarUsers), 4, RoundingMode.HALF_UP)
-                    .multiply(BigDecimal.valueOf(100))
-                    .doubleValue()
+                .divide(BigDecimal.valueOf(similarUsers), 4, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .doubleValue()
                 : 0.0;
 
         var motivationalMessage = generateMilestoneMessage(currentMilestone, percentageAtPoint);
@@ -186,7 +189,7 @@ public class SocialProofService {
         return results.stream()
                 .limit(3)
                 .map(row -> (StrugglingType) row[0])
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<String> getStrategiesForCategory(GoalCategory category) {
@@ -309,10 +312,14 @@ public class SocialProofService {
 
     private String generateMilestoneMessage(int milestone, double percentageAtPoint) {
         return switch (milestone) {
-            case 100 -> String.format("Congratulations! You're among the %.0f%% who completed their goal!", percentageAtPoint);
-            case 75 -> String.format("Amazing! Only %.0f%% of users reach this point. The finish line is in sight!", percentageAtPoint);
-            case 50 -> String.format("Halfway there! %.0f%% of users with similar goals have reached this milestone.", percentageAtPoint);
-            case 25 -> String.format("Great start! %.0f%% of users hit this first milestone. Keep the momentum!", percentageAtPoint);
+            case 100 ->
+                    String.format("Congratulations! You're among the %.0f%% who completed their goal!", percentageAtPoint);
+            case 75 ->
+                    String.format("Amazing! Only %.0f%% of users reach this point. The finish line is in sight!", percentageAtPoint);
+            case 50 ->
+                    String.format("Halfway there! %.0f%% of users with similar goals have reached this milestone.", percentageAtPoint);
+            case 25 ->
+                    String.format("Great start! %.0f%% of users hit this first milestone. Keep the momentum!", percentageAtPoint);
             default -> "Every journey starts with a single step. You've got this!";
         };
     }

@@ -6,12 +6,14 @@ import com.relyon.metasmart.entity.user.dto.UpdateProfileRequest;
 import com.relyon.metasmart.entity.user.dto.UserProfileResponse;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.UserRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -20,6 +22,9 @@ public class UserProfileService {
 
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
+
+    @Setter(onMethod_ = {@Autowired, @Lazy})
+    private UserProfileService self;
 
     @Transactional(readOnly = true)
     public UserProfileResponse getProfile(User user) {
@@ -48,7 +53,7 @@ public class UserProfileService {
         var savedUser = userRepository.save(user);
         log.info("Profile updated for user: {}", savedUser.getEmail());
 
-        return getProfile(savedUser);
+        return self.getProfile(savedUser);
     }
 
     @Transactional

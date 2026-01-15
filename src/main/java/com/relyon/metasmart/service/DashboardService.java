@@ -8,11 +8,6 @@ import com.relyon.metasmart.entity.goal.GoalStatus;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.ProgressEntryRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -21,6 +16,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -63,8 +62,8 @@ public class DashboardService {
         var abandonedGoals = goalRepository.countByOwnerAndGoalStatusAndArchivedAtIsNull(user, GoalStatus.ABANDONED);
 
         var completionRate = totalGoals > 0
-            ? BigDecimal.valueOf(completedGoals * 100.0 / totalGoals).setScale(2, RoundingMode.HALF_UP)
-            : BigDecimal.ZERO;
+                ? BigDecimal.valueOf(completedGoals * 100.0 / totalGoals).setScale(2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
 
         var streaks = calculateBestStreaks(user);
         var goalsByCategory = calculateGoalsByCategory(user);
@@ -114,35 +113,24 @@ public class DashboardService {
         var today = LocalDate.now();
         var lastProgressDate = dates.getFirst();
         var daysWithoutProgress = (int) ChronoUnit.DAYS.between(lastProgressDate, today);
+        var shieldUsed = wasShieldUsedYesterday(goal, today);
 
-        // Check if streak shield was used within recovery window (yesterday)
-        var shieldUsed = goal.getLastStreakShieldUsedAt() != null
-                && goal.getLastStreakShieldUsedAt().equals(today.minusDays(1));
-
-        // If shield was used yesterday and no progress today, extend grace period
         if (shieldUsed && daysWithoutProgress == 1) {
             daysWithoutProgress = 0;
         }
 
-        var currentStreak = 0;
+        var hasRecentProgress = isRecentProgress(lastProgressDate, today, shieldUsed);
+        var currentStreak = hasRecentProgress ? 1 : 0;
         var streak = 1;
-
-        if (lastProgressDate.equals(today) || lastProgressDate.equals(today.minusDays(1)) || shieldUsed) {
-            currentStreak = 1;
-        }
 
         for (var dateIndex = 0; dateIndex < dates.size() - 1; dateIndex++) {
             var current = dates.get(dateIndex);
             var next = dates.get(dateIndex + 1);
-
-            // Check if this gap was covered by a shield
-            var gapCoveredByShield = goal.getLastStreakShieldUsedAt() != null
-                    && goal.getLastStreakShieldUsedAt().equals(current.minusDays(1))
-                    && next.equals(current.minusDays(2));
+            var gapCoveredByShield = isGapCoveredByShield(goal, current, next);
 
             if (current.minusDays(1).equals(next) || gapCoveredByShield) {
                 streak++;
-                if (lastProgressDate.equals(today) || lastProgressDate.equals(today.minusDays(1)) || shieldUsed) {
+                if (hasRecentProgress) {
                     currentStreak = streak;
                 }
             } else {
@@ -151,6 +139,21 @@ public class DashboardService {
         }
 
         return new int[]{currentStreak, daysWithoutProgress};
+    }
+
+    private boolean wasShieldUsedYesterday(Goal goal, LocalDate today) {
+        return goal.getLastStreakShieldUsedAt() != null
+                && goal.getLastStreakShieldUsedAt().equals(today.minusDays(1));
+    }
+
+    private boolean isRecentProgress(LocalDate lastProgressDate, LocalDate today, boolean shieldUsed) {
+        return lastProgressDate.equals(today) || lastProgressDate.equals(today.minusDays(1)) || shieldUsed;
+    }
+
+    private boolean isGapCoveredByShield(Goal goal, LocalDate current, LocalDate next) {
+        return goal.getLastStreakShieldUsedAt() != null
+                && goal.getLastStreakShieldUsedAt().equals(current.minusDays(1))
+                && next.equals(current.minusDays(2));
     }
 
     private int[] calculateBestStreaks(User user) {

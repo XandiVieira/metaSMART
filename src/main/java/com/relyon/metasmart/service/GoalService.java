@@ -1,18 +1,14 @@
 package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.constant.ErrorMessages;
+import com.relyon.metasmart.constant.LogMessages;
 import com.relyon.metasmart.entity.actionplan.ActionItem;
+import com.relyon.metasmart.entity.actionplan.dto.ActionItemResponse;
+import com.relyon.metasmart.entity.actionplan.dto.TaskCompletionDto;
 import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.goal.GoalStatus;
-import com.relyon.metasmart.entity.goal.dto.ActionPlanDto;
-import com.relyon.metasmart.entity.goal.dto.CheckinDto;
-import com.relyon.metasmart.entity.goal.dto.GoalRequest;
-import com.relyon.metasmart.entity.goal.dto.GoalResponse;
-import com.relyon.metasmart.entity.goal.dto.MilestoneDto;
-import com.relyon.metasmart.entity.goal.dto.SmartPillarsDto;
-import com.relyon.metasmart.entity.goal.dto.SupportSystemDto;
-import com.relyon.metasmart.entity.goal.dto.UpdateGoalRequest;
+import com.relyon.metasmart.entity.goal.dto.*;
 import com.relyon.metasmart.entity.guardian.GuardianStatus;
 import com.relyon.metasmart.entity.progress.Milestone;
 import com.relyon.metasmart.entity.user.User;
@@ -20,26 +16,18 @@ import com.relyon.metasmart.exception.ResourceNotFoundException;
 import com.relyon.metasmart.mapper.ActionItemMapper;
 import com.relyon.metasmart.mapper.GoalMapper;
 import com.relyon.metasmart.mapper.ScheduledTaskMapper;
-import com.relyon.metasmart.repository.ActionItemRepository;
-import com.relyon.metasmart.repository.GoalGuardianRepository;
-import com.relyon.metasmart.repository.GoalRepository;
-import com.relyon.metasmart.repository.MilestoneRepository;
-import com.relyon.metasmart.repository.ObstacleEntryRepository;
-import com.relyon.metasmart.repository.ProgressEntryRepository;
-import com.relyon.metasmart.repository.ScheduledTaskRepository;
-import com.relyon.metasmart.repository.TaskCompletionRepository;
+import com.relyon.metasmart.repository.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -77,7 +65,7 @@ public class GoalService {
         return enrichGoalResponse(savedGoal);
     }
 
-    private void createDefaultMilestones(com.relyon.metasmart.entity.goal.Goal goal) {
+    private void createDefaultMilestones(Goal goal) {
         var percentages = List.of(25, 50, 75, 100);
         for (var percentage : percentages) {
             var milestone = Milestone.builder()
@@ -97,7 +85,7 @@ public class GoalService {
         return goalRepository.findByIdAndOwner(id, owner)
                 .map(this::enrichGoalResponse)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", id, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, id, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
     }
@@ -129,7 +117,7 @@ public class GoalService {
 
         var goal = goalRepository.findByIdAndOwner(id, owner)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", id, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, id, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 
@@ -155,7 +143,7 @@ public class GoalService {
 
         var goal = goalRepository.findByIdAndOwner(id, owner)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", id, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, id, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 
@@ -173,7 +161,7 @@ public class GoalService {
 
         var goal = goalRepository.findByIdAndOwner(id, owner)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", id, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, id, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 
@@ -237,7 +225,7 @@ public class GoalService {
 
         var original = goalRepository.findByIdAndOwner(id, owner)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", id, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, id, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 
@@ -269,7 +257,7 @@ public class GoalService {
 
         var goal = goalRepository.findByIdAndOwnerAndArchivedAtIsNull(goalId, owner)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", goalId, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, goalId, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 
@@ -348,11 +336,11 @@ public class GoalService {
                 .build();
     }
 
-    private com.relyon.metasmart.entity.actionplan.dto.ActionItemResponse enrichActionItemWithCompletionHistory(ActionItem actionItem) {
+    private ActionItemResponse enrichActionItemWithCompletionHistory(ActionItem actionItem) {
         var response = actionItemMapper.toResponse(actionItem);
         var completions = taskCompletionRepository.findByActionItemOrderByCompletedAtDesc(actionItem);
         var completionDtos = completions.stream()
-                .map(completion -> com.relyon.metasmart.entity.actionplan.dto.TaskCompletionDto.builder()
+                .map(completion -> TaskCompletionDto.builder()
                         .id(completion.getId())
                         .date(completion.getDate())
                         .completedAt(completion.getCompletedAt())
@@ -459,7 +447,7 @@ public class GoalService {
         // Check if streak shield was used within recovery window (today or yesterday)
         var shieldUsed = goal.getLastStreakShieldUsedAt() != null
                 && (goal.getLastStreakShieldUsedAt().equals(today)
-                    || goal.getLastStreakShieldUsedAt().equals(today.minusDays(1)));
+                || goal.getLastStreakShieldUsedAt().equals(today.minusDays(1)));
 
         if (dates.getFirst().equals(today) || dates.getFirst().equals(today.minusDays(1)) || shieldUsed) {
             currentStreak = 1;

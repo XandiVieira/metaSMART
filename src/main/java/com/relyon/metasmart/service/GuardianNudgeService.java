@@ -1,6 +1,7 @@
 package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.constant.ErrorMessages;
+import com.relyon.metasmart.constant.LogMessages;
 import com.relyon.metasmart.entity.guardian.GuardianPermission;
 import com.relyon.metasmart.entity.guardian.GuardianStatus;
 import com.relyon.metasmart.entity.guardian.dto.NudgeResponse;
@@ -13,14 +14,13 @@ import com.relyon.metasmart.mapper.GuardianNudgeMapper;
 import com.relyon.metasmart.repository.GoalGuardianRepository;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.GuardianNudgeRepository;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -62,7 +62,7 @@ public class GuardianNudgeService {
 
         goalRepository.findByIdAndOwner(goalId, owner)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", goalId, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, goalId, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 
@@ -82,7 +82,7 @@ public class GuardianNudgeService {
 
         goalRepository.findByIdAndOwner(goalId, owner)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", goalId, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, goalId, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 
@@ -112,7 +112,7 @@ public class GuardianNudgeService {
 
         goalRepository.findByIdAndOwner(goalId, owner)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", goalId, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, goalId, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 

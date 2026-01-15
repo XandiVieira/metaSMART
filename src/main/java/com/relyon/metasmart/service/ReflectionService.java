@@ -5,23 +5,25 @@ import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.goal.GoalStatus;
 import com.relyon.metasmart.entity.reflection.GoalReflection;
 import com.relyon.metasmart.entity.reflection.ReflectionFrequency;
-import com.relyon.metasmart.entity.reflection.dto.*;
+import com.relyon.metasmart.entity.reflection.dto.PendingReflectionResponse;
+import com.relyon.metasmart.entity.reflection.dto.ReflectionRequest;
+import com.relyon.metasmart.entity.reflection.dto.ReflectionResponse;
+import com.relyon.metasmart.entity.reflection.dto.ReflectionStatusResponse;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.BadRequestException;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
 import com.relyon.metasmart.repository.GoalReflectionRepository;
 import com.relyon.metasmart.repository.GoalRepository;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -80,7 +82,7 @@ public class ReflectionService {
                     .map(r -> r.getPeriodEnd().equals(currentPeriod[1]))
                     .orElse(false);
 
-            if (!reflectionCompleted && (today.isEqual(currentPeriod[1]) || today.isAfter(currentPeriod[1]))) {
+            if (Boolean.FALSE.equals(reflectionCompleted) && (today.isEqual(currentPeriod[1]) || today.isAfter(currentPeriod[1]))) {
                 var daysOverdue = (int) ChronoUnit.DAYS.between(currentPeriod[1], today);
                 pending.add(PendingReflectionResponse.builder()
                         .goalId(goal.getId())
@@ -199,8 +201,8 @@ public class ReflectionService {
         var daysSinceStart = ChronoUnit.DAYS.between(startDate, today);
         var completedPeriods = daysSinceStart / frequencyDays;
 
-        var periodStart = startDate.plusDays(completedPeriods * frequencyDays);
-        var periodEnd = periodStart.plusDays(frequencyDays - 1);
+        var periodStart = startDate.plusDays(completedPeriods * (long) frequencyDays);
+        var periodEnd = periodStart.plusDays((long) frequencyDays - 1);
 
         if (goal.getTargetDate() != null && periodEnd.isAfter(goal.getTargetDate())) {
             periodEnd = goal.getTargetDate();

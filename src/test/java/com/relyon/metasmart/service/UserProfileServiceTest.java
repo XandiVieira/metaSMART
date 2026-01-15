@@ -1,10 +1,18 @@
 package com.relyon.metasmart.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.relyon.metasmart.entity.goal.GoalStatus;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.entity.user.dto.UpdateProfileRequest;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.UserRepository;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,12 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserProfileServiceTest {
@@ -36,6 +38,8 @@ class UserProfileServiceTest {
 
     @BeforeEach
     void setUp() {
+        userProfileService.setSelf(userProfileService);
+
         user = User.builder()
                 .id(1L)
                 .name("John Doe")

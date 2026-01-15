@@ -1,6 +1,7 @@
 package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.constant.ErrorMessages;
+import com.relyon.metasmart.constant.LogMessages;
 import com.relyon.metasmart.entity.actionplan.ActionItem;
 import com.relyon.metasmart.entity.actionplan.dto.ActionItemRequest;
 import com.relyon.metasmart.entity.actionplan.dto.ActionItemResponse;
@@ -14,14 +15,13 @@ import com.relyon.metasmart.mapper.TaskCompletionMapper;
 import com.relyon.metasmart.repository.ActionItemRepository;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.TaskCompletionRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -89,8 +89,7 @@ public class ActionItemService {
         Optional.ofNullable(request.getEffortEstimate()).ifPresent(actionItem::setEffortEstimate);
         Optional.ofNullable(request.getNotes()).ifPresent(actionItem::setNotes);
 
-        var targetDate = request.getTargetDate() != null ? request.getTargetDate() : request.getDueDate();
-        Optional.ofNullable(targetDate).ifPresent(actionItem::setTargetDate);
+        Optional.ofNullable(request.getTargetDate()).ifPresent(actionItem::setTargetDate);
 
         if (request.getContext() != null) {
             actionItem.setContext(String.join(",", request.getContext()));
@@ -114,9 +113,9 @@ public class ActionItemService {
 
         if (request.getCompleted() != null) {
             actionItem.setCompleted(request.getCompleted());
-            if (request.getCompleted() && actionItem.getCompletedAt() == null) {
+            if (Boolean.TRUE.equals(request.getCompleted()) && actionItem.getCompletedAt() == null) {
                 actionItem.setCompletedAt(LocalDateTime.now());
-            } else if (!request.getCompleted()) {
+            } else if (Boolean.FALSE.equals(request.getCompleted())) {
                 actionItem.setCompletedAt(null);
             }
         }
@@ -143,7 +142,7 @@ public class ActionItemService {
     private Goal findGoalByIdAndOwner(Long goalId, User user) {
         return goalRepository.findByIdAndOwner(goalId, user)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", goalId, user.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, goalId, user.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
     }

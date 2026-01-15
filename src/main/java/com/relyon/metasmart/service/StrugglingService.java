@@ -2,36 +2,29 @@ package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.goal.Goal;
-import com.relyon.metasmart.entity.guardian.GoalGuardian;
-import com.relyon.metasmart.entity.guardian.GuardianNudge;
-import com.relyon.metasmart.entity.guardian.GuardianPermission;
-import com.relyon.metasmart.entity.guardian.GuardianStatus;
-import com.relyon.metasmart.entity.guardian.NudgeType;
+import com.relyon.metasmart.entity.guardian.*;
 import com.relyon.metasmart.entity.struggling.StrugglingRequest;
 import com.relyon.metasmart.entity.struggling.StrugglingType;
 import com.relyon.metasmart.entity.struggling.dto.StrugglingHelpRequest;
 import com.relyon.metasmart.entity.struggling.dto.StrugglingHelpResponse;
 import com.relyon.metasmart.entity.struggling.dto.StrugglingStatusResponse;
+import com.relyon.metasmart.entity.subscription.PurchaseType;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.BadRequestException;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
-import com.relyon.metasmart.entity.subscription.PurchaseType;
 import com.relyon.metasmart.repository.GoalGuardianRepository;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.GuardianNudgeRepository;
 import com.relyon.metasmart.repository.StrugglingRequestRepository;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -69,7 +62,7 @@ public class StrugglingService {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND));
 
         var status = getStatus(user);
-        if (!status.getCanRequestHelp()) {
+        if (Boolean.FALSE.equals(status.getCanRequestHelp())) {
             throw new BadRequestException(ErrorMessages.STRUGGLING_LIMIT_REACHED);
         }
 

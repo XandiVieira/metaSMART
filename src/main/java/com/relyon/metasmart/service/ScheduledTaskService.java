@@ -1,7 +1,6 @@
 package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.constant.ErrorMessages;
-import com.relyon.metasmart.entity.actionplan.ActionItem;
 import com.relyon.metasmart.entity.actionplan.ScheduledTask;
 import com.relyon.metasmart.entity.actionplan.TaskType;
 import com.relyon.metasmart.entity.actionplan.dto.ScheduledTaskDto;
@@ -14,15 +13,17 @@ import com.relyon.metasmart.mapper.ScheduledTaskMapper;
 import com.relyon.metasmart.repository.ActionItemRepository;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.ScheduledTaskRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -33,6 +34,9 @@ public class ScheduledTaskService {
     private final ActionItemRepository actionItemRepository;
     private final GoalRepository goalRepository;
     private final ScheduledTaskMapper scheduledTaskMapper;
+
+    @Setter(onMethod_ = {@Autowired, @Lazy})
+    private ScheduledTaskService self;
 
     @Transactional
     public ScheduledTaskDto createScheduledTask(Long goalId, ScheduledTaskRequest request, User user) {
@@ -101,7 +105,7 @@ public class ScheduledTaskService {
         var frequencyGoal = actionItem.getFrequencyGoal();
         var dates = calculateScheduleDates(startDate, endDate, frequencyGoal.getCount(), frequencyGoal.getPeriod(), frequencyGoal.getFixedDays());
 
-        return createBulkScheduledTasks(goalId, actionItemId, dates, user);
+        return self.createBulkScheduledTasks(goalId, actionItemId, dates, user);
     }
 
     @Transactional(readOnly = true)
@@ -202,7 +206,7 @@ public class ScheduledTaskService {
     }
 
     private List<LocalDate> calculateScheduleDates(LocalDate startDate, LocalDate endDate, int count,
-            com.relyon.metasmart.entity.actionplan.FrequencyPeriod period, String fixedDaysStr) {
+                                                   com.relyon.metasmart.entity.actionplan.FrequencyPeriod period, String fixedDaysStr) {
         var dates = new ArrayList<LocalDate>();
 
         if (fixedDaysStr != null && !fixedDaysStr.isBlank()) {

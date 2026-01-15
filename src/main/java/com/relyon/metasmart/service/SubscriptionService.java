@@ -7,16 +7,14 @@ import com.relyon.metasmart.entity.subscription.dto.UserEntitlementsResponse;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.repository.UserPurchaseRepository;
 import com.relyon.metasmart.repository.UserSubscriptionRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -46,7 +44,7 @@ public class SubscriptionService {
 
         return subscriptionRepository.findActiveSubscription(user)
                 .map(this::toSubscriptionResponse)
-                .orElseGet(() -> buildFreeSubscriptionResponse());
+                .orElseGet(this::buildFreeSubscriptionResponse);
     }
 
     public UserEntitlementsResponse getEntitlements(User user) {
@@ -78,7 +76,7 @@ public class SubscriptionService {
 
         return purchaseRepository.findByUserOrderByPurchasedAtDesc(user).stream()
                 .map(this::toPurchaseResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public boolean isPremium(User user) {

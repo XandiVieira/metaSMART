@@ -1,6 +1,7 @@
 package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.constant.ErrorMessages;
+import com.relyon.metasmart.constant.LogMessages;
 import com.relyon.metasmart.entity.AuditableEntity;
 import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.guardian.GoalGuardian;
@@ -14,23 +15,17 @@ import com.relyon.metasmart.exception.AccessDeniedException;
 import com.relyon.metasmart.exception.BadRequestException;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
 import com.relyon.metasmart.mapper.GoalGuardianMapper;
-import com.relyon.metasmart.repository.ActionItemRepository;
-import com.relyon.metasmart.repository.GoalGuardianRepository;
-import com.relyon.metasmart.repository.GoalRepository;
-import com.relyon.metasmart.repository.ObstacleEntryRepository;
-import com.relyon.metasmart.repository.ProgressEntryRepository;
-import com.relyon.metasmart.repository.UserRepository;
+import com.relyon.metasmart.repository.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -52,7 +47,7 @@ public class GoalGuardianService {
 
         var goal = goalRepository.findByIdAndOwner(goalId, owner)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", goalId, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, goalId, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 
@@ -95,7 +90,7 @@ public class GoalGuardianService {
 
         var goal = goalRepository.findByIdAndOwner(goalId, owner)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", goalId, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, goalId, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 
@@ -109,7 +104,7 @@ public class GoalGuardianService {
 
         var goal = goalRepository.findByIdAndOwner(goalId, owner)
                 .orElseThrow(() -> {
-                    log.warn("Goal not found with ID: {} for user ID: {}", goalId, owner.getId());
+                    log.warn(LogMessages.GOAL_NOT_FOUND_FOR_USER, goalId, owner.getId());
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 

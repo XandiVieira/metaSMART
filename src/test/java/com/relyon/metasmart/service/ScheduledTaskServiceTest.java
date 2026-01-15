@@ -1,5 +1,10 @@
 package com.relyon.metasmart.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.actionplan.*;
 import com.relyon.metasmart.entity.actionplan.dto.ScheduledTaskDto;
@@ -12,6 +17,10 @@ import com.relyon.metasmart.mapper.ScheduledTaskMapper;
 import com.relyon.metasmart.repository.ActionItemRepository;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.ScheduledTaskRepository;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,16 +29,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ScheduledTaskServiceTest {
@@ -57,6 +56,8 @@ class ScheduledTaskServiceTest {
 
     @BeforeEach
     void setUp() {
+        scheduledTaskService.setSelf(scheduledTaskService);
+
         user = User.builder().id(1L).name("John").email("john@test.com").build();
         goal = Goal.builder().id(1L).title("Run 5K").owner(user).build();
         actionItem = ActionItem.builder()
