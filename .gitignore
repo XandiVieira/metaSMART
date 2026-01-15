@@ -33,4 +33,6 @@ build/
 
 ### Environment files (secrets) ###
 .env
-!.env
+
+### macOS ###
+.DS_Store
