@@ -46,6 +46,11 @@ public final class ErrorMessages {
     public static final String SCHEDULED_TASK_NOT_FOUND = "Scheduled task not found";
     public static final String SCHEDULED_TASK_ALREADY_EXISTS = "Scheduled task already exists for this date";
 
+    // Request parsing related
+    public static final String INVALID_REQUEST_BODY = "Invalid request body format";
+    public static final String INVALID_NUMBER_FORMAT = "Invalid number format provided";
+    public static final String UNEXPECTED_ERROR = "An unexpected error occurred. Please try again later.";
+
     // Payment related
     public static final String FAILED_TO_CREATE_PAYMENT_SESSION = "Failed to create payment session";
     public static final String FAILED_TO_DESERIALIZE_SESSION = "Failed to deserialize session";

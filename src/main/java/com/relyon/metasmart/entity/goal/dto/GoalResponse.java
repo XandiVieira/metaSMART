@@ -26,7 +26,7 @@ public class GoalResponse {
     @Deprecated
     private GoalCategory goalCategory;
 
-    private String targetValue;
+    private BigDecimal targetValue;
     private String unit;
     private BigDecimal currentProgress;
     private BigDecimal progressPercentage;

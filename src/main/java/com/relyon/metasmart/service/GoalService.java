@@ -378,7 +378,7 @@ public class GoalService {
 
     private SmartPillarsDto calculateSmartPillars(Goal goal) {
         var specific = hasContent(goal.getTitle()) && hasContent(goal.getDescription());
-        var measurable = hasContent(goal.getTargetValue()) && hasContent(goal.getUnit());
+        var measurable = goal.getTargetValue() != null && hasContent(goal.getUnit());
         var achievable = hasContent(goal.getMotivation());
         var relevant = goal.getGoalCategory() != null && hasContent(goal.getMotivation());
         var timeBound = goal.getStartDate() != null && goal.getTargetDate() != null;
@@ -409,7 +409,7 @@ public class GoalService {
         if (hasContent(goal.getTitle())) completedFields++;
         if (hasContent(goal.getDescription())) completedFields++;
         if (goal.getGoalCategory() != null) completedFields++;
-        if (hasContent(goal.getTargetValue())) completedFields++;
+        if (goal.getTargetValue() != null) completedFields++;
         if (hasContent(goal.getUnit())) completedFields++;
         if (hasContent(goal.getMotivation())) completedFields++;
         if (goal.getStartDate() != null) completedFields++;
@@ -419,18 +419,12 @@ public class GoalService {
     }
 
     private BigDecimal calculateProgressPercentage(Goal goal) {
-        try {
-            var targetValue = new BigDecimal(goal.getTargetValue());
-            if (targetValue.compareTo(BigDecimal.ZERO) == 0) {
-                return BigDecimal.ZERO;
-            }
-            return goal.getCurrentProgress()
-                    .multiply(BigDecimal.valueOf(100))
-                    .divide(targetValue, 2, RoundingMode.HALF_UP);
-        } catch (NumberFormatException e) {
-            log.warn("Invalid target value for goal ID: {}", goal.getId());
+        if (goal.getTargetValue() == null || goal.getTargetValue().compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
+        return goal.getCurrentProgress()
+                .multiply(BigDecimal.valueOf(100))
+                .divide(goal.getTargetValue(), 2, RoundingMode.HALF_UP);
     }
 
     private int[] calculateStreaks(Goal goal) {

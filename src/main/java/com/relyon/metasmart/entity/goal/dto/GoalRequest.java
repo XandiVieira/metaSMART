@@ -4,7 +4,9 @@ import com.relyon.metasmart.entity.goal.GoalCategory;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -28,8 +30,9 @@ public class GoalRequest {
     @NotNull(message = "Category is required")
     private GoalCategory goalCategory;
 
-    @NotBlank(message = "Target value is required")
-    private String targetValue;
+    @NotNull(message = "Target value is required")
+    @Positive(message = "Target value must be positive")
+    private BigDecimal targetValue;
 
     @NotBlank(message = "Unit is required")
     private String unit;

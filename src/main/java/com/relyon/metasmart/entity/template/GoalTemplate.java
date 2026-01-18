@@ -4,6 +4,7 @@ import com.relyon.metasmart.entity.AuditableEntity;
 import com.relyon.metasmart.entity.goal.GoalCategory;
 import com.relyon.metasmart.entity.user.User;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -39,8 +40,8 @@ public class GoalTemplate extends AuditableEntity {
     @Enumerated(EnumType.STRING)
     private GoalCategory defaultCategory;
 
-    @Column(length = 50)
-    private String defaultTargetValue;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal defaultTargetValue;
 
     @Column(length = 50)
     private String defaultUnit;

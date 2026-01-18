@@ -25,6 +25,7 @@ import com.relyon.metasmart.repository.GoalGuardianRepository;
 import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.GuardianNudgeRepository;
 import com.relyon.metasmart.repository.StrugglingRequestRepository;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -74,7 +75,7 @@ class StrugglingServiceTest {
                 .title("Run 5K")
                 .owner(user)
                 .goalCategory(GoalCategory.HEALTH)
-                .targetValue("100")
+                .targetValue(new BigDecimal("100"))
                 .targetDate(LocalDate.now().plusDays(30))
                 .build();
         strugglingRequest = StrugglingRequest.builder()

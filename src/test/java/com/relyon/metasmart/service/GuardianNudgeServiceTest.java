@@ -87,7 +87,7 @@ class GuardianNudgeServiceTest {
                 .title("Run 5km")
                 .description("Build endurance")
                 .goalCategory(GoalCategory.HEALTH)
-                .targetValue("5")
+                .targetValue(new BigDecimal("5"))
                 .unit("km")
                 .currentProgress(BigDecimal.ZERO)
                 .startDate(LocalDate.now())

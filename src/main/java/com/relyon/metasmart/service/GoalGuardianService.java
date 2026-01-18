@@ -252,18 +252,12 @@ public class GoalGuardianService {
     }
 
     private BigDecimal calculateProgressPercentage(Goal goal) {
-        try {
-            var targetValue = new BigDecimal(goal.getTargetValue());
-            if (targetValue.compareTo(BigDecimal.ZERO) == 0) {
-                return BigDecimal.ZERO;
-            }
-            return goal.getCurrentProgress()
-                    .multiply(BigDecimal.valueOf(100))
-                    .divide(targetValue, 2, RoundingMode.HALF_UP);
-        } catch (NumberFormatException e) {
-            log.warn("Invalid target value for goal ID: {}", goal.getId());
+        if (goal.getTargetValue() == null || goal.getTargetValue().compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
+        return goal.getCurrentProgress()
+                .multiply(BigDecimal.valueOf(100))
+                .divide(goal.getTargetValue(), 2, RoundingMode.HALF_UP);
     }
 
     private int[] calculateStreaks(Goal goal) {

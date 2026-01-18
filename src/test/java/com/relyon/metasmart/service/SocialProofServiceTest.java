@@ -54,7 +54,7 @@ class SocialProofServiceTest {
                 .title("Run 5K")
                 .owner(user)
                 .goalCategory(GoalCategory.HEALTH)
-                .targetValue("100")
+                .targetValue(new BigDecimal("100"))
                 .currentProgress(BigDecimal.valueOf(50))
                 .build();
     }
@@ -197,7 +197,7 @@ class SocialProofServiceTest {
         @DisplayName("Should generate encouragement for high progress")
         void shouldGenerateEncouragementForHighProgress() {
             goal.setCurrentProgress(BigDecimal.valueOf(80));
-            goal.setTargetValue("100");
+            goal.setTargetValue(new BigDecimal("100"));
 
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
             when(goalRepository.countUsersWithSimilarGoals(GoalCategory.HEALTH)).thenReturn(100L);
@@ -234,7 +234,7 @@ class SocialProofServiceTest {
         @Test
         @DisplayName("Should handle zero target value")
         void shouldHandleZeroTargetValue() {
-            goal.setTargetValue("0");
+            goal.setTargetValue(BigDecimal.ZERO);
 
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
             when(goalRepository.countUsersWithSimilarGoals(GoalCategory.HEALTH)).thenReturn(100L);

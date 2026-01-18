@@ -255,3 +255,36 @@ The goal is to release ASAP - keep the codebase always close to or in production
 - MapStruct
 - Lombok
 - Maven
+
+## Database Migrations
+
+When changing column types in PostgreSQL, automatic migrations may fail. JPA/Hibernate cannot automatically cast between incompatible types (e.g., `varchar` to `numeric`).
+
+### Manual Migration Required
+
+For type changes that PostgreSQL cannot auto-cast, create and run migration scripts manually:
+
+```sql
+-- Example: Converting varchar to numeric
+ALTER TABLE goals
+  ALTER COLUMN target_value TYPE numeric(19,2)
+  USING NULLIF(target_value, '')::numeric(19,2);
+
+ALTER TABLE goal_templates
+  ALTER COLUMN default_target_value TYPE numeric(19,2)
+  USING NULLIF(default_target_value, '')::numeric(19,2);
+```
+
+### Best Practices
+
+- Always backup data before running migrations
+- Test migrations in a non-production environment first
+- For production deployments, run migrations separately before deploying new code
+- Use `ddl-auto: validate` in production instead of `update` to prevent accidental schema changes
+
+## Numeric Fields
+
+- Use `BigDecimal` for monetary values and precise measurements
+- Use `@Column(precision = 19, scale = 2)` for database column precision
+- Add `@NotNull` and `@Positive` validations where appropriate
+- Never use `String` for numeric values that require calculations

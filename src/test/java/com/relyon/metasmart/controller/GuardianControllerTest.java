@@ -110,7 +110,7 @@ class GuardianControllerTest {
                 .ownerName("John Owner")
                 .permissions(Set.of(GuardianPermission.VIEW_PROGRESS))
                 .currentProgress(BigDecimal.valueOf(2))
-                .targetValue("5")
+                .targetValue(new BigDecimal("5"))
                 .unit("km")
                 .progressPercentage(BigDecimal.valueOf(40))
                 .build();

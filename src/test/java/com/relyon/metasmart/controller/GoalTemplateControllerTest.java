@@ -27,6 +27,7 @@ import com.relyon.metasmart.entity.template.dto.UpdateGoalTemplateRequest;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.GlobalExceptionHandler;
 import com.relyon.metasmart.service.GoalTemplateService;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -195,7 +196,7 @@ class GoalTemplateControllerTest {
         void shouldCreateGoalFromTemplate() throws Exception {
             var goalRequest = GoalRequest.builder()
                     .title("Run 5km")
-                    .targetValue("5")
+                    .targetValue(new BigDecimal("5"))
                     .unit("km")
                     .startDate(LocalDate.now())
                     .targetDate(LocalDate.now().plusDays(90))

@@ -64,7 +64,7 @@ class DashboardServiceTest {
                 .goalStatus(GoalStatus.ACTIVE)
                 .goalCategory(GoalCategory.HEALTH)
                 .currentProgress(BigDecimal.valueOf(50))
-                .targetValue("100")
+                .targetValue(new BigDecimal("100"))
                 .build();
     }
 

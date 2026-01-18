@@ -4,6 +4,7 @@ import com.relyon.metasmart.entity.goal.GoalCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,8 +31,8 @@ public class GoalTemplateRequest {
 
     private GoalCategory defaultCategory;
 
-    @Size(max = 50, message = "Default target value must be at most 50 characters")
-    private String defaultTargetValue;
+    @Positive(message = "Default target value must be positive")
+    private BigDecimal defaultTargetValue;
 
     @Size(max = 50, message = "Default unit must be at most 50 characters")
     private String defaultUnit;

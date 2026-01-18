@@ -73,7 +73,7 @@ class ProgressServiceTest {
         goal = Goal.builder()
                 .id(1L)
                 .title("Run 5km")
-                .targetValue("5")
+                .targetValue(new BigDecimal("5"))
                 .unit("km")
                 .currentProgress(BigDecimal.ZERO)
                 .goalStatus(GoalStatus.ACTIVE)

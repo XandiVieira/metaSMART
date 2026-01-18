@@ -24,7 +24,7 @@ public class UpdateGoalRequest {
 
     private GoalCategory goalCategory;
 
-    private String targetValue;
+    private BigDecimal targetValue;
 
     private String unit;
 

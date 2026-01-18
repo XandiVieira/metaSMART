@@ -17,6 +17,7 @@ import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
 import com.relyon.metasmart.mapper.GoalTemplateMapper;
 import com.relyon.metasmart.repository.GoalTemplateRepository;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +59,7 @@ class GoalTemplateServiceTest {
                 .description("Template for running goals")
                 .defaultTitle("Run [distance]")
                 .defaultCategory(GoalCategory.HEALTH)
-                .defaultTargetValue("5")
+                .defaultTargetValue(new BigDecimal("5"))
                 .defaultUnit("km")
                 .defaultDurationDays(90)
                 .isPublic(false)
@@ -69,7 +70,7 @@ class GoalTemplateServiceTest {
                 .description("Template for running goals")
                 .defaultTitle("Run [distance]")
                 .defaultCategory(GoalCategory.HEALTH)
-                .defaultTargetValue("5")
+                .defaultTargetValue(new BigDecimal("5"))
                 .defaultUnit("km")
                 .defaultDurationDays(90)
                 .isPublic(false)
@@ -81,7 +82,7 @@ class GoalTemplateServiceTest {
                 .description("Template for running goals")
                 .defaultTitle("Run [distance]")
                 .defaultCategory(GoalCategory.HEALTH)
-                .defaultTargetValue("5")
+                .defaultTargetValue(new BigDecimal("5"))
                 .defaultUnit("km")
                 .defaultDurationDays(90)
                 .isPublic(false)
@@ -270,7 +271,7 @@ class GoalTemplateServiceTest {
                     .defaultTitle("Updated Title")
                     .defaultDescription("Updated Default Description")
                     .defaultCategory(GoalCategory.FINANCE)
-                    .defaultTargetValue("100")
+                    .defaultTargetValue(new BigDecimal("100"))
                     .defaultUnit("dollars")
                     .defaultMotivation("Financial freedom")
                     .defaultDurationDays(180)

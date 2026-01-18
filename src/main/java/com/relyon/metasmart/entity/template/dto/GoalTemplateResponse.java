@@ -1,6 +1,7 @@
 package com.relyon.metasmart.entity.template.dto;
 
 import com.relyon.metasmart.entity.goal.GoalCategory;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +20,7 @@ public class GoalTemplateResponse {
     private String defaultTitle;
     private String defaultDescription;
     private GoalCategory defaultCategory;
-    private String defaultTargetValue;
+    private BigDecimal defaultTargetValue;
     private String defaultUnit;
     private String defaultMotivation;
     private Integer defaultDurationDays;

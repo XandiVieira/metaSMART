@@ -100,7 +100,7 @@ class GoalServiceTest {
                 .title("Run 5km")
                 .description("Build endurance to run 5km")
                 .goalCategory(GoalCategory.HEALTH)
-                .targetValue("5")
+                .targetValue(new BigDecimal("5"))
                 .unit("km")
                 .currentProgress(BigDecimal.ZERO)
                 .motivation("Improve health")
@@ -114,7 +114,7 @@ class GoalServiceTest {
                 .title("Run 5km")
                 .description("Build endurance to run 5km")
                 .goalCategory(GoalCategory.HEALTH)
-                .targetValue("5")
+                .targetValue(new BigDecimal("5"))
                 .unit("km")
                 .motivation("Improve health")
                 .startDate(LocalDate.now())
@@ -126,7 +126,7 @@ class GoalServiceTest {
                 .title("Run 5km")
                 .description("Build endurance to run 5km")
                 .goalCategory(GoalCategory.HEALTH)
-                .targetValue("5")
+                .targetValue(new BigDecimal("5"))
                 .unit("km")
                 .currentProgress(BigDecimal.ZERO)
                 .motivation("Improve health")
@@ -324,9 +324,9 @@ class GoalServiceTest {
         }
 
         @Test
-        @DisplayName("Should handle invalid target value for progress percentage")
-        void shouldHandleInvalidTargetValue() {
-            goal.setTargetValue("invalid");
+        @DisplayName("Should handle null target value for progress percentage")
+        void shouldHandleNullTargetValue() {
+            goal.setTargetValue(null);
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
             when(goalMapper.toResponse(goal)).thenReturn(goalResponse);
             when(progressEntryRepository.findDistinctProgressDates(goal)).thenReturn(Collections.emptyList());
@@ -339,7 +339,7 @@ class GoalServiceTest {
         @Test
         @DisplayName("Should handle zero target value for progress percentage")
         void shouldHandleZeroTargetValue() {
-            goal.setTargetValue("0");
+            goal.setTargetValue(BigDecimal.ZERO);
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
             when(goalMapper.toResponse(goal)).thenReturn(goalResponse);
             when(progressEntryRepository.findDistinctProgressDates(goal)).thenReturn(Collections.emptyList());
@@ -420,7 +420,7 @@ class GoalServiceTest {
                     .title("Updated title")
                     .description("Updated description")
                     .goalCategory(GoalCategory.FINANCE)
-                    .targetValue("10")
+                    .targetValue(new BigDecimal("10"))
                     .unit("miles")
                     .currentProgress(BigDecimal.valueOf(5))
                     .motivation("New motivation")
@@ -450,7 +450,7 @@ class GoalServiceTest {
         void shouldCalculateSetupCompletionWithEmptyStrings() {
             goal.setTitle("");
             goal.setDescription("   ");
-            goal.setTargetValue("");  // Empty string instead of null to avoid NPE
+            goal.setTargetValue(null);
             goal.setUnit("");
             goal.setMotivation(null);
             goal.setStartDate(null);
@@ -473,7 +473,7 @@ class GoalServiceTest {
             goal.setTitle("Title");
             goal.setDescription("");
             // Target value set but unit null
-            goal.setTargetValue("5");
+            goal.setTargetValue(new BigDecimal("5"));
             goal.setUnit(null);
             // Motivation set (achievable and relevant)
             goal.setMotivation("Stay healthy");
@@ -526,7 +526,7 @@ class GoalServiceTest {
         @DisplayName("Should calculate progress percentage with actual progress")
         void shouldCalculateProgressPercentageWithProgress() {
             goal.setCurrentProgress(BigDecimal.valueOf(2.5));
-            goal.setTargetValue("5");
+            goal.setTargetValue(new BigDecimal("5"));
 
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
             when(goalMapper.toResponse(goal)).thenReturn(goalResponse);
@@ -666,7 +666,7 @@ class GoalServiceTest {
             var goal2 = Goal.builder()
                     .id(2L)
                     .title("Second goal")
-                    .targetValue("10")
+                    .targetValue(new BigDecimal("10"))
                     .archivedAt(LocalDate.now().minusDays(3))
                     .owner(user)
                     .currentProgress(BigDecimal.ZERO)
@@ -877,7 +877,7 @@ class GoalServiceTest {
             var goal2 = Goal.builder()
                     .id(2L)
                     .title("Second goal")
-                    .targetValue("10")
+                    .targetValue(new BigDecimal("10"))
                     .targetDate(LocalDate.now().plusDays(3))
                     .owner(user)
                     .currentProgress(BigDecimal.ZERO)
@@ -918,7 +918,7 @@ class GoalServiceTest {
                     .title("Run 5km (Copy)")
                     .description("Build endurance to run 5km")
                     .goalCategory(GoalCategory.HEALTH)
-                    .targetValue("5")
+                    .targetValue(new BigDecimal("5"))
                     .unit("km")
                     .currentProgress(BigDecimal.ZERO)
                     .motivation("Improve health")
@@ -964,7 +964,7 @@ class GoalServiceTest {
             var savedGoal = Goal.builder()
                     .id(2L)
                     .title("Run 5km (Copy)")
-                    .targetValue("5")
+                    .targetValue(new BigDecimal("5"))
                     .startDate(LocalDate.now())
                     .currentProgress(BigDecimal.ZERO)
                     .owner(user)
@@ -993,7 +993,7 @@ class GoalServiceTest {
             var savedGoal = Goal.builder()
                     .id(2L)
                     .title("Run 5km (Copy)")
-                    .targetValue("5")
+                    .targetValue(new BigDecimal("5"))
                     .startDate(LocalDate.now())
                     .targetDate(LocalDate.now().plusDays(30))
                     .currentProgress(BigDecimal.ZERO)
@@ -1022,7 +1022,7 @@ class GoalServiceTest {
             var savedGoal = Goal.builder()
                     .id(2L)
                     .title("Run 5km (Copy)")
-                    .targetValue("5")
+                    .targetValue(new BigDecimal("5"))
                     .startDate(LocalDate.now())
                     .targetDate(null)
                     .currentProgress(BigDecimal.ZERO)
@@ -1062,7 +1062,7 @@ class GoalServiceTest {
             var savedGoal = Goal.builder()
                     .id(2L)
                     .title("Run 5km (Copy)")
-                    .targetValue("5")
+                    .targetValue(new BigDecimal("5"))
                     .currentProgress(BigDecimal.ZERO)
                     .owner(user)
                     .build();

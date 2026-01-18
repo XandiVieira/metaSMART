@@ -31,8 +31,8 @@ public class Goal extends AuditableEntity {
     @Column(nullable = false)
     private GoalCategory goalCategory;
 
-    @Column(nullable = false)
-    private String targetValue;
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal targetValue;
 
     @Column(nullable = false)
     private String unit;

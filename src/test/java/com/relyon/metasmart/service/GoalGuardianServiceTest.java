@@ -95,7 +95,7 @@ class GoalGuardianServiceTest {
                 .title("Run 5km")
                 .description("Build endurance")
                 .goalCategory(GoalCategory.HEALTH)
-                .targetValue("5")
+                .targetValue(new BigDecimal("5"))
                 .unit("km")
                 .currentProgress(BigDecimal.ZERO)
                 .startDate(LocalDate.now())
@@ -457,9 +457,9 @@ class GoalGuardianServiceTest {
         }
 
         @Test
-        @DisplayName("Should handle invalid target value for progress percentage")
-        void shouldHandleInvalidTargetValueForProgressPercentage() {
-            goal.setTargetValue("invalid");
+        @DisplayName("Should handle null target value for progress percentage")
+        void shouldHandleNullTargetValueForProgressPercentage() {
+            goal.setTargetValue(null);
             goalGuardian.setStatus(GuardianStatus.ACTIVE);
             goalGuardian.setPermissions(Set.of(GuardianPermission.VIEW_PROGRESS));
 
@@ -475,7 +475,7 @@ class GoalGuardianServiceTest {
         @Test
         @DisplayName("Should handle zero target value for progress percentage")
         void shouldHandleZeroTargetValueForProgressPercentage() {
-            goal.setTargetValue("0");
+            goal.setTargetValue(BigDecimal.ZERO);
             goalGuardian.setStatus(GuardianStatus.ACTIVE);
             goalGuardian.setPermissions(Set.of(GuardianPermission.VIEW_PROGRESS));
 

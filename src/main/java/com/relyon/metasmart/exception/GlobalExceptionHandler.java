@@ -1,10 +1,14 @@
 package com.relyon.metasmart.exception;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.relyon.metasmart.constant.ErrorMessages;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -94,11 +98,56 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ErrorMessages.VALIDATION_FAILED, errors));
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        var cause = ex.getCause();
+        if (cause instanceof InvalidFormatException invalidFormatEx) {
+            var fieldName = extractFieldName(invalidFormatEx);
+            var targetType = invalidFormatEx.getTargetType();
+            var value = invalidFormatEx.getValue();
+
+            String message;
+            if (Number.class.isAssignableFrom(targetType) || targetType.isPrimitive()) {
+                message = "Invalid number format: '%s' is not a valid number".formatted(value);
+            } else if (targetType.isEnum()) {
+                message = "Invalid value '%s' for field '%s'".formatted(value, fieldName);
+            } else {
+                message = "Invalid value for field '%s'".formatted(fieldName);
+            }
+
+            log.warn("JSON parsing failed for field '{}': {}", fieldName, message);
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(ErrorMessages.VALIDATION_FAILED, Map.of(fieldName, message)));
+        }
+
+        log.warn("Invalid request body: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ErrorMessages.INVALID_REQUEST_BODY));
+    }
+
+    @ExceptionHandler(NumberFormatException.class)
+    public ResponseEntity<ErrorResponse> handleNumberFormat(NumberFormatException ex) {
+        log.warn("Number format error: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ErrorMessages.INVALID_NUMBER_FORMAT));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         log.error("Unexpected error occurred", ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("An unexpected error occurred"));
+                .body(new ErrorResponse(ErrorMessages.UNEXPECTED_ERROR));
+    }
+
+    private String extractFieldName(InvalidFormatException ex) {
+        return ex.getPath().stream()
+                .map(JsonMappingException.Reference::getFieldName)
+                .filter(name -> name != null)
+                .reduce((first, second) -> second)
+                .orElse("unknown");
     }
 }

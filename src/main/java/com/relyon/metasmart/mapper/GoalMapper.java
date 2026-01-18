@@ -3,15 +3,16 @@ package com.relyon.metasmart.mapper;
 import com.relyon.metasmart.entity.goal.*;
 import com.relyon.metasmart.entity.goal.dto.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.NonNull;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
-import org.springframework.lang.NonNull;
 
 @Mapper(config = MapperConfig.class)
 public interface GoalMapper {
@@ -94,13 +95,12 @@ public interface GoalMapper {
         if (goal.getTargetValue() == null || goal.getCurrentProgress() == null) {
             return BigDecimal.ZERO;
         }
-        var target = new BigDecimal(goal.getTargetValue());
-        if (target.compareTo(BigDecimal.ZERO) == 0) {
+        if (goal.getTargetValue().compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
         return goal.getCurrentProgress()
                 .multiply(BigDecimal.valueOf(100))
-                .divide(target, 2, java.math.RoundingMode.HALF_UP)
+                .divide(goal.getTargetValue(), 2, RoundingMode.HALF_UP)
                 .min(BigDecimal.valueOf(100));
     }
 
@@ -133,7 +133,7 @@ public interface GoalMapper {
         var measurement = goal.getMeasurement();
         return GoalMeasurementDto.builder()
                 .unit(goal.getUnit())
-                .targetValue(goal.getTargetValue() != null ? new BigDecimal(goal.getTargetValue()) : null)
+                .targetValue(goal.getTargetValue())
                 .currentValue(goal.getCurrentProgress())
                 .frequency(measurement != null ? GoalMeasurementDto.FrequencyDto.builder()
                         .type(measurement.getFrequencyType())
@@ -235,8 +235,7 @@ public interface GoalMapper {
         return Arrays.stream(value.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
-                .map(ReminderChannel::valueOf)
-                .collect(Collectors.toList());
+                .map(ReminderChannel::valueOf).toList();
     }
 
     default String channelListToString(List<ReminderChannel> list) {

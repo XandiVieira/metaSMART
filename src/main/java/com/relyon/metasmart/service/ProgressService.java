@@ -226,8 +226,7 @@ public class ProgressService {
         goalRepository.save(goal);
         log.debug("Goal ID: {} progress updated to: {}", goal.getId(), totalProgress);
 
-        var targetValue = new BigDecimal(goal.getTargetValue());
-        if (totalProgress.compareTo(targetValue) >= 0 && goal.getGoalStatus() == GoalStatus.ACTIVE) {
+        if (goal.getTargetValue() != null && totalProgress.compareTo(goal.getTargetValue()) >= 0 && goal.getGoalStatus() == GoalStatus.ACTIVE) {
             goal.setGoalStatus(GoalStatus.COMPLETED);
             goalRepository.save(goal);
             log.info("Goal ID: {} marked as COMPLETED", goal.getId());
@@ -270,12 +269,11 @@ public class ProgressService {
     }
 
     private BigDecimal calculateProgressPercentage(Goal goal) {
-        var targetValue = new BigDecimal(goal.getTargetValue());
-        if (targetValue.compareTo(BigDecimal.ZERO) == 0) {
+        if (goal.getTargetValue() == null || goal.getTargetValue().compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
         return goal.getCurrentProgress()
                 .multiply(BigDecimal.valueOf(100))
-                .divide(targetValue, 2, RoundingMode.HALF_UP);
+                .divide(goal.getTargetValue(), 2, RoundingMode.HALF_UP);
     }
 }

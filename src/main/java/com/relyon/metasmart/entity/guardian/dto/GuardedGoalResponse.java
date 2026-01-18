@@ -38,7 +38,7 @@ public class GuardedGoalResponse {
     // Progress info (if VIEW_PROGRESS permission)
     private BigDecimal progressPercentage;
     private BigDecimal currentProgress;
-    private String targetValue;
+    private BigDecimal targetValue;
     private String unit;
     private LocalDateTime lastProgressAt;
     private List<ProgressEntryResponse> recentProgress;

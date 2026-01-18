@@ -241,12 +241,11 @@ public class SocialProofService {
         if (goal.getTargetValue() == null || goal.getCurrentProgress() == null) {
             return 0;
         }
-        var target = new BigDecimal(goal.getTargetValue());
-        if (target.compareTo(BigDecimal.ZERO) == 0) {
+        if (goal.getTargetValue().compareTo(BigDecimal.ZERO) == 0) {
             return 0;
         }
         return goal.getCurrentProgress()
-                .divide(target, 4, RoundingMode.HALF_UP)
+                .divide(goal.getTargetValue(), 4, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100))
                 .min(BigDecimal.valueOf(100))
                 .intValue();

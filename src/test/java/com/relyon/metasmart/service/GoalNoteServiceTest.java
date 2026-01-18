@@ -59,7 +59,7 @@ class GoalNoteServiceTest {
                 .title("Run 5km")
                 .description("Build endurance to run 5km")
                 .goalCategory(GoalCategory.HEALTH)
-                .targetValue("5")
+                .targetValue(new BigDecimal("5"))
                 .unit("km")
                 .currentProgress(BigDecimal.ZERO)
                 .startDate(LocalDate.now())
