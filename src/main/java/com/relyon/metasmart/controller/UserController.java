@@ -17,9 +17,11 @@ import jakarta.validation.Valid;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -46,6 +48,22 @@ public class UserController {
             @Valid @RequestBody UpdateProfileRequest request) {
         log.debug("Updating profile for user: {}", user.getEmail());
         return ResponseEntity.ok(userProfileService.updateProfile(user, request));
+    }
+
+    @PostMapping(value = "/profile/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload profile picture")
+    public ResponseEntity<UserProfileResponse> uploadProfilePicture(
+            @AuthenticationPrincipal User user,
+            @RequestParam("file") MultipartFile file) {
+        log.debug("Uploading profile picture for user: {}", user.getEmail());
+        return ResponseEntity.ok(userProfileService.uploadProfilePicture(user, file));
+    }
+
+    @DeleteMapping("/profile/picture")
+    @Operation(summary = "Delete profile picture")
+    public ResponseEntity<UserProfileResponse> deleteProfilePicture(@AuthenticationPrincipal User user) {
+        log.debug("Deleting profile picture for user: {}", user.getEmail());
+        return ResponseEntity.ok(userProfileService.deleteProfilePicture(user));
     }
 
     @PostMapping("/streak-shields/use")

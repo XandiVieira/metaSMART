@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -22,6 +23,7 @@ public class UserProfileService {
 
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Setter(onMethod_ = {@Autowired, @Lazy})
     private UserProfileService self;
@@ -37,6 +39,7 @@ public class UserProfileService {
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .joinedAt(user.getCreatedAt())
                 .totalGoals(totalGoals)
                 .completedGoals(completedGoals)
@@ -77,5 +80,29 @@ public class UserProfileService {
         userRepository.save(user);
         log.info("Streak shield used by user: {}. Remaining: {}", user.getEmail(), user.getStreakShields());
         return true;
+    }
+
+    @Transactional
+    public UserProfileResponse uploadProfilePicture(User user, MultipartFile file) {
+        log.debug("Uploading profile picture for user: {}", user.getEmail());
+
+        var imageUrl = cloudinaryService.uploadProfilePicture(file, user.getId());
+        user.setProfilePictureUrl(imageUrl);
+        userRepository.save(user);
+
+        log.info("Profile picture uploaded for user: {}", user.getEmail());
+        return self.getProfile(user);
+    }
+
+    @Transactional
+    public UserProfileResponse deleteProfilePicture(User user) {
+        log.debug("Deleting profile picture for user: {}", user.getEmail());
+
+        cloudinaryService.deleteProfilePicture(user.getId());
+        user.setProfilePictureUrl(null);
+        userRepository.save(user);
+
+        log.info("Profile picture deleted for user: {}", user.getEmail());
+        return self.getProfile(user);
     }
 }

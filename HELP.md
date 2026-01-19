@@ -10,6 +10,16 @@
 
 **Health Check:** `http://localhost:8080/relyon/metasmart/actuator/health`
 
+### Test Users
+
+On startup, if the database is empty, the following test users are automatically created:
+
+| Name          | Email            | Password   | Role  |
+|---------------|------------------|------------|-------|
+| Maria Silva   | maria@test.com   | Test@123   | ADMIN |
+| João Santos   | joao@test.com    | Test@123   | USER  |
+| Ana Oliveira  | ana@test.com     | Test@123   | USER  |
+
 **Authentication:** All endpoints (except `/api/v1/auth/*`, `/api/v1/payments/webhook`, and `/actuator/*`) require JWT
 token in header:
 
@@ -203,7 +213,7 @@ postgresql://metasmart_user:abc123@dpg-xxxxx.oregon-postgres.render.com/metasmar
 ./mvnw test -Dtest=GoalServiceTest
 ```
 
-**Current Coverage:** 66% (355 tests)
+**Current Coverage:** 549 tests
 
 ---
 

@@ -4,19 +4,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.relyon.metasmart.config.JwtService;
 import com.relyon.metasmart.constant.ErrorMessages;
+import com.relyon.metasmart.entity.user.PasswordResetToken;
 import com.relyon.metasmart.entity.user.User;
+import com.relyon.metasmart.entity.user.dto.ForgotPasswordRequest;
 import com.relyon.metasmart.entity.user.dto.LoginRequest;
 import com.relyon.metasmart.entity.user.dto.RegisterRequest;
+import com.relyon.metasmart.entity.user.dto.ResetPasswordRequest;
 import com.relyon.metasmart.exception.AuthenticationException;
+import com.relyon.metasmart.exception.BadRequestException;
 import com.relyon.metasmart.exception.DuplicateResourceException;
 import com.relyon.metasmart.mapper.AuthMapper;
 import com.relyon.metasmart.repository.UserRepository;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -165,6 +171,172 @@ class AuthServiceTest {
             verify(userRepository).findByEmail(loginRequest.getEmail());
             verify(passwordEncoder).matches(loginRequest.getPassword(), user.getPassword());
             verify(jwtService, never()).generateToken(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("Forgot password tests")
+    class ForgotPasswordTests {
+
+        @Test
+        @DisplayName("Should process forgot password for existing user")
+        void shouldProcessForgotPasswordForExistingUser() {
+            var request = ForgotPasswordRequest.builder()
+                    .email("john@example.com")
+                    .build();
+
+            when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+
+            authService.forgotPassword(request);
+
+            verify(passwordResetTokenRepository).invalidateAllTokensForUser(user);
+            verify(passwordResetTokenRepository).save(any(PasswordResetToken.class));
+            verify(emailService).sendPasswordResetEmail(eq(user.getEmail()), anyString(), eq(user.getName()));
+        }
+
+        @Test
+        @DisplayName("Should silently return for non-existent email")
+        void shouldSilentlyReturnForNonExistentEmail() {
+            var request = ForgotPasswordRequest.builder()
+                    .email("nonexistent@example.com")
+                    .build();
+
+            when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+
+            authService.forgotPassword(request);
+
+            verify(passwordResetTokenRepository, never()).save(any());
+            verify(emailService, never()).sendPasswordResetEmail(anyString(), anyString(), anyString());
+        }
+    }
+
+    @Nested
+    @DisplayName("Reset password tests")
+    class ResetPasswordTests {
+
+        @Test
+        @DisplayName("Should reset password successfully with valid token")
+        void shouldResetPasswordSuccessfully() {
+            var request = ResetPasswordRequest.builder()
+                    .token("valid-token")
+                    .newPassword("NewPassword123!")
+                    .build();
+
+            var resetToken = PasswordResetToken.builder()
+                    .id(1L)
+                    .token("valid-token")
+                    .user(user)
+                    .expiresAt(LocalDateTime.now().plusHours(1))
+                    .used(false)
+                    .build();
+
+            when(passwordResetTokenRepository.findByTokenAndUsedFalse(request.getToken()))
+                    .thenReturn(Optional.of(resetToken));
+            when(passwordEncoder.encode(request.getNewPassword())).thenReturn("encodedNewPassword");
+
+            authService.resetPassword(request);
+
+            verify(userRepository).save(user);
+            verify(passwordResetTokenRepository).save(resetToken);
+            assertThat(resetToken.getUsed()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Should throw exception for invalid token")
+        void shouldThrowExceptionForInvalidToken() {
+            var request = ResetPasswordRequest.builder()
+                    .token("invalid-token")
+                    .newPassword("NewPassword123!")
+                    .build();
+
+            when(passwordResetTokenRepository.findByTokenAndUsedFalse(request.getToken()))
+                    .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> authService.resetPassword(request))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("Invalid or expired password reset token");
+
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw exception for expired token")
+        void shouldThrowExceptionForExpiredToken() {
+            var request = ResetPasswordRequest.builder()
+                    .token("expired-token")
+                    .newPassword("NewPassword123!")
+                    .build();
+
+            var expiredToken = PasswordResetToken.builder()
+                    .id(1L)
+                    .token("expired-token")
+                    .user(user)
+                    .expiresAt(LocalDateTime.now().minusHours(1))
+                    .used(false)
+                    .build();
+
+            when(passwordResetTokenRepository.findByTokenAndUsedFalse(request.getToken()))
+                    .thenReturn(Optional.of(expiredToken));
+
+            assertThatThrownBy(() -> authService.resetPassword(request))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("Password reset token has expired");
+
+            verify(userRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("Validate reset token tests")
+    class ValidateResetTokenTests {
+
+        @Test
+        @DisplayName("Should return true for valid token")
+        void shouldReturnTrueForValidToken() {
+            var validToken = PasswordResetToken.builder()
+                    .id(1L)
+                    .token("valid-token")
+                    .user(user)
+                    .expiresAt(LocalDateTime.now().plusHours(1))
+                    .used(false)
+                    .build();
+
+            when(passwordResetTokenRepository.findByTokenAndUsedFalse("valid-token"))
+                    .thenReturn(Optional.of(validToken));
+
+            var result = authService.validateResetToken("valid-token");
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        @DisplayName("Should return false for expired token")
+        void shouldReturnFalseForExpiredToken() {
+            var expiredToken = PasswordResetToken.builder()
+                    .id(1L)
+                    .token("expired-token")
+                    .user(user)
+                    .expiresAt(LocalDateTime.now().minusHours(1))
+                    .used(false)
+                    .build();
+
+            when(passwordResetTokenRepository.findByTokenAndUsedFalse("expired-token"))
+                    .thenReturn(Optional.of(expiredToken));
+
+            var result = authService.validateResetToken("expired-token");
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("Should return false for non-existent token")
+        void shouldReturnFalseForNonExistentToken() {
+            when(passwordResetTokenRepository.findByTokenAndUsedFalse("non-existent"))
+                    .thenReturn(Optional.empty());
+
+            var result = authService.validateResetToken("non-existent");
+
+            assertThat(result).isFalse();
         }
     }
 }

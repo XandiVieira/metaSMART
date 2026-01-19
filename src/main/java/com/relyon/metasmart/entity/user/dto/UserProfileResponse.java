@@ -15,6 +15,7 @@ public class UserProfileResponse {
     private Long id;
     private String name;
     private String email;
+    private String profilePictureUrl;
     private LocalDateTime joinedAt;
     private long totalGoals;
     private long completedGoals;

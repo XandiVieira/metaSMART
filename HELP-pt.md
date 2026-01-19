@@ -18,6 +18,18 @@ Authorization: Bearer <token>
 
 ---
 
+## Usuarios de Teste
+
+Ao iniciar a aplicacao, se o banco de dados estiver vazio, os seguintes usuarios de teste sao criados automaticamente:
+
+| Nome          | Email            | Senha      | Papel |
+|---------------|------------------|------------|-------|
+| Maria Silva   | maria@test.com   | Test@123   | ADMIN |
+| Joao Santos   | joao@test.com    | Test@123   | USER  |
+| Ana Oliveira  | ana@test.com     | Test@123   | USER  |
+
+---
+
 ## Health Check
 
 A aplicacao expoe endpoints de saude do Spring Boot Actuator:
@@ -70,15 +82,33 @@ postgresql://metasmart_user:abc123@dpg-xxxxx.oregon-postgres.render.com/metasmar
 
 ### Autenticacao (`/api/v1/auth`)
 
-| Metodo | Endpoint    | Descricao                               |
-|--------|-------------|-----------------------------------------|
-| POST   | `/register` | Registrar usuario → retorna `{ token }` |
-| POST   | `/login`    | Login → retorna `{ token }`             |
+| Metodo | Endpoint                       | Descricao                           |
+|--------|--------------------------------|-------------------------------------|
+| POST   | `/register`                    | Registrar usuario → retorna `{ token }` |
+| POST   | `/login`                       | Login → retorna `{ token }`         |
+| POST   | `/forgot-password`             | Solicitar email de recuperacao      |
+| POST   | `/reset-password`              | Redefinir senha com token           |
+| GET    | `/validate-reset-token?token=` | Verificar se token e valido         |
 
-**Corpo da requisicao:**
+**Corpo de registro/login:**
 
 ```json
 { "name": "John", "email": "john@example.com", "password": "Password123!" }
+```
+
+**Esqueci a senha:**
+
+```json
+{ "email": "john@example.com" }
+```
+
+**Redefinir senha:**
+
+```json
+{
+  "token": "uuid-reset-token",
+  "newPassword": "NovaSenha123!"
+}
 ```
 
 **Requisitos de senha:** Minimo 8 caracteres com maiuscula, minuscula, numero e caractere especial (@$!%*?&).
@@ -667,7 +697,51 @@ As seguintes funcionalidades estao planejadas para versoes futuras:
 
 ---
 
-## Funcionalidades Premium (Planejadas)
+### Pagamentos (`/api/v1/payments`)
+
+*Integracao Stripe para assinaturas e compras avulsas.*
+
+| Metodo | Endpoint    | Descricao                             |
+|--------|-------------|---------------------------------------|
+| POST   | `/checkout` | Criar sessao de checkout Stripe       |
+| POST   | `/webhook`  | Processar webhooks Stripe (sem auth)  |
+
+**Requisicao de checkout:**
+
+```json
+{
+  "productType": "PREMIUM_SUBSCRIPTION",
+  "billingPeriod": "MONTHLY"
+}
+```
+
+**Tipos de produto:**
+
+- `PREMIUM_SUBSCRIPTION` - Assinatura mensal/anual
+- `STREAK_SHIELD` - Escudo de sequencia avulso
+- `STREAK_SHIELD_PACK` - Pacote de escudos
+- `AI_INSIGHTS` - Add-on de insights por IA
+- `GUARDIAN_SLOT` - Slot adicional de guardiao
+
+**Periodos de cobranca (para assinaturas):**
+
+- `MONTHLY` - Mensal
+- `YEARLY` - Anual
+
+**Resposta do checkout:**
+
+```json
+{
+  "sessionId": "cs_test_...",
+  "url": "https://checkout.stripe.com/pay/cs_test_..."
+}
+```
+
+Redirecione o usuario para a `url` para completar o pagamento.
+
+---
+
+## Funcionalidades Premium
 
 ### Niveis de Assinatura
 

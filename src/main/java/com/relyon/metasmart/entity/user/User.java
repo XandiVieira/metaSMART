@@ -41,6 +41,9 @@ public class User extends AuditableEntity implements UserDetails {
     @Column(nullable = false)
     private Integer streakShields = 0;
 
+    @Column(name = "profile_picture_url")
+    private String profilePictureUrl;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

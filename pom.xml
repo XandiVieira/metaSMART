@@ -36,6 +36,7 @@
     <springdoc.version>2.7.0</springdoc.version>
     <stripe.version>28.2.0</stripe.version>
     <bucket4j.version>8.10.1</bucket4j.version>
+    <cloudinary.version>1.39.0</cloudinary.version>
   </properties>
   <dependencies>
     <dependency>
@@ -113,6 +114,11 @@
       <groupId>com.bucket4j</groupId>
       <artifactId>bucket4j-core</artifactId>
       <version>${bucket4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.cloudinary</groupId>
+      <artifactId>cloudinary-http44</artifactId>
+      <version>${cloudinary.version}</version>
     </dependency>
     <dependency>
       <groupId>org.mapstruct</groupId>

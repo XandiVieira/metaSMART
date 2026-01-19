@@ -191,16 +191,6 @@ public interface GoalMapper {
 ./mvnw clean package
 ```
 
-## Test Users
-
-On startup, if the database is empty, the following test users are automatically created:
-
-| Name          | Email            | Password   | Role  |
-|---------------|------------------|------------|-------|
-| Maria Silva   | maria@test.com   | Test@123   | ADMIN |
-| João Santos   | joao@test.com    | Test@123   | USER  |
-| Ana Oliveira  | ana@test.com     | Test@123   | USER  |
-
 ## Automated API Testing (Newman)
 
 Newman is used to automate Postman collection tests for CI/CD.

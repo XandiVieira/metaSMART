@@ -1,5 +1,9 @@
 package com.relyon.metasmart.service;
 
+import static com.relyon.metasmart.constant.AppConstants.DEFAULT_MILESTONE_PERCENTAGES;
+import static com.relyon.metasmart.constant.AppConstants.STREAK_SHIELD_AWARD_MILESTONE_COMPLETE;
+import static com.relyon.metasmart.constant.AppConstants.STREAK_SHIELD_AWARD_MILESTONE_HALF;
+
 import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.goal.GoalStatus;
@@ -199,8 +203,7 @@ public class ProgressService {
     public void createDefaultMilestones(Goal goal) {
         log.debug("Creating default milestones for goal ID: {}", goal.getId());
 
-        var percentages = List.of(25, 50, 75, 100);
-        for (var percentage : percentages) {
+        for (var percentage : DEFAULT_MILESTONE_PERCENTAGES) {
             var milestone = Milestone.builder()
                     .goal(goal)
                     .percentage(percentage)
@@ -245,7 +248,8 @@ public class ProgressService {
                 log.info("Milestone {}% achieved for goal ID: {}", milestone.getPercentage(), goal.getId());
 
                 // Award streak shield for major milestones (50% and 100%)
-                if (milestone.getPercentage() == 50 || milestone.getPercentage() == 100) {
+                if (milestone.getPercentage() == STREAK_SHIELD_AWARD_MILESTONE_HALF
+                        || milestone.getPercentage() == STREAK_SHIELD_AWARD_MILESTONE_COMPLETE) {
                     userProfileService.addStreakShield(user, 1);
                     log.info("Streak shield awarded to user {} for reaching {}% milestone", user.getEmail(), milestone.getPercentage());
                 }
