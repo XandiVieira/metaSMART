@@ -1,5 +1,7 @@
 package com.relyon.metasmart.service;
 
+import static com.relyon.metasmart.constant.AppConstants.*;
+
 import com.relyon.metasmart.entity.subscription.*;
 import com.relyon.metasmart.entity.subscription.dto.PurchaseResponse;
 import com.relyon.metasmart.entity.subscription.dto.SubscriptionResponse;
@@ -21,19 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SubscriptionService {
 
-    private static final int FREE_MAX_GOALS = 2;
+    // Premium tier has unlimited goals
     private static final int PREMIUM_MAX_GOALS = Integer.MAX_VALUE;
-
-    private static final int FREE_MAX_GUARDIANS = 1;
-    private static final int PREMIUM_MAX_GUARDIANS = 5;
-
-    private static final int FREE_PROGRESS_HISTORY_DAYS = 30;
-    private static final int PREMIUM_PROGRESS_HISTORY_DAYS = Integer.MAX_VALUE;
-
-    private static final int FREE_STREAK_SHIELDS = 1;
     private static final int PREMIUM_STREAK_SHIELDS = 3;
-
-    private static final int FREE_STRUGGLING_REQUESTS = 1;
     private static final int PREMIUM_STRUGGLING_REQUESTS = Integer.MAX_VALUE;
 
     private final UserSubscriptionRepository subscriptionRepository;
@@ -59,10 +51,10 @@ public class SubscriptionService {
                 .tier(tier)
                 .isPremium(isPremium)
                 .maxActiveGoals(isPremium ? PREMIUM_MAX_GOALS : FREE_MAX_GOALS)
-                .maxGuardiansPerGoal(isPremium ? PREMIUM_MAX_GUARDIANS : FREE_MAX_GUARDIANS)
+                .maxGuardiansPerGoal(isPremium ? PREMIUM_MAX_GUARDIANS_PER_GOAL : FREE_MAX_GUARDIANS_PER_GOAL)
                 .progressHistoryDays(isPremium ? PREMIUM_PROGRESS_HISTORY_DAYS : FREE_PROGRESS_HISTORY_DAYS)
-                .streakShieldsPerMonth(isPremium ? PREMIUM_STREAK_SHIELDS : FREE_STREAK_SHIELDS)
-                .strugglingRequestsPerMonth(isPremium ? PREMIUM_STRUGGLING_REQUESTS : FREE_STRUGGLING_REQUESTS)
+                .streakShieldsPerMonth(isPremium ? PREMIUM_STREAK_SHIELDS : FREE_STREAK_SHIELDS_PER_MONTH)
+                .strugglingRequestsPerMonth(isPremium ? PREMIUM_STRUGGLING_REQUESTS : FREE_STRUGGLING_REQUESTS_PER_MONTH)
                 .streakShieldsAvailable(purchaseRepository.countAvailable(user, PurchaseType.STREAK_SHIELD, now))
                 .strugglingAssistsAvailable(purchaseRepository.countAvailable(user, PurchaseType.STRUGGLING_ASSIST, now))
                 .goalBoostsAvailable(purchaseRepository.countAvailable(user, PurchaseType.GOAL_BOOST, now))

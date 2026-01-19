@@ -1,5 +1,7 @@
 package com.relyon.metasmart.service;
 
+import static com.relyon.metasmart.constant.AppConstants.DEFAULT_MILESTONE_PERCENTAGES;
+
 import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.constant.LogMessages;
 import com.relyon.metasmart.entity.actionplan.ActionItem;
@@ -47,6 +49,8 @@ public class GoalService {
     private final ScheduledTaskMapper scheduledTaskMapper;
     private final UserProfileService userProfileService;
     private final UsageLimitService usageLimitService;
+    private final SubscriptionService subscriptionService;
+    private final GoalLockService goalLockService;
 
     @Transactional
     public GoalResponse create(GoalRequest request, User owner) {
@@ -57,8 +61,13 @@ public class GoalService {
         var goal = goalMapper.toEntity(request);
         goal.setOwner(owner);
 
+        // Mark if created during premium subscription
+        var isPremium = subscriptionService.isPremium(owner);
+        goal.setCreatedDuringPremium(isPremium);
+
         var savedGoal = goalRepository.save(goal);
-        log.info("Goal created with ID: {} for user ID: {}", savedGoal.getId(), owner.getId());
+        log.info("Goal created with ID: {} for user ID: {} (premium: {})",
+                savedGoal.getId(), owner.getId(), isPremium);
 
         createDefaultMilestones(savedGoal);
 
@@ -66,8 +75,7 @@ public class GoalService {
     }
 
     private void createDefaultMilestones(Goal goal) {
-        var percentages = List.of(25, 50, 75, 100);
-        for (var percentage : percentages) {
+        for (var percentage : DEFAULT_MILESTONE_PERCENTAGES) {
             var milestone = Milestone.builder()
                     .goal(goal)
                     .percentage(percentage)
@@ -139,7 +147,7 @@ public class GoalService {
 
     @Transactional
     public void delete(Long id, User owner) {
-        log.debug("Deleting goal ID: {} for user ID: {}", id, owner.getId());
+        log.debug("Soft deleting goal ID: {} for user ID: {}", id, owner.getId());
 
         var goal = goalRepository.findByIdAndOwner(id, owner)
                 .orElseThrow(() -> {
@@ -147,12 +155,72 @@ public class GoalService {
                     return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
                 });
 
+        // Soft delete - set deletedAt instead of physical delete
+        goal.setDeletedAt(LocalDate.now());
+        goalRepository.save(goal);
+        log.info("Goal soft deleted with ID: {}", id);
+
+        // Recalculate locks - a slot may have been freed
+        goalLockService.recalculateLocksForUser(owner);
+    }
+
+    @Transactional
+    public GoalResponse reactivate(Long id, User owner) {
+        log.debug("Reactivating goal ID: {} for user ID: {}", id, owner.getId());
+
+        var goal = goalRepository.findByIdAndOwnerAndDeletedAtIsNotNull(id, owner)
+                .orElseThrow(() -> {
+                    log.warn("Deleted goal not found with ID: {} for user ID: {}", id, owner.getId());
+                    return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
+                });
+
+        // Check if user can reactivate (counts as new goal for limit purposes)
+        usageLimitService.enforceGoalLimit(owner);
+
+        // Reactivate the goal
+        goal.setDeletedAt(null);
+
+        // Mark as created during premium if reactivating while premium
+        var isPremium = subscriptionService.isPremium(owner);
+        goal.setCreatedDuringPremium(isPremium);
+
+        // Reset to active status
+        goal.setGoalStatus(GoalStatus.ACTIVE);
+        goal.setPreviousStatus(null);
+
+        var savedGoal = goalRepository.save(goal);
+        log.info("Goal reactivated with ID: {} for user ID: {} (premium: {})",
+                id, owner.getId(), isPremium);
+
+        return enrichGoalResponse(savedGoal);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<GoalResponse> findDeleted(User owner, Pageable pageable) {
+        log.debug("Finding deleted goals for user ID: {}", owner.getId());
+        return goalRepository.findByOwnerAndDeletedAtIsNotNull(owner, pageable)
+                .map(this::enrichGoalResponse);
+    }
+
+    @Transactional
+    public void permanentDelete(Long id, User owner) {
+        log.debug("Permanently deleting goal ID: {} for user ID: {}", id, owner.getId());
+
+        var goal = goalRepository.findByIdAndOwnerAndDeletedAtIsNotNull(id, owner)
+                .orElseThrow(() -> {
+                    log.warn("Deleted goal not found with ID: {} for user ID: {}", id, owner.getId());
+                    return new ResourceNotFoundException(ErrorMessages.GOAL_NOT_FOUND);
+                });
+
+        // Physical delete - remove all related data
         obstacleEntryRepository.deleteByGoal(goal);
         actionItemRepository.deleteByGoal(goal);
         progressEntryRepository.deleteByGoal(goal);
         milestoneRepository.deleteByGoal(goal);
+        scheduledTaskRepository.deleteByGoal(goal);
+        taskCompletionRepository.deleteByGoal(goal);
         goalRepository.delete(goal);
-        log.info("Goal deleted with ID: {}", id);
+        log.info("Goal permanently deleted with ID: {}", id);
     }
 
     @Transactional

@@ -34,13 +34,22 @@ public interface GoalMapper {
     @Mapping(target = "checkins", ignore = true)
     @Mapping(target = "supportSystem", ignore = true)
     @Mapping(target = "milestones", ignore = true)
+    @Mapping(target = "isLocked", source = ".", qualifiedByName = "toIsLocked")
     GoalResponse toResponse(@NonNull Goal goal);
+
+    @Named("toIsLocked")
+    default boolean toIsLocked(Goal goal) {
+        return goal != null && goal.getGoalStatus() == GoalStatus.LOCKED;
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "currentProgress", ignore = true)
     @Mapping(target = "goalStatus", ignore = true)
     @Mapping(target = "owner", ignore = true)
     @Mapping(target = "archivedAt", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
+    @Mapping(target = "createdDuringPremium", ignore = true)
+    @Mapping(target = "previousStatus", ignore = true)
     @Mapping(target = "lastStreakShieldUsedAt", ignore = true)
     @Mapping(target = "streak", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -60,6 +69,9 @@ public interface GoalMapper {
     @Mapping(target = "goalStatus", ignore = true)
     @Mapping(target = "owner", ignore = true)
     @Mapping(target = "archivedAt", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
+    @Mapping(target = "createdDuringPremium", ignore = true)
+    @Mapping(target = "previousStatus", ignore = true)
     @Mapping(target = "lastStreakShieldUsedAt", ignore = true)
     @Mapping(target = "streak", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

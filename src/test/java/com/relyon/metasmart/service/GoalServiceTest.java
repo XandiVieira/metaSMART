@@ -79,6 +79,12 @@ class GoalServiceTest {
     @Mock
     private UsageLimitService usageLimitService;
 
+    @Mock
+    private SubscriptionService subscriptionService;
+
+    @Mock
+    private GoalLockService goalLockService;
+
     @InjectMocks
     private GoalService goalService;
 
@@ -285,14 +291,15 @@ class GoalServiceTest {
         @DisplayName("Should delete goal successfully")
         void shouldDeleteGoalSuccessfully() {
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(goalRepository.save(any(Goal.class))).thenReturn(goal);
 
             goalService.delete(1L, user);
 
-            verify(obstacleEntryRepository).deleteByGoal(goal);
-            verify(actionItemRepository).deleteByGoal(goal);
-            verify(progressEntryRepository).deleteByGoal(goal);
-            verify(milestoneRepository).deleteByGoal(goal);
-            verify(goalRepository).delete(goal);
+            // Soft delete - should set deletedAt instead of physical delete
+            verify(goalRepository).save(any(Goal.class));
+            verify(goalLockService).recalculateLocksForUser(user);
+            // Physical delete should NOT be called
+            verify(goalRepository, times(0)).delete(any(Goal.class));
         }
 
         @Test

@@ -66,4 +66,9 @@ public class GoalResponse {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Soft delete and lock state
+    private LocalDate deletedAt;
+    private boolean isLocked;
+    private boolean createdDuringPremium;
 }

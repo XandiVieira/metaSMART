@@ -61,6 +61,16 @@ public class Goal extends AuditableEntity {
 
     private LocalDate archivedAt;
 
+    private LocalDate deletedAt;
+
+    @Builder.Default
+    @Column(name = "created_during_premium")
+    private boolean createdDuringPremium = false;
+
+    @Column(name = "previous_status")
+    @Enumerated(EnumType.STRING)
+    private GoalStatus previousStatus;
+
     private LocalDate lastStreakShieldUsedAt;
 
     @Embedded

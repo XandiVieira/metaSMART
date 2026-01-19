@@ -49,6 +49,9 @@ class StripeServiceTest {
     @Mock
     private UserPurchaseRepository purchaseRepository;
 
+    @Mock
+    private GoalLockService goalLockService;
+
     @InjectMocks
     private StripeService stripeService;
 

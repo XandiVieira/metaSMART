@@ -126,7 +126,7 @@ class SubscriptionServiceTest {
 
             assertThat(result.getTier()).isEqualTo(SubscriptionTier.FREE);
             assertThat(result.getIsPremium()).isFalse();
-            assertThat(result.getMaxActiveGoals()).isEqualTo(3);
+            assertThat(result.getMaxActiveGoals()).isEqualTo(2);
             assertThat(result.getMaxGuardiansPerGoal()).isEqualTo(1);
             assertThat(result.getProgressHistoryDays()).isEqualTo(30);
             assertThat(result.getStreakShieldsPerMonth()).isEqualTo(1);

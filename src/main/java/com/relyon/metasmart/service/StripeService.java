@@ -1,5 +1,6 @@
 package com.relyon.metasmart.service;
 
+import static com.relyon.metasmart.constant.AppConstants.CURRENCY_CENTS_DIVISOR;
 import static com.relyon.metasmart.constant.ErrorMessages.FAILED_TO_CREATE_PAYMENT_SESSION;
 import static com.relyon.metasmart.constant.ErrorMessages.FAILED_TO_DESERIALIZE_INVOICE;
 import static com.relyon.metasmart.constant.ErrorMessages.FAILED_TO_DESERIALIZE_SESSION;
@@ -47,6 +48,7 @@ public class StripeService {
     private final StripeConfig stripeConfig;
     private final UserSubscriptionRepository subscriptionRepository;
     private final UserPurchaseRepository purchaseRepository;
+    private final GoalLockService goalLockService;
 
     @Value("${metasmart.mail.frontend-url}")
     private String frontendUrl;
@@ -157,7 +159,7 @@ public class StripeService {
                 .quantity(quantity)
                 .quantityRemaining(quantity)
                 .priceAmount(session.getAmountTotal() != null
-                        ? BigDecimal.valueOf(session.getAmountTotal()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                        ? BigDecimal.valueOf(session.getAmountTotal()).divide(BigDecimal.valueOf(CURRENCY_CENTS_DIVISOR), 2, RoundingMode.HALF_UP)
                         : null)
                 .priceCurrency(session.getCurrency())
                 .externalTransactionId(session.getPaymentIntent() != null ? session.getPaymentIntent() : session.getId())
@@ -203,6 +205,9 @@ public class StripeService {
                     userSubscription.setCancelledAt(LocalDateTime.now());
                     subscriptionRepository.save(userSubscription);
                     log.info("Subscription cancelled: {}", subscription.getId());
+
+                    // Recalculate goal locks after subscription cancellation (downgrade)
+                    goalLockService.recalculateLocksForUser(userSubscription.getUser());
                 });
     }
 
@@ -270,13 +275,16 @@ public class StripeService {
         var items = stripeSubscription.getItems().getData();
         if (!items.isEmpty()) {
             var price = items.getFirst().getPrice();
-            userSubscription.setPriceAmount(BigDecimal.valueOf(price.getUnitAmount()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+            userSubscription.setPriceAmount(BigDecimal.valueOf(price.getUnitAmount()).divide(BigDecimal.valueOf(CURRENCY_CENTS_DIVISOR), 2, RoundingMode.HALF_UP));
             userSubscription.setPriceCurrency(price.getCurrency());
             userSubscription.setBillingPeriod(price.getRecurring() != null ? price.getRecurring().getInterval() : null);
         }
 
         subscriptionRepository.save(userSubscription);
         log.info("Subscription saved for user ID: {}, status: {}", userId, userSubscription.getStatus());
+
+        // Recalculate goal locks after subscription change (may unlock goals if upgrading)
+        goalLockService.recalculateLocksForUser(user);
     }
 
     private Optional<Long> extractUserIdFromSubscription(Subscription subscription) {

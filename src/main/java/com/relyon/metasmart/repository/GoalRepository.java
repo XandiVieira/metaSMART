@@ -14,35 +14,59 @@ import org.springframework.data.repository.query.Param;
 
 public interface GoalRepository extends JpaRepository<Goal, Long> {
 
-    // Active goals (non-archived)
-    Page<Goal> findByOwnerAndArchivedAtIsNull(User owner, Pageable pageable);
+    // Active goals (non-archived, non-deleted)
+    Page<Goal> findByOwnerAndArchivedAtIsNullAndDeletedAtIsNull(User owner, Pageable pageable);
 
-    Page<Goal> findByOwnerAndGoalStatusAndArchivedAtIsNull(User owner, GoalStatus goalStatus, Pageable pageable);
+    Page<Goal> findByOwnerAndGoalStatusAndArchivedAtIsNullAndDeletedAtIsNull(User owner, GoalStatus goalStatus, Pageable pageable);
 
-    Page<Goal> findByOwnerAndGoalCategoryAndArchivedAtIsNull(User owner, GoalCategory goalCategory, Pageable pageable);
+    Page<Goal> findByOwnerAndGoalCategoryAndArchivedAtIsNullAndDeletedAtIsNull(User owner, GoalCategory goalCategory, Pageable pageable);
 
-    Optional<Goal> findByIdAndOwnerAndArchivedAtIsNull(Long id, User owner);
+    Optional<Goal> findByIdAndOwnerAndArchivedAtIsNullAndDeletedAtIsNull(Long id, User owner);
 
-    List<Goal> findByOwnerAndGoalStatusAndArchivedAtIsNull(User owner, GoalStatus goalStatus);
+    List<Goal> findByOwnerAndGoalStatusAndArchivedAtIsNullAndDeletedAtIsNull(User owner, GoalStatus goalStatus);
 
-    // Archived goals
-    Page<Goal> findByOwnerAndArchivedAtIsNotNull(User owner, Pageable pageable);
+    // Archived goals (non-deleted)
+    Page<Goal> findByOwnerAndArchivedAtIsNotNullAndDeletedAtIsNull(User owner, Pageable pageable);
 
-    Optional<Goal> findByIdAndOwnerAndArchivedAtIsNotNull(Long id, User owner);
+    Optional<Goal> findByIdAndOwnerAndArchivedAtIsNotNullAndDeletedAtIsNull(Long id, User owner);
 
-    // Statistics
-    long countByOwnerAndArchivedAtIsNull(User owner);
+    // Deleted goals (soft deleted)
+    Page<Goal> findByOwnerAndDeletedAtIsNotNull(User owner, Pageable pageable);
 
-    long countByOwnerAndGoalStatusAndArchivedAtIsNull(User owner, GoalStatus goalStatus);
+    Optional<Goal> findByIdAndOwnerAndDeletedAtIsNotNull(Long id, User owner);
 
-    // Search
-    @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL " +
+    // Statistics (exclude deleted)
+    long countByOwnerAndArchivedAtIsNullAndDeletedAtIsNull(User owner);
+
+    long countByOwnerAndGoalStatusAndArchivedAtIsNullAndDeletedAtIsNull(User owner, GoalStatus goalStatus);
+
+    // Count active (non-locked, non-archived, non-deleted) goals
+    @Query("SELECT COUNT(g) FROM Goal g WHERE g.owner = :owner " +
+            "AND g.archivedAt IS NULL AND g.deletedAt IS NULL " +
+            "AND g.goalStatus NOT IN ('LOCKED', 'COMPLETED', 'ABANDONED')")
+    long countActiveGoalsByOwner(@Param("owner") User owner);
+
+    // Find locked goals ordered by createdAt ASC (oldest first for unlocking)
+    @Query("SELECT g FROM Goal g WHERE g.owner = :owner " +
+            "AND g.goalStatus = 'LOCKED' AND g.deletedAt IS NULL " +
+            "ORDER BY g.createdAt ASC")
+    List<Goal> findLockedGoalsOrderByCreatedAtAsc(@Param("owner") User owner);
+
+    // Find goals created during premium ordered by createdAt DESC (newest first for locking)
+    @Query("SELECT g FROM Goal g WHERE g.owner = :owner " +
+            "AND g.createdDuringPremium = true AND g.deletedAt IS NULL " +
+            "AND g.archivedAt IS NULL AND g.goalStatus NOT IN ('LOCKED', 'COMPLETED', 'ABANDONED') " +
+            "ORDER BY g.createdAt DESC")
+    List<Goal> findPremiumGoalsForLocking(@Param("owner") User owner);
+
+    // Search (exclude deleted)
+    @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL AND g.deletedAt IS NULL " +
             "AND (LOWER(g.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
             "OR LOWER(g.description) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Goal> searchByOwner(@Param("owner") User owner, @Param("query") String query, Pageable pageable);
 
-    // Combined filters
-    @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL " +
+    // Combined filters (exclude deleted)
+    @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL AND g.deletedAt IS NULL " +
             "AND (:status IS NULL OR g.goalStatus = :status) " +
             "AND (:category IS NULL OR g.goalCategory = :category)")
     Page<Goal> findByOwnerWithFilters(
@@ -51,31 +75,60 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
             @Param("category") GoalCategory category,
             Pageable pageable);
 
-    // Goals due soon (within days)
-    @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL " +
+    // Goals due soon (within days, exclude deleted)
+    @Query("SELECT g FROM Goal g WHERE g.owner = :owner AND g.archivedAt IS NULL AND g.deletedAt IS NULL " +
             "AND g.goalStatus = 'ACTIVE' " +
             "AND g.targetDate <= :dueDate ORDER BY g.targetDate ASC")
     List<Goal> findGoalsDueSoon(@Param("owner") User owner, @Param("dueDate") java.time.LocalDate dueDate);
 
     // Legacy methods (keeping for backward compatibility)
     default Page<Goal> findByOwner(User owner, Pageable pageable) {
-        return findByOwnerAndArchivedAtIsNull(owner, pageable);
+        return findByOwnerAndArchivedAtIsNullAndDeletedAtIsNull(owner, pageable);
     }
 
     default Page<Goal> findByOwnerAndGoalStatus(User owner, GoalStatus goalStatus, Pageable pageable) {
-        return findByOwnerAndGoalStatusAndArchivedAtIsNull(owner, goalStatus, pageable);
+        return findByOwnerAndGoalStatusAndArchivedAtIsNullAndDeletedAtIsNull(owner, goalStatus, pageable);
     }
 
     default Page<Goal> findByOwnerAndGoalCategory(User owner, GoalCategory goalCategory, Pageable pageable) {
-        return findByOwnerAndGoalCategoryAndArchivedAtIsNull(owner, goalCategory, pageable);
+        return findByOwnerAndGoalCategoryAndArchivedAtIsNullAndDeletedAtIsNull(owner, goalCategory, pageable);
     }
 
     default Optional<Goal> findByIdAndOwner(Long id, User owner) {
-        return findByIdAndOwnerAndArchivedAtIsNull(id, owner);
+        return findByIdAndOwnerAndArchivedAtIsNullAndDeletedAtIsNull(id, owner);
     }
 
     default List<Goal> findByOwnerAndGoalStatus(User owner, GoalStatus goalStatus) {
-        return findByOwnerAndGoalStatusAndArchivedAtIsNull(owner, goalStatus);
+        return findByOwnerAndGoalStatusAndArchivedAtIsNullAndDeletedAtIsNull(owner, goalStatus);
+    }
+
+    default Optional<Goal> findByIdAndOwnerAndArchivedAtIsNotNull(Long id, User owner) {
+        return findByIdAndOwnerAndArchivedAtIsNotNullAndDeletedAtIsNull(id, owner);
+    }
+
+    default Page<Goal> findByOwnerAndArchivedAtIsNotNull(User owner, Pageable pageable) {
+        return findByOwnerAndArchivedAtIsNotNullAndDeletedAtIsNull(owner, pageable);
+    }
+
+    default long countByOwnerAndArchivedAtIsNull(User owner) {
+        return countByOwnerAndArchivedAtIsNullAndDeletedAtIsNull(owner);
+    }
+
+    default long countByOwnerAndGoalStatusAndArchivedAtIsNull(User owner, GoalStatus goalStatus) {
+        return countByOwnerAndGoalStatusAndArchivedAtIsNullAndDeletedAtIsNull(owner, goalStatus);
+    }
+
+    // Additional legacy methods for DashboardService and GoalNoteService compatibility
+    default Page<Goal> findByOwnerAndArchivedAtIsNull(User owner, Pageable pageable) {
+        return findByOwnerAndArchivedAtIsNullAndDeletedAtIsNull(owner, pageable);
+    }
+
+    default List<Goal> findByOwnerAndGoalStatusAndArchivedAtIsNull(User owner, GoalStatus goalStatus) {
+        return findByOwnerAndGoalStatusAndArchivedAtIsNullAndDeletedAtIsNull(owner, goalStatus);
+    }
+
+    default Optional<Goal> findByIdAndOwnerAndArchivedAtIsNull(Long id, User owner) {
+        return findByIdAndOwnerAndArchivedAtIsNullAndDeletedAtIsNull(id, owner);
     }
 
     // Social Proof aggregate queries

@@ -171,4 +171,32 @@ public class GoalController {
         log.debug("Received request to use streak shield for goal ID: {} for user ID: {}", id, user.getId());
         return ResponseEntity.ok(goalService.useStreakShield(id, user));
     }
+
+    @GetMapping("/deleted")
+    public ResponseEntity<Page<GoalResponse>> findDeleted(
+            @AuthenticationPrincipal User user,
+            @PageableDefault(size = 10, sort = "deletedAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        log.debug("Received request to get deleted goals for user ID: {}", user.getId());
+        return ResponseEntity.ok(goalService.findDeleted(user, pageable));
+    }
+
+    @PutMapping("/{id}/reactivate")
+    public ResponseEntity<GoalResponse> reactivate(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user
+    ) {
+        log.debug("Received request to reactivate goal ID: {} for user ID: {}", id, user.getId());
+        return ResponseEntity.ok(goalService.reactivate(id, user));
+    }
+
+    @DeleteMapping("/{id}/permanent")
+    public ResponseEntity<Void> permanentDelete(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user
+    ) {
+        log.debug("Received request to permanently delete goal ID: {} for user ID: {}", id, user.getId());
+        goalService.permanentDelete(id, user);
+        return ResponseEntity.noContent().build();
+    }
 }

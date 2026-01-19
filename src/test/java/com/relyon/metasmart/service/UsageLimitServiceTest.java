@@ -61,7 +61,7 @@ class UsageLimitServiceTest {
         freeEntitlements = UserEntitlementsResponse.builder()
                 .tier(SubscriptionTier.FREE)
                 .isPremium(false)
-                .maxActiveGoals(3)
+                .maxActiveGoals(2)
                 .maxGuardiansPerGoal(1)
                 .progressHistoryDays(30)
                 .streakShieldsPerMonth(1)
@@ -90,7 +90,7 @@ class UsageLimitServiceTest {
         void shouldAllowGoalCreationWhenUnderLimit() {
             when(subscriptionService.getEntitlements(freeUser)).thenReturn(freeEntitlements);
             when(goalRepository.countByOwnerAndGoalStatusAndArchivedAtIsNull(freeUser, GoalStatus.ACTIVE))
-                    .thenReturn(2L);
+                    .thenReturn(1L);
 
             usageLimitService.enforceGoalLimit(freeUser);
         }
@@ -100,12 +100,12 @@ class UsageLimitServiceTest {
         void shouldThrowWhenGoalLimitExceededForFreeUser() {
             when(subscriptionService.getEntitlements(freeUser)).thenReturn(freeEntitlements);
             when(goalRepository.countByOwnerAndGoalStatusAndArchivedAtIsNull(freeUser, GoalStatus.ACTIVE))
-                    .thenReturn(3L);
+                    .thenReturn(2L);
 
             assertThatThrownBy(() -> usageLimitService.enforceGoalLimit(freeUser))
                     .isInstanceOf(UsageLimitExceededException.class)
                     .hasMessageContaining("active goals")
-                    .hasMessageContaining("3/3");
+                    .hasMessageContaining("2/2");
         }
 
         @Test
@@ -199,7 +199,7 @@ class UsageLimitServiceTest {
 
             var remaining = usageLimitService.getRemainingGoals(freeUser);
 
-            assertThat(remaining).isEqualTo(2);
+            assertThat(remaining).isEqualTo(1); // maxActiveGoals (2) - current (1) = 1
         }
 
         @Test
