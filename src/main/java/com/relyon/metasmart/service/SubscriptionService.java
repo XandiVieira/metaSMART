@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SubscriptionService {
 
-    private static final int FREE_MAX_GOALS = 3;
+    private static final int FREE_MAX_GOALS = 2;
     private static final int PREMIUM_MAX_GOALS = Integer.MAX_VALUE;
 
     private static final int FREE_MAX_GUARDIANS = 1;

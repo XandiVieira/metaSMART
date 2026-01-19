@@ -17,7 +17,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Setter
 public class CorsConfig {
 
-    private String allowedOrigins = "http://localhost:3000";
+    private String allowedOrigins = "http://localhost:3000,http://localhost:5173,https://smart-metas.onrender.com";
     private String allowedMethods = "GET,POST,PUT,PATCH,DELETE,OPTIONS";
     private String allowedHeaders = "Authorization,Content-Type,X-Requested-With";
     private boolean allowCredentials = true;
