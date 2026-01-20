@@ -48,7 +48,7 @@ public class AuthService {
         log.info("User registered successfully with ID: {}", user.getId());
 
         var token = jwtService.generateToken(user);
-        return buildAuthResponse(user.getEmail(), user.getName(), token);
+        return buildAuthResponse(user.getEmail(), user.getName(), user.getProfilePictureUrl(), token);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -67,14 +67,15 @@ public class AuthService {
 
         log.info("User logged in successfully with ID: {}", user.getId());
         var token = jwtService.generateToken(user);
-        return buildAuthResponse(user.getEmail(), user.getName(), token);
+        return buildAuthResponse(user.getEmail(), user.getName(), user.getProfilePictureUrl(), token);
     }
 
-    private AuthResponse buildAuthResponse(String email, String name, String token) {
+    private AuthResponse buildAuthResponse(String email, String name, String profilePictureUrl, String token) {
         return AuthResponse.builder()
                 .token(token)
                 .email(email)
                 .name(name)
+                .profilePictureUrl(profilePictureUrl)
                 .build();
     }
 
