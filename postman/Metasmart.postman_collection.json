@@ -110,6 +110,11 @@
       "key": "strugglingRequestId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "scheduleSlotId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -1156,7 +1161,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"date\": \"{{completionDate}}\",\n    \"note\": \"E2E test - completed stretching routine!\"\n}"
+              "raw": "{\n    \"scheduledDate\": \"{{completionDate}}\",\n    \"status\": \"COMPLETED\",\n    \"note\": \"E2E test - completed stretching routine!\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{frequencyActionItemId}}/completions",
@@ -2734,7 +2739,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"timezone\": \"America/Sao_Paulo\",\n    \"language\": \"pt\"\n}"
+              "raw": "{\n    \"timezone\": \"America/Sao_Paulo\",\n    \"weekStartDay\": 1,\n    \"language\": \"pt\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/users/preferences",
@@ -2746,6 +2751,371 @@
                 "v1",
                 "users",
                 "preferences"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Streaks",
+      "description": "Streak tracking endpoints - maintained vs perfect streaks",
+      "item": [
+        {
+          "name": "Get All User Streaks",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/streaks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "streaks"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Streak for Goal",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/streaks/goal/{{goalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "streaks",
+                "goal",
+                "{{goalId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Streak for Task",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/streaks/task/{{actionItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "streaks",
+                "task",
+                "{{actionItemId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Streak Summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/streaks/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "streaks",
+                "summary"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Schedule Slots",
+      "description": "Task scheduling - drag & drop allocation of recurring tasks",
+      "item": [
+        {
+          "name": "Create Schedule Slot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"slotIndex\": 0,\n    \"specificTime\": \"07:00\",\n    \"createdVia\": \"DRAG_DROP\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/schedule-slots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{actionItemId}}",
+                "schedule-slots"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Schedule Slots",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/schedule-slots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{actionItemId}}",
+                "schedule-slots"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Schedule Slots",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/schedule-slots/active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{actionItemId}}",
+                "schedule-slots",
+                "active"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Schedule Slot (Reschedule)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"slotIndex\": 2,\n    \"specificTime\": \"18:00\",\n    \"rescheduleReason\": \"USER_PREFERENCE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/schedule-slots/{{scheduleSlotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{actionItemId}}",
+                "schedule-slots",
+                "{{scheduleSlotId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Schedule Slot",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/schedule-slots/{{scheduleSlotId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{actionItemId}}",
+                "schedule-slots",
+                "{{scheduleSlotId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Task Completions (Detailed)",
+      "description": "Task completion with status tracking - COMPLETED, PARTIAL, MISSED, RESCHEDULED",
+      "item": [
+        {
+          "name": "Record Completion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"scheduledDate\": \"2025-01-20\",\n    \"status\": \"COMPLETED\",\n    \"note\": \"Great workout session!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{actionItemId}}",
+                "completions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Record Partial Completion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"scheduledDate\": \"2025-01-20\",\n    \"status\": \"PARTIAL\",\n    \"note\": \"Only drank 4 glasses instead of 8\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{actionItemId}}",
+                "completions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark as Missed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"scheduledDate\": \"2025-01-19\",\n    \"status\": \"MISSED\",\n    \"note\": \"Was sick, couldn't make it\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{actionItemId}}",
+                "completions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Completion History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{actionItemId}}",
+                "completions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Completions by Date Range",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{actionItemId}}/completions/range?startDate=2025-01-01&endDate=2025-01-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{actionItemId}}",
+                "completions",
+                "range"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-01-31"
+                }
               ]
             }
           }

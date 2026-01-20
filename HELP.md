@@ -312,6 +312,7 @@ The application exposes Spring Boot Actuator health endpoints:
 ```json
 {
   "timezone": "America/Sao_Paulo",
+  "weekStartDay": 1,
   "language": "pt",
   "emailNotifications": true,
   "pushNotifications": true,
@@ -321,6 +322,8 @@ The application exposes Spring Boot Actuator health endpoints:
   "preferredReminderTime": "09:00"
 }
 ```
+
+**Week Start Day:** `0` = Sunday, `1` = Monday (default), `2` = Tuesday, etc.
 
 **Notification preferences:**
 
@@ -343,6 +346,37 @@ The application exposes Spring Boot Actuator health endpoints:
   "quietHoursEnd": "08:00"
 }
 ```
+
+---
+
+### Streaks (`/api/v1/streaks`)
+
+*Track streak progress with two separate metrics: maintained (doesn't break on partial) and perfect (breaks on anything other than completed).*
+
+| Method | Endpoint           | Description                        |
+|--------|--------------------|------------------------------------|
+| GET    | `/`                | Get all user streaks               |
+| GET    | `/goal/{goalId}`   | Get streak for a specific goal     |
+| GET    | `/task/{taskId}`   | Get streak for a specific task     |
+| GET    | `/summary`         | Get overall streak summary         |
+
+**Streak response:**
+
+```json
+{
+  "currentMaintainedStreak": 12,
+  "bestMaintainedStreak": 30,
+  "currentPerfectStreak": 5,
+  "bestPerfectStreak": 15,
+  "lastUpdatedAt": "2025-01-20T10:00:00"
+}
+```
+
+**Streak types:**
+- **Maintained Streak** - Breaks only on `MISSED`. Partial completions keep it going.
+- **Perfect Streak** - Breaks on anything other than `COMPLETED`. Rewards full consistency.
+
+*Maintained streaks preserve motivation, while perfect streaks reward excellence. Both can unlock badges (future feature).*
 
 ---
 
@@ -473,6 +507,41 @@ The application exposes Spring Boot Actuator health endpoints:
 - `FREQUENCY_BASED` - Task with frequency goal (e.g., 3x per week)
 - `MILESTONE` - Milestone-based task
 
+**Frequency configuration (for FREQUENCY_BASED tasks):**
+
+```json
+{
+  "title": "Exercise",
+  "taskType": "FREQUENCY_BASED",
+  "frequencyGoal": {
+    "count": 3,
+    "period": "WEEK"
+  }
+}
+```
+
+**Frequency Periods:** `DAY`, `WEEK`, `MONTH`, `SEMESTER`
+
+**Target per completion (optional):**
+
+```json
+{
+  "title": "Drink water",
+  "taskType": "DAILY_HABIT",
+  "targetPerCompletion": 250,
+  "targetUnit": "ml"
+}
+```
+
+**Notification settings:**
+
+```json
+{
+  "notifyOnScheduledTime": true,
+  "notifyMinutesBefore": 15
+}
+```
+
 ---
 
 ### Task Completions (`/api/v1/goals/{goalId}/action-items/{actionItemId}/completions`)
@@ -489,15 +558,72 @@ The application exposes Spring Boot Actuator health endpoints:
 | GET    | `/count/range?startDate=&endDate=` | Count in period         |
 | DELETE | `/{completionId}`                  | Delete completion       |
 
+**Completion Status:** `PENDING`, `COMPLETED`, `PARTIAL`, `MISSED`, `RESCHEDULED`
+
 **Record completion request:**
 
 ```json
 {
-  "date": "2025-01-15",
-  // Optional, defaults to today
+  "scheduledDate": "2025-01-15",
+  "status": "COMPLETED",
   "note": "Completed morning run!"
 }
 ```
+
+**Partial completion example:**
+
+```json
+{
+  "scheduledDate": "2025-01-15",
+  "status": "PARTIAL",
+  "note": "Only drank 4 glasses instead of 8"
+}
+```
+
+---
+
+### Task Schedule Slots (`/api/v1/goals/{goalId}/action-items/{actionItemId}/schedule-slots`)
+
+*Allocate recurring tasks to specific time slots (drag & drop scheduling).*
+
+| Method | Endpoint        | Description                 |
+|--------|-----------------|-----------------------------|
+| POST   | `/`             | Create schedule slot        |
+| GET    | `/`             | Get all slots for task      |
+| GET    | `/active`       | Get active slots only       |
+| PUT    | `/{slotId}`     | Update slot (reschedule)    |
+| DELETE | `/{slotId}`     | Delete slot                 |
+
+**Frequency Periods:** `DAY`, `WEEK`, `MONTH`, `SEMESTER`
+
+- `DAY` → slots are hours (0-23)
+- `WEEK` → slots are days (0-6, based on user's weekStartDay)
+- `MONTH` → slots are weeks (1-5)
+- `SEMESTER` → slots are months (1-6)
+
+**Create slot request (3x/week on Mon/Wed/Fri):**
+
+```json
+{
+  "slotIndex": 0,
+  "specificTime": "07:00",
+  "createdVia": "DRAG_DROP"
+}
+```
+
+**Reschedule request:**
+
+```json
+{
+  "slotIndex": 1,
+  "specificTime": "18:00",
+  "rescheduleReason": "USER_PREFERENCE"
+}
+```
+
+**Reschedule Reasons:** `USER_PREFERENCE`, `MISSED_RECOVERY`, `RETROACTIVE`
+
+**Creation Types:** `MANUAL`, `DRAG_DROP`, `AUTO_DISTRIBUTE`
 
 ---
 
@@ -580,7 +706,9 @@ The application exposes Spring Boot Actuator health endpoints:
 }
 ```
 
-**Permissions:** `VIEW_PROGRESS`, `VIEW_OBSTACLES`, `VIEW_ACTION_PLAN`, `VIEW_STREAK`, `SEND_NUDGE`
+**Permissions:** `VIEW_PROGRESS`, `VIEW_OBSTACLES`, `VIEW_ACTION_PLAN`, `VIEW_STREAK`, `SEND_NUDGE`, `VALIDATE_BADGES`*, `VALIDATE_TITLES`*, `ADD_NOTES`*, `RECEIVE_ALERTS`*
+
+*\* Future features for badge/title validation system*
 
 ---
 
