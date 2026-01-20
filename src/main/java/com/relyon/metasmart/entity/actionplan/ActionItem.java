@@ -85,7 +85,7 @@ public class ActionItem extends AuditableEntity {
     private String targetUnit;
 
     @Builder.Default
-    @Column(name = "notify_on_scheduled_time", nullable = false)
+    @Column(name = "notify_on_scheduled_time", nullable = false, columnDefinition = "boolean default false")
     private Boolean notifyOnScheduledTime = false;
 
     @Column(name = "notify_minutes_before")
