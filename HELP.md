@@ -353,30 +353,47 @@ The application exposes Spring Boot Actuator health endpoints:
 
 *Track streak progress with two separate metrics: maintained (doesn't break on partial) and perfect (breaks on anything other than completed).*
 
-| Method | Endpoint           | Description                        |
-|--------|--------------------|------------------------------------|
-| GET    | `/`                | Get all user streaks               |
-| GET    | `/goal/{goalId}`   | Get streak for a specific goal     |
-| GET    | `/task/{taskId}`   | Get streak for a specific task     |
-| GET    | `/summary`         | Get overall streak summary         |
+| Method | Endpoint                             | Description                          |
+|--------|--------------------------------------|--------------------------------------|
+| GET    | `/summary`                           | Get overall streak summary           |
+| GET    | `/user`                              | Get user-level streak                |
+| GET    | `/goals/{goalId}`                    | Get streak for a specific goal       |
+| GET    | `/goals/{goalId}/tasks/{actionItemId}` | Get streak for a specific task     |
+| GET    | `/goals/{goalId}/all`                | Get all streaks for a goal           |
 
 **Streak response:**
 
 ```json
 {
+  "id": 1,
+  "goalId": 5,
+  "actionItemId": 12,
   "currentMaintainedStreak": 12,
   "bestMaintainedStreak": 30,
   "currentPerfectStreak": 5,
   "bestPerfectStreak": 15,
-  "lastUpdatedAt": "2025-01-20T10:00:00"
+  "lastUpdatedAt": "2025-01-20T10:00:00",
+  "level": "TASK"
 }
 ```
+
+**Streak summary response:**
+
+```json
+{
+  "userStreak": { ... },
+  "goalStreaks": [ ... ],
+  "taskStreaks": [ ... ]
+}
+```
+
+**Streak levels:** `USER`, `GOAL`, `TASK`
 
 **Streak types:**
 - **Maintained Streak** - Breaks only on `MISSED`. Partial completions keep it going.
 - **Perfect Streak** - Breaks on anything other than `COMPLETED`. Rewards full consistency.
 
-*Maintained streaks preserve motivation, while perfect streaks reward excellence. Both can unlock badges (future feature).*
+*Streaks are automatically updated when task completions are recorded. Maintained streaks preserve motivation, while perfect streaks reward excellence. Both can unlock badges (future feature).*
 
 ---
 

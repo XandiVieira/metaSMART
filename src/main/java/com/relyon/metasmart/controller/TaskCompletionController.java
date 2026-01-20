@@ -41,8 +41,8 @@ public class TaskCompletionController {
                 actionItemId, goalId, user.getEmail());
 
         TaskCompletionDto result;
-        if (request != null && request.getDate() != null) {
-            result = taskCompletionService.recordCompletionForDate(goalId, actionItemId, request.getDate(),
+        if (request != null && request.getScheduledDate() != null) {
+            result = taskCompletionService.recordCompletionForDate(goalId, actionItemId, request.getScheduledDate(),
                     request.getNote(), user);
         } else {
             result = taskCompletionService.recordCompletion(goalId, actionItemId,

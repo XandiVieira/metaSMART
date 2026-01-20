@@ -2762,61 +2762,6 @@
       "description": "Streak tracking endpoints - maintained vs perfect streaks",
       "item": [
         {
-          "name": "Get All User Streaks",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/streaks",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "streaks"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Streak for Goal",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/streaks/goal/{{goalId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "streaks",
-                "goal",
-                "{{goalId}}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Streak for Task",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/streaks/task/{{actionItemId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "streaks",
-                "task",
-                "{{actionItemId}}"
-              ]
-            }
-          }
-        },
-        {
           "name": "Get Streak Summary",
           "request": {
             "method": "GET",
@@ -2830,6 +2775,84 @@
                 "v1",
                 "streaks",
                 "summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User-Level Streak",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/streaks/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "streaks",
+                "user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Goal Streak",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/streaks/goals/{{goalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "streaks",
+                "goals",
+                "{{goalId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Task Streak",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/streaks/goals/{{goalId}}/tasks/{{actionItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "streaks",
+                "goals",
+                "{{goalId}}",
+                "tasks",
+                "{{actionItemId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Streaks for Goal",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/streaks/goals/{{goalId}}/all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "streaks",
+                "goals",
+                "{{goalId}}",
+                "all"
               ]
             }
           }

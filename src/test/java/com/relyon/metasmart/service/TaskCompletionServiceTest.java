@@ -49,6 +49,9 @@ class TaskCompletionServiceTest {
     @Mock
     private TaskCompletionMapper taskCompletionMapper;
 
+    @Mock
+    private StreakService streakService;
+
     @InjectMocks
     private TaskCompletionService taskCompletionService;
 
@@ -74,7 +77,8 @@ class TaskCompletionServiceTest {
                 .build();
         taskCompletionDto = TaskCompletionDto.builder()
                 .id(1L)
-                .date(LocalDate.now())
+                .scheduledDate(LocalDate.now())
+                .status(CompletionStatus.COMPLETED)
                 .completedAt(LocalDateTime.now())
                 .note("Great workout!")
                 .build();

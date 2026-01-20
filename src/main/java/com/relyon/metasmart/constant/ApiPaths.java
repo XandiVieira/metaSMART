@@ -24,4 +24,6 @@ public final class ApiPaths {
     public static final String USERS = API_V1 + "/users";
     public static final String COMPLETIONS = "/completions";
     public static final String SCHEDULED_TASKS = "/scheduled-tasks";
+    public static final String SCHEDULE_SLOTS = "/schedule-slots";
+    public static final String STREAKS = API_V1 + "/streaks";
 }

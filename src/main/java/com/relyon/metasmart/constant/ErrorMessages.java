@@ -46,6 +46,13 @@ public final class ErrorMessages {
     public static final String SCHEDULED_TASK_NOT_FOUND = "Scheduled task not found";
     public static final String SCHEDULED_TASK_ALREADY_EXISTS = "Scheduled task already exists for this date";
 
+    // Schedule slot related
+    public static final String SCHEDULE_SLOT_NOT_FOUND = "Schedule slot not found";
+    public static final String SCHEDULE_SLOT_ALREADY_EXISTS = "Schedule slot already exists for this index";
+
+    // Streak related
+    public static final String STREAK_NOT_FOUND = "Streak info not found";
+
     // Request parsing related
     public static final String INVALID_REQUEST_BODY = "Invalid request body format";
     public static final String INVALID_NUMBER_FORMAT = "Invalid number format provided";

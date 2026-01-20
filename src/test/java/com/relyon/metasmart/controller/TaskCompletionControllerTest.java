@@ -18,6 +18,7 @@ import com.relyon.metasmart.config.CorsConfig;
 import com.relyon.metasmart.config.JwtService;
 import com.relyon.metasmart.config.RateLimitConfig;
 import com.relyon.metasmart.config.SecurityConfig;
+import com.relyon.metasmart.entity.actionplan.CompletionStatus;
 import com.relyon.metasmart.entity.actionplan.dto.TaskCompletionDto;
 import com.relyon.metasmart.entity.actionplan.dto.TaskCompletionRequest;
 import com.relyon.metasmart.entity.user.User;
@@ -76,7 +77,8 @@ class TaskCompletionControllerTest {
 
         completionDto = TaskCompletionDto.builder()
                 .id(1L)
-                .date(LocalDate.now())
+                .scheduledDate(LocalDate.now())
+                .status(CompletionStatus.COMPLETED)
                 .completedAt(LocalDateTime.now())
                 .note("Completed task successfully")
                 .build();
@@ -90,7 +92,7 @@ class TaskCompletionControllerTest {
         @DisplayName("Should record completion with date")
         void shouldRecordCompletionWithDate() throws Exception {
             var request = TaskCompletionRequest.builder()
-                    .date(LocalDate.now())
+                    .scheduledDate(LocalDate.now())
                     .note("Completed task")
                     .build();
 
