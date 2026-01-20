@@ -2,6 +2,7 @@ package com.relyon.metasmart.service;
 
 import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.actionplan.ActionItem;
+import com.relyon.metasmart.entity.actionplan.CompletionStatus;
 import com.relyon.metasmart.entity.actionplan.TaskCompletion;
 import com.relyon.metasmart.entity.actionplan.dto.TaskCompletionDto;
 import com.relyon.metasmart.entity.user.User;
@@ -12,7 +13,9 @@ import com.relyon.metasmart.repository.GoalRepository;
 import com.relyon.metasmart.repository.TaskCompletionRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.WeekFields;
 import java.util.List;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,10 +38,13 @@ public class TaskCompletionService {
         log.debug("Recording completion for action item {} in goal {}", actionItemId, goalId);
 
         var actionItem = findActionItemByGoalAndUser(goalId, actionItemId, user);
+        var today = LocalDate.now();
 
         var completion = TaskCompletion.builder()
                 .actionItem(actionItem)
-                .date(LocalDate.now())
+                .scheduledDate(today)
+                .periodStart(calculatePeriodStart(today))
+                .status(CompletionStatus.COMPLETED)
                 .completedAt(LocalDateTime.now())
                 .note(note)
                 .build();
@@ -57,7 +63,9 @@ public class TaskCompletionService {
 
         var completion = TaskCompletion.builder()
                 .actionItem(actionItem)
-                .date(date)
+                .scheduledDate(date)
+                .periodStart(calculatePeriodStart(date))
+                .status(CompletionStatus.COMPLETED)
                 .completedAt(LocalDateTime.now())
                 .note(note)
                 .build();
@@ -95,7 +103,7 @@ public class TaskCompletionService {
 
         var actionItem = findActionItemByGoalAndUser(goalId, actionItemId, user);
 
-        return taskCompletionRepository.findByActionItemAndDateBetween(actionItem, startDate, endDate).stream()
+        return taskCompletionRepository.findByActionItemAndScheduledDateBetween(actionItem, startDate, endDate).stream()
                 .map(taskCompletionMapper::toDto)
                 .toList();
     }
@@ -109,7 +117,7 @@ public class TaskCompletionService {
     @Transactional(readOnly = true)
     public long countCompletionsInPeriod(Long goalId, Long actionItemId, LocalDate startDate, LocalDate endDate, User user) {
         var actionItem = findActionItemByGoalAndUser(goalId, actionItemId, user);
-        return taskCompletionRepository.countByActionItemAndDateBetween(actionItem, startDate, endDate);
+        return taskCompletionRepository.countByActionItemAndScheduledDateBetween(actionItem, startDate, endDate);
     }
 
     @Transactional
@@ -131,5 +139,10 @@ public class TaskCompletionService {
 
         return actionItemRepository.findByIdAndGoal(actionItemId, goal)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.ACTION_ITEM_NOT_FOUND));
+    }
+
+    private LocalDate calculatePeriodStart(LocalDate date) {
+        var weekFields = WeekFields.of(Locale.getDefault());
+        return date.with(weekFields.dayOfWeek(), 1);
     }
 }

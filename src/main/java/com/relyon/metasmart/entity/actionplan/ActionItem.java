@@ -3,6 +3,7 @@ package com.relyon.metasmart.entity.actionplan;
 import com.relyon.metasmart.entity.AuditableEntity;
 import com.relyon.metasmart.entity.goal.Goal;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
@@ -76,6 +77,19 @@ public class ActionItem extends AuditableEntity {
 
     @Embedded
     private ReminderOverride reminderOverride;
+
+    @Column(name = "target_per_completion", precision = 19, scale = 2)
+    private BigDecimal targetPerCompletion;
+
+    @Column(name = "target_unit", length = 50)
+    private String targetUnit;
+
+    @Builder.Default
+    @Column(name = "notify_on_scheduled_time", nullable = false)
+    private Boolean notifyOnScheduledTime = false;
+
+    @Column(name = "notify_minutes_before")
+    private Integer notifyMinutesBefore;
 
     @Column(length = 1000)
     private String notes;

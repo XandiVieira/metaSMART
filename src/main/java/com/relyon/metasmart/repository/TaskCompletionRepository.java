@@ -18,11 +18,11 @@ public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, 
 
     Page<TaskCompletion> findByActionItemOrderByCompletedAtDesc(ActionItem actionItem, Pageable pageable);
 
-    List<TaskCompletion> findByActionItemAndDateBetween(ActionItem actionItem, LocalDate startDate, LocalDate endDate);
+    List<TaskCompletion> findByActionItemAndScheduledDateBetween(ActionItem actionItem, LocalDate startDate, LocalDate endDate);
 
     long countByActionItem(ActionItem actionItem);
 
-    long countByActionItemAndDateBetween(ActionItem actionItem, LocalDate startDate, LocalDate endDate);
+    long countByActionItemAndScheduledDateBetween(ActionItem actionItem, LocalDate startDate, LocalDate endDate);
 
     void deleteByActionItem(ActionItem actionItem);
 

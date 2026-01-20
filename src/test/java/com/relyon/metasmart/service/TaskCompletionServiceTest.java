@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.actionplan.ActionItem;
+import com.relyon.metasmart.entity.actionplan.CompletionStatus;
 import com.relyon.metasmart.entity.actionplan.TaskCompletion;
 import com.relyon.metasmart.entity.actionplan.dto.TaskCompletionDto;
 import com.relyon.metasmart.entity.goal.Goal;
@@ -65,7 +66,9 @@ class TaskCompletionServiceTest {
         taskCompletion = TaskCompletion.builder()
                 .id(1L)
                 .actionItem(actionItem)
-                .date(LocalDate.now())
+                .scheduledDate(LocalDate.now())
+                .periodStart(LocalDate.now().withDayOfMonth(1))
+                .status(CompletionStatus.COMPLETED)
                 .completedAt(LocalDateTime.now())
                 .note("Great workout!")
                 .build();
@@ -109,7 +112,7 @@ class TaskCompletionServiceTest {
             var result = taskCompletionService.recordCompletionForDate(1L, 1L, specificDate, "Missed yesterday", user);
 
             assertThat(result).isNotNull();
-            verify(taskCompletionRepository).save(argThat(tc -> tc.getDate().equals(specificDate)));
+            verify(taskCompletionRepository).save(argThat(tc -> tc.getScheduledDate().equals(specificDate)));
         }
 
         @Test
@@ -177,7 +180,7 @@ class TaskCompletionServiceTest {
 
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
             when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
-            when(taskCompletionRepository.findByActionItemAndDateBetween(actionItem, startDate, endDate))
+            when(taskCompletionRepository.findByActionItemAndScheduledDateBetween(actionItem, startDate, endDate))
                     .thenReturn(List.of(taskCompletion));
             when(taskCompletionMapper.toDto(taskCompletion)).thenReturn(taskCompletionDto);
 
@@ -211,7 +214,7 @@ class TaskCompletionServiceTest {
 
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
             when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
-            when(taskCompletionRepository.countByActionItemAndDateBetween(actionItem, startDate, endDate))
+            when(taskCompletionRepository.countByActionItemAndScheduledDateBetween(actionItem, startDate, endDate))
                     .thenReturn(5L);
 
             var result = taskCompletionService.countCompletionsInPeriod(1L, 1L, startDate, endDate, user);

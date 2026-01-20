@@ -38,4 +38,14 @@ public class UpdateGoalRequest {
     private LocalDate targetDate;
 
     private GoalStatus goalStatus;
+
+    private GoalPillarsDto pillars;
+
+    private GoalMeasurementDto measurement;
+
+    private GoalRemindersDto reminders;
+
+    private EmotionalAnchorsDto emotionalAnchors;
+
+    private AiSupportDto aiSupport;
 }

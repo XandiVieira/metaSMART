@@ -139,6 +139,21 @@ public class GoalService {
         Optional.ofNullable(request.getStartDate()).ifPresent(goal::setStartDate);
         Optional.ofNullable(request.getTargetDate()).ifPresent(goal::setTargetDate);
         Optional.ofNullable(request.getGoalStatus()).ifPresent(goal::setGoalStatus);
+        Optional.ofNullable(request.getPillars())
+                .map(goalMapper::toPillarsEntity)
+                .ifPresent(goal::setPillars);
+        Optional.ofNullable(request.getMeasurement())
+                .map(goalMapper::toMeasurementEntity)
+                .ifPresent(goal::setMeasurement);
+        Optional.ofNullable(request.getReminders())
+                .map(goalMapper::toRemindersEntity)
+                .ifPresent(goal::setReminders);
+        Optional.ofNullable(request.getEmotionalAnchors())
+                .map(goalMapper::toEmotionalAnchorsEntity)
+                .ifPresent(goal::setEmotionalAnchors);
+        Optional.ofNullable(request.getAiSupport())
+                .map(goalMapper::toAiSupportEntity)
+                .ifPresent(goal::setAiSupport);
 
         var savedGoal = goalRepository.save(goal);
         log.info("Goal updated with ID: {}", savedGoal.getId());

@@ -27,6 +27,10 @@ public class UserPreferences extends AuditableEntity {
     private String timezone = "UTC";
 
     @Builder.Default
+    @Column(name = "week_start_day", nullable = false)
+    private Integer weekStartDay = 1;
+
+    @Builder.Default
     @Column(nullable = false)
     private String language = "en";
 

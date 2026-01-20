@@ -5,5 +5,9 @@ public enum GuardianPermission {
     VIEW_OBSTACLES,
     VIEW_ACTION_PLAN,
     VIEW_STREAK,
-    SEND_NUDGE
+    SEND_NUDGE,
+    VALIDATE_BADGES,
+    VALIDATE_TITLES,
+    ADD_NOTES,
+    RECEIVE_ALERTS
 }
