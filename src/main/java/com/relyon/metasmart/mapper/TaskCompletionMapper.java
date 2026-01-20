@@ -9,6 +9,7 @@ import org.springframework.lang.NonNull;
 @Mapper(config = MapperConfig.class)
 public interface TaskCompletionMapper {
 
+    @Mapping(target = "scheduleSlotId", source = "scheduleSlot.id")
     TaskCompletionDto toDto(@NonNull TaskCompletion completion);
 
     @Mapping(target = "id", ignore = true)
