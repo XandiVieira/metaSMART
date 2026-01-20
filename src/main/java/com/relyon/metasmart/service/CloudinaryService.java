@@ -1,6 +1,7 @@
 package com.relyon.metasmart.service;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import com.relyon.metasmart.config.CloudinaryConfig;
 import com.relyon.metasmart.exception.ImageUploadException;
@@ -38,19 +39,20 @@ public class CloudinaryService {
         try {
             var publicId = cloudinaryConfig.getFolder() + "/user_" + userId;
 
+            var transformation = new Transformation<>()
+                    .width(400)
+                    .height(400)
+                    .crop("fill")
+                    .gravity("face")
+                    .quality("auto")
+                    .fetchFormat("auto");
+
             @SuppressWarnings("unchecked")
             Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
                     "public_id", publicId,
                     "overwrite", true,
                     "resource_type", "image",
-                    "transformation", ObjectUtils.asMap(
-                            "width", 400,
-                            "height", 400,
-                            "crop", "fill",
-                            "gravity", "face",
-                            "quality", "auto",
-                            "fetch_format", "auto"
-                    )
+                    "transformation", transformation
             ));
 
             var secureUrl = (String) uploadResult.get("secure_url");

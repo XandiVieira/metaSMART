@@ -53,11 +53,11 @@ public class DataSeeder implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         if (userRepository.count() > 0) {
-            log.info("Banco de dados já populado, pulando seed...");
+            log.info("Database already populated, skipping seed...");
             return;
         }
 
-        log.info("Iniciando população do banco de dados...");
+        log.info("Starting database seeding...");
 
         var users = createUsers();
         var goals = createGoals(users);
@@ -68,12 +68,12 @@ public class DataSeeder implements CommandLineRunner {
         createObstacles(goals);
         createTemplates(users);
 
-        log.info("População do banco concluída!");
-        log.info("Criados {} usuários, {} metas", users.size(), goals.size());
+        log.info("Database seeding completed!");
+        log.info("Created {} users, {} goals", users.size(), goals.size());
     }
 
     private List<User> createUsers() {
-        log.info("Criando usuários...");
+        log.info("Creating users...");
         var users = new ArrayList<User>();
         var encodedPassword = passwordEncoder.encode(DEFAULT_PASSWORD);
 
@@ -95,12 +95,12 @@ public class DataSeeder implements CommandLineRunner {
             users.add(userRepository.save(user));
         }
 
-        log.info("Criados {} usuários (senha padrão: {})", users.size(), DEFAULT_PASSWORD);
+        log.info("Created {} users (default password: {})", users.size(), DEFAULT_PASSWORD);
         return users;
     }
 
     private List<Goal> createGoals(List<User> users) {
-        log.info("Criando metas...");
+        log.info("Creating goals...");
         var goals = new ArrayList<Goal>();
 
         var maria = users.get(0);
@@ -406,7 +406,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void createProgressEntries(List<Goal> goals) {
-        log.info("Criando registros de progresso...");
+        log.info("Creating progress entries...");
 
         var notes = List.of(
                 "Progresso do dia, mantendo o foco!",
@@ -439,7 +439,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void createMilestones(List<Goal> goals) {
-        log.info("Criando marcos...");
+        log.info("Creating milestones...");
         var milestoneData = List.of(
                 new Object[]{25, "Primeiro quarto concluído!"},
                 new Object[]{50, "Metade do caminho!"},
@@ -471,7 +471,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void createActionItems(List<Goal> goals) {
-        log.info("Criando itens de ação...");
+        log.info("Creating action items...");
 
         var actionItemsPerCategory = getActionItemsPerCategory();
 
@@ -570,7 +570,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void createGuardians(List<Goal> goals, List<User> users) {
-        log.info("Criando guardiões...");
+        log.info("Creating guardians...");
 
         for (var goal : goals) {
             if (random.nextDouble() < 0.4) {
@@ -614,7 +614,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void createObstacles(List<Goal> goals) {
-        log.info("Criando obstáculos...");
+        log.info("Creating obstacles...");
 
         var obstacles = List.of(
                 new String[]{"Falta de tempo devido ao trabalho", "Reorganizei minha agenda e acordei mais cedo"},
@@ -650,7 +650,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void createTemplates(List<User> users) {
-        log.info("Criando templates de metas...");
+        log.info("Creating goal templates...");
 
         var templates = List.of(
                 new Object[]{GoalCategory.HEALTH, "Template Emagrecimento", "Template para metas de perda de peso", "Perder peso de forma saudável", "Emagrecer com dieta e exercícios", new BigDecimal("10"), "kg", "Melhorar saúde e autoestima", 90, true},
