@@ -3,6 +3,7 @@ package com.relyon.metasmart.service;
 import com.relyon.metasmart.config.JwtService;
 import com.relyon.metasmart.constant.ErrorMessages;
 import com.relyon.metasmart.entity.user.PasswordResetToken;
+import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.entity.user.dto.*;
 import com.relyon.metasmart.exception.AuthenticationException;
 import com.relyon.metasmart.exception.BadRequestException;
@@ -31,6 +32,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthMapper authMapper;
     private final EmailService emailService;
+    private final SubscriptionService subscriptionService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -48,7 +50,7 @@ public class AuthService {
         log.info("User registered successfully with ID: {}", user.getId());
 
         var token = jwtService.generateToken(user);
-        return buildAuthResponse(user.getEmail(), user.getName(), user.getProfilePictureUrl(), token);
+        return buildAuthResponse(user, token);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -67,15 +69,16 @@ public class AuthService {
 
         log.info("User logged in successfully with ID: {}", user.getId());
         var token = jwtService.generateToken(user);
-        return buildAuthResponse(user.getEmail(), user.getName(), user.getProfilePictureUrl(), token);
+        return buildAuthResponse(user, token);
     }
 
-    private AuthResponse buildAuthResponse(String email, String name, String profilePictureUrl, String token) {
+    private AuthResponse buildAuthResponse(User user, String token) {
         return AuthResponse.builder()
                 .token(token)
-                .email(email)
-                .name(name)
-                .profilePictureUrl(profilePictureUrl)
+                .email(user.getEmail())
+                .name(user.getName())
+                .profilePictureUrl(user.getProfilePictureUrl())
+                .premium(subscriptionService.isPremium(user))
                 .build();
     }
 

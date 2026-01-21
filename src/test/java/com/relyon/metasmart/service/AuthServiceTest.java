@@ -55,6 +55,9 @@ class AuthServiceTest {
     @Mock
     private EmailService emailService;
 
+    @Mock
+    private SubscriptionService subscriptionService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -95,6 +98,7 @@ class AuthServiceTest {
             when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
             when(userRepository.save(any(User.class))).thenReturn(user);
             when(jwtService.generateToken(user)).thenReturn("jwt-token");
+            when(subscriptionService.isPremium(user)).thenReturn(false);
 
             var response = authService.register(registerRequest);
 
@@ -102,6 +106,7 @@ class AuthServiceTest {
             assertThat(response.getToken()).isEqualTo("jwt-token");
             assertThat(response.getEmail()).isEqualTo(user.getEmail());
             assertThat(response.getName()).isEqualTo(user.getName());
+            assertThat(response.isPremium()).isFalse();
 
             verify(userRepository).existsByEmail(registerRequest.getEmail());
             verify(userRepository).save(any(User.class));
@@ -132,6 +137,7 @@ class AuthServiceTest {
             when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
             when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).thenReturn(true);
             when(jwtService.generateToken(user)).thenReturn("jwt-token");
+            when(subscriptionService.isPremium(user)).thenReturn(true);
 
             var response = authService.login(loginRequest);
 
@@ -139,6 +145,7 @@ class AuthServiceTest {
             assertThat(response.getToken()).isEqualTo("jwt-token");
             assertThat(response.getEmail()).isEqualTo(user.getEmail());
             assertThat(response.getName()).isEqualTo(user.getName());
+            assertThat(response.isPremium()).isTrue();
 
             verify(userRepository).findByEmail(loginRequest.getEmail());
             verify(passwordEncoder).matches(loginRequest.getPassword(), user.getPassword());

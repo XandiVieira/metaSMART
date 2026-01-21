@@ -15,4 +15,5 @@ public class AuthResponse {
     private String email;
     private String name;
     private String profilePictureUrl;
+    private boolean premium;
 }

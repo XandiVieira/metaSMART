@@ -23,6 +23,7 @@ import com.relyon.metasmart.entity.subscription.SubscriptionStatus;
 import com.relyon.metasmart.entity.subscription.SubscriptionTier;
 import com.relyon.metasmart.entity.subscription.UserSubscription;
 import com.relyon.metasmart.entity.template.GoalTemplate;
+import com.relyon.metasmart.entity.user.Role;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.entity.user.UserPreferences;
 import com.relyon.metasmart.repository.*;
@@ -125,7 +126,7 @@ public class DataSeeder implements CommandLineRunner {
                     .name(data[0])
                     .email(data[1])
                     .password(data[2])
-                    .role(userIndex == 0 ? User.Role.ADMIN : User.Role.USER)
+                    .role(userIndex == 0 ? Role.ADMIN : Role.USER)
                     .streakShields(random.nextInt(5))
                     .build();
             users.add(userRepository.save(user));

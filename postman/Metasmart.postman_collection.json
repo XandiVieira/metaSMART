@@ -149,12 +149,14 @@
                   "    pm.response.to.have.status(201);",
                   "});",
                   "",
-                  "pm.test('Response has token, email and name', function () {",
+                  "pm.test('Response has token, email, name and premium', function () {",
                   "    var jsonData = pm.response.json();",
                   "    pm.expect(jsonData).to.have.property('token');",
                   "    pm.expect(jsonData).to.have.property('email');",
                   "    pm.expect(jsonData).to.have.property('name');",
+                  "    pm.expect(jsonData).to.have.property('premium');",
                   "    pm.expect(jsonData.name).to.eql('E2E Test User');",
+                  "    pm.expect(jsonData.premium).to.be.a('boolean');",
                   "    pm.collectionVariables.set('token', jsonData.token);",
                   "});"
                 ],
@@ -202,9 +204,11 @@
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
-                  "pm.test('Response has token', function () {",
+                  "pm.test('Response has token and premium', function () {",
                   "    var jsonData = pm.response.json();",
                   "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.expect(jsonData).to.have.property('premium');",
+                  "    pm.expect(jsonData.premium).to.be.a('boolean');",
                   "    pm.collectionVariables.set('token', jsonData.token);",
                   "});"
                 ],
@@ -502,6 +506,96 @@
                 "api",
                 "v1",
                 "users",
+                "preferences"
+              ]
+            }
+          }
+        },
+        {
+          "name": "06a. Get Feature Preferences",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Feature preferences returned with defaults', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('dailyJournalEnabled');",
+                  "    pm.expect(jsonData).to.have.property('streaksEnabled');",
+                  "    pm.expect(jsonData).to.have.property('achievementsEnabled');",
+                  "    pm.expect(jsonData.dailyJournalEnabled).to.eql(true);",
+                  "    pm.expect(jsonData.streaksEnabled).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/features/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "features",
+                "preferences"
+              ]
+            }
+          }
+        },
+        {
+          "name": "06b. Update Feature Preferences",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Feature preferences updated', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.dailyJournalEnabled).to.eql(false);",
+                  "    pm.expect(jsonData.streaksEnabled).to.eql(true);",
+                  "    pm.expect(jsonData.socialProofEnabled).to.eql(false);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dailyJournalEnabled\": false,\n    \"streaksEnabled\": true,\n    \"achievementsEnabled\": true,\n    \"analyticsEnabled\": true,\n    \"flightPlanEnabled\": true,\n    \"progressRemindersEnabled\": true,\n    \"milestonesEnabled\": true,\n    \"obstacleTrackingEnabled\": true,\n    \"reflectionsEnabled\": true,\n    \"socialProofEnabled\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/features/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "features",
                 "preferences"
               ]
             }
@@ -3455,6 +3549,96 @@
                 "exec": [
                   "pm.test('Status code is 200', function () {",
                   "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Feature Preferences",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/features/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "features",
+                "preferences"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has feature toggle fields', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('dailyJournalEnabled');",
+                  "    pm.expect(jsonData).to.have.property('streaksEnabled');",
+                  "    pm.expect(jsonData).to.have.property('achievementsEnabled');",
+                  "    pm.expect(jsonData).to.have.property('analyticsEnabled');",
+                  "    pm.expect(jsonData).to.have.property('flightPlanEnabled');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Feature Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/features/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "features",
+                "preferences"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dailyJournalEnabled\": true,\n    \"streaksEnabled\": true,\n    \"achievementsEnabled\": true,\n    \"analyticsEnabled\": true,\n    \"flightPlanEnabled\": true,\n    \"progressRemindersEnabled\": true,\n    \"milestonesEnabled\": true,\n    \"obstacleTrackingEnabled\": true,\n    \"reflectionsEnabled\": true,\n    \"socialProofEnabled\": false\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response reflects updated preferences', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.dailyJournalEnabled).to.eql(true);",
+                  "    pm.expect(jsonData.socialProofEnabled).to.eql(false);",
                   "});"
                 ],
                 "type": "text/javascript"

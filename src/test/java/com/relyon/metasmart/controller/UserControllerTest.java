@@ -16,6 +16,8 @@ import com.relyon.metasmart.config.CorsConfig;
 import com.relyon.metasmart.config.JwtService;
 import com.relyon.metasmart.config.RateLimitConfig;
 import com.relyon.metasmart.config.SecurityConfig;
+import com.relyon.metasmart.entity.feature.dto.FeaturePreferencesRequest;
+import com.relyon.metasmart.entity.feature.dto.FeaturePreferencesResponse;
 import com.relyon.metasmart.entity.notification.dto.NotificationPreferencesRequest;
 import com.relyon.metasmart.entity.notification.dto.NotificationPreferencesResponse;
 import com.relyon.metasmart.entity.user.User;
@@ -24,6 +26,7 @@ import com.relyon.metasmart.entity.user.dto.UserPreferencesRequest;
 import com.relyon.metasmart.entity.user.dto.UserPreferencesResponse;
 import com.relyon.metasmart.entity.user.dto.UserProfileResponse;
 import com.relyon.metasmart.exception.GlobalExceptionHandler;
+import com.relyon.metasmart.service.FeatureToggleService;
 import com.relyon.metasmart.service.NotificationPreferencesService;
 import com.relyon.metasmart.service.UserPreferencesService;
 import com.relyon.metasmart.service.UserProfileService;
@@ -63,6 +66,9 @@ class UserControllerTest {
     private NotificationPreferencesService notificationPreferencesService;
 
     @MockitoBean
+    private FeatureToggleService featureToggleService;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -72,6 +78,7 @@ class UserControllerTest {
     private UserProfileResponse profileResponse;
     private UserPreferencesResponse preferencesResponse;
     private NotificationPreferencesResponse notificationPreferencesResponse;
+    private FeaturePreferencesResponse featurePreferencesResponse;
 
     @BeforeEach
     void setUp() {
@@ -121,6 +128,20 @@ class UserControllerTest {
                 .quietHoursEnabled(true)
                 .quietHoursStart("22:00")
                 .quietHoursEnd("08:00")
+                .build();
+
+        featurePreferencesResponse = FeaturePreferencesResponse.builder()
+                .id(1L)
+                .dailyJournalEnabled(true)
+                .streaksEnabled(true)
+                .achievementsEnabled(true)
+                .analyticsEnabled(true)
+                .flightPlanEnabled(true)
+                .progressRemindersEnabled(true)
+                .milestonesEnabled(true)
+                .obstacleTrackingEnabled(true)
+                .reflectionsEnabled(true)
+                .socialProofEnabled(true)
                 .build();
     }
 
@@ -334,6 +355,78 @@ class UserControllerTest {
                     .andExpect(jsonPath("$.whatsappEnabled").value(true))
                     .andExpect(jsonPath("$.whatsappNumber").value("+5511999999999"))
                     .andExpect(jsonPath("$.quietHoursEnabled").value(false));
+        }
+    }
+
+    @Nested
+    @DisplayName("Feature preferences tests")
+    class FeaturePreferencesTests {
+
+        @Test
+        @DisplayName("Should get feature preferences")
+        void shouldGetFeaturePreferences() throws Exception {
+            when(featureToggleService.getPreferences(any(User.class)))
+                    .thenReturn(featurePreferencesResponse);
+
+            mockMvc.perform(get(BASE_URL + "/features/preferences")
+                            .with(user(user)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(1L))
+                    .andExpect(jsonPath("$.dailyJournalEnabled").value(true))
+                    .andExpect(jsonPath("$.streaksEnabled").value(true))
+                    .andExpect(jsonPath("$.achievementsEnabled").value(true))
+                    .andExpect(jsonPath("$.analyticsEnabled").value(true))
+                    .andExpect(jsonPath("$.flightPlanEnabled").value(true))
+                    .andExpect(jsonPath("$.progressRemindersEnabled").value(true))
+                    .andExpect(jsonPath("$.milestonesEnabled").value(true))
+                    .andExpect(jsonPath("$.obstacleTrackingEnabled").value(true))
+                    .andExpect(jsonPath("$.reflectionsEnabled").value(true))
+                    .andExpect(jsonPath("$.socialProofEnabled").value(true));
+        }
+
+        @Test
+        @DisplayName("Should update feature preferences")
+        void shouldUpdateFeaturePreferences() throws Exception {
+            var request = FeaturePreferencesRequest.builder()
+                    .dailyJournalEnabled(false)
+                    .streaksEnabled(false)
+                    .achievementsEnabled(true)
+                    .analyticsEnabled(false)
+                    .flightPlanEnabled(true)
+                    .progressRemindersEnabled(false)
+                    .milestonesEnabled(true)
+                    .obstacleTrackingEnabled(false)
+                    .reflectionsEnabled(true)
+                    .socialProofEnabled(false)
+                    .build();
+
+            var updatedResponse = FeaturePreferencesResponse.builder()
+                    .id(1L)
+                    .dailyJournalEnabled(false)
+                    .streaksEnabled(false)
+                    .achievementsEnabled(true)
+                    .analyticsEnabled(false)
+                    .flightPlanEnabled(true)
+                    .progressRemindersEnabled(false)
+                    .milestonesEnabled(true)
+                    .obstacleTrackingEnabled(false)
+                    .reflectionsEnabled(true)
+                    .socialProofEnabled(false)
+                    .build();
+
+            when(featureToggleService.updatePreferences(any(User.class), any(FeaturePreferencesRequest.class)))
+                    .thenReturn(updatedResponse);
+
+            mockMvc.perform(put(BASE_URL + "/features/preferences")
+                            .with(user(user))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.dailyJournalEnabled").value(false))
+                    .andExpect(jsonPath("$.streaksEnabled").value(false))
+                    .andExpect(jsonPath("$.achievementsEnabled").value(true))
+                    .andExpect(jsonPath("$.analyticsEnabled").value(false))
+                    .andExpect(jsonPath("$.socialProofEnabled").value(false));
         }
     }
 }
