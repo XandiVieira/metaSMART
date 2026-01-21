@@ -45,7 +45,7 @@ public class DailyJournalService {
         var savedJournal = dailyJournalRepository.save(journal);
         log.info("Journal entry created with ID: {} for user: {}", savedJournal.getId(), user.getEmail());
 
-        userStreakService.awardJournalShield(user, request.getJournalDate());
+        userStreakService.checkAndAwardJournalShield(user, request.getJournalDate());
 
         return dailyJournalMapper.toResponse(savedJournal);
     }

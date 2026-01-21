@@ -18,4 +18,6 @@ public class DailyActivityResponse {
     private List<ProgressEntrySummary> progressEntries;
     private JournalEntrySummary journalEntry;
     private boolean hasActivity;
+    private boolean hasRealActivity;
+    private boolean protectedByShield;
 }

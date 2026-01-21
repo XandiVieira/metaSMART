@@ -54,7 +54,10 @@ public class ActivityHistoryService {
             var progress = progressByDate.getOrDefault(date, List.of());
             var journal = journalsByDate.get(date);
 
-            var hasActivity = !tasks.isEmpty() || !progress.isEmpty() || journal != null;
+            var hasRealActivity = !tasks.isEmpty() || !progress.isEmpty();
+            var hasActivity = hasRealActivity || journal != null;
+            var protectedByShield = journal != null && Boolean.TRUE.equals(journal.getShieldUsed());
+
             if (hasActivity) {
                 activeDays++;
             }
@@ -65,6 +68,8 @@ public class ActivityHistoryService {
                     .progressEntries(progress.stream().map(this::toProgressSummary).toList())
                     .journalEntry(journal != null ? toJournalSummary(journal) : null)
                     .hasActivity(hasActivity)
+                    .hasRealActivity(hasRealActivity)
+                    .protectedByShield(protectedByShield)
                     .build();
 
             dailyActivities.put(date, dailyActivity);
@@ -97,7 +102,9 @@ public class ActivityHistoryService {
                 date.atTime(LocalTime.MAX));
         var journalEntry = dailyJournalRepository.findByUserAndJournalDate(user, date).orElse(null);
 
-        var hasActivity = !taskCompletions.isEmpty() || !progressEntries.isEmpty() || journalEntry != null;
+        var hasRealActivity = !taskCompletions.isEmpty() || !progressEntries.isEmpty();
+        var hasActivity = hasRealActivity || journalEntry != null;
+        var protectedByShield = journalEntry != null && Boolean.TRUE.equals(journalEntry.getShieldUsed());
 
         return DailyActivityResponse.builder()
                 .date(date)
@@ -105,6 +112,8 @@ public class ActivityHistoryService {
                 .progressEntries(progressEntries.stream().map(this::toProgressSummary).toList())
                 .journalEntry(journalEntry != null ? toJournalSummary(journalEntry) : null)
                 .hasActivity(hasActivity)
+                .hasRealActivity(hasRealActivity)
+                .protectedByShield(protectedByShield)
                 .build();
     }
 

@@ -1,7 +1,8 @@
 package com.relyon.metasmart.service;
 
+import static com.relyon.metasmart.constant.AppConstants.CONSECUTIVE_JOURNAL_DAYS_FOR_SHIELD;
 import static com.relyon.metasmart.constant.AppConstants.MAX_STREAK_SHIELDS;
-import static com.relyon.metasmart.constant.AppConstants.SHIELDS_PER_WEEK_FROM_JOURNAL;
+import static com.relyon.metasmart.constant.AppConstants.SHIELDS_PER_WEEK;
 
 import com.relyon.metasmart.entity.actionplan.CompletionStatus;
 import com.relyon.metasmart.entity.streak.StreakInfo;
@@ -158,19 +159,36 @@ public class UserStreakService {
     }
 
     @Transactional
-    public void awardJournalShield(User user, LocalDate journalDate) {
-        var weekStart = journalDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        var weekEnd = journalDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
-
-        var journalEntriesThisWeek = dailyJournalRepository
-                .findJournalDatesByUserAndDateRange(user, weekStart, weekEnd)
-                .size();
-
-        // Award shield only on first journal entry of the week
-        if (journalEntriesThisWeek == 1 && user.getStreakShields() < MAX_STREAK_SHIELDS) {
-            userProfileService.addStreakShield(user, 1);
-            log.info("Journal shield awarded to user: {} (first entry of the week)", user.getEmail());
+    public void checkAndAwardJournalShield(User user, LocalDate journalDate) {
+        if (user.getStreakShields() >= MAX_STREAK_SHIELDS) {
+            log.debug("User {} already has max shields ({})", user.getEmail(), MAX_STREAK_SHIELDS);
+            return;
         }
+
+        var hasConsecutiveDays = hasConsecutiveJournalDays(user, journalDate, CONSECUTIVE_JOURNAL_DAYS_FOR_SHIELD);
+
+        if (hasConsecutiveDays) {
+            userProfileService.addStreakShield(user, 1);
+            log.info("Journal shield awarded to user: {} ({} consecutive journal days)", user.getEmail(), CONSECUTIVE_JOURNAL_DAYS_FOR_SHIELD);
+        }
+    }
+
+    private boolean hasConsecutiveJournalDays(User user, LocalDate endDate, int requiredDays) {
+        var startDate = endDate.minusDays(requiredDays - 1);
+        var journalDates = dailyJournalRepository
+                .findJournalDatesByUserAndDateRange(user, startDate, endDate);
+
+        if (journalDates.size() < requiredDays) {
+            return false;
+        }
+
+        // Check if all dates in the range are present
+        for (var date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            if (!journalDates.contains(date)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean hasRealActivityOnDate(User user, LocalDate date) {
@@ -196,7 +214,7 @@ public class UserStreakService {
 
         var shieldsUsedThisWeek = dailyJournalRepository.countShieldsUsedInWeek(user, weekStart, weekEnd);
 
-        return shieldsUsedThisWeek < SHIELDS_PER_WEEK_FROM_JOURNAL;
+        return shieldsUsedThisWeek < SHIELDS_PER_WEEK;
     }
 
     private void useShield(User user, LocalDate date, StreakInfo streakInfo) {

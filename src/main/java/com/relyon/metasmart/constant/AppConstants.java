@@ -43,5 +43,6 @@ public final class AppConstants {
 
     // Streak shields
     public static final int MAX_STREAK_SHIELDS = 2;
-    public static final int SHIELDS_PER_WEEK_FROM_JOURNAL = 1;
+    public static final int CONSECUTIVE_JOURNAL_DAYS_FOR_SHIELD = 7;
+    public static final int SHIELDS_PER_WEEK = 1;
 }
