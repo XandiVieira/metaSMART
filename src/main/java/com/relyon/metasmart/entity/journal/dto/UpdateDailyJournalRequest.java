@@ -1,0 +1,20 @@
+package com.relyon.metasmart.entity.journal.dto;
+
+import com.relyon.metasmart.entity.journal.Mood;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdateDailyJournalRequest {
+
+    @Size(max = 2000, message = "Content must not exceed 2000 characters")
+    private String content;
+
+    private Mood mood;
+}

@@ -69,16 +69,22 @@ public class UserProfileService {
 
     @Transactional
     public boolean useStreakShield(User user) {
-        log.debug("Attempting to use streak shield for user: {}", user.getEmail());
+        return useStreakShield(user, 1);
+    }
 
-        if (user.getStreakShields() <= 0) {
-            log.warn("User {} has no streak shields available", user.getEmail());
+    @Transactional
+    public boolean useStreakShield(User user, int count) {
+        log.debug("Attempting to use {} streak shield(s) for user: {}", count, user.getEmail());
+
+        if (user.getStreakShields() < count) {
+            log.warn("User {} has insufficient streak shields (has: {}, needs: {})",
+                    user.getEmail(), user.getStreakShields(), count);
             return false;
         }
 
-        user.setStreakShields(user.getStreakShields() - 1);
+        user.setStreakShields(user.getStreakShields() - count);
         userRepository.save(user);
-        log.info("Streak shield used by user: {}. Remaining: {}", user.getEmail(), user.getStreakShields());
+        log.info("Streak shield(s) used by user: {}. Remaining: {}", user.getEmail(), user.getStreakShields());
         return true;
     }
 

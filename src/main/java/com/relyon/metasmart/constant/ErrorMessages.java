@@ -53,6 +53,10 @@ public final class ErrorMessages {
     // Streak related
     public static final String STREAK_NOT_FOUND = "Streak info not found";
 
+    // Daily journal related
+    public static final String DAILY_JOURNAL_NOT_FOUND = "Journal entry not found";
+    public static final String DAILY_JOURNAL_ALREADY_EXISTS = "Journal entry already exists for this date";
+
     // Request parsing related
     public static final String INVALID_REQUEST_BODY = "Invalid request body format";
     public static final String INVALID_NUMBER_FORMAT = "Invalid number format provided";

@@ -3,8 +3,10 @@ package com.relyon.metasmart.controller;
 import com.relyon.metasmart.constant.ApiPaths;
 import com.relyon.metasmart.entity.streak.dto.StreakResponse;
 import com.relyon.metasmart.entity.streak.dto.StreakSummaryResponse;
+import com.relyon.metasmart.entity.streak.dto.UserStreakResponse;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.service.StreakService;
+import com.relyon.metasmart.service.UserStreakService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class StreakController {
 
     private final StreakService streakService;
+    private final UserStreakService userStreakService;
 
     @GetMapping("/summary")
     @Operation(summary = "Get user's streak summary")
@@ -40,6 +43,27 @@ public class StreakController {
 
         log.debug("Getting user-level streak for user: {}", user.getEmail());
         var streak = streakService.getUserStreak(user);
+        return ResponseEntity.ok(streak);
+    }
+
+    @GetMapping("/user/details")
+    @Operation(summary = "Get detailed user streak with shields info")
+    public ResponseEntity<UserStreakResponse> getUserStreakDetails(
+            @AuthenticationPrincipal User user) {
+
+        log.debug("Getting detailed user streak for user: {}", user.getEmail());
+        var streak = userStreakService.getUserStreak(user);
+        return ResponseEntity.ok(streak);
+    }
+
+    @PostMapping("/recalculate")
+    @Operation(summary = "Recalculate user streak")
+    public ResponseEntity<UserStreakResponse> recalculateStreak(
+            @AuthenticationPrincipal User user) {
+
+        log.debug("Recalculating streak for user: {}", user.getEmail());
+        userStreakService.recalculateStreak(user);
+        var streak = userStreakService.getUserStreak(user);
         return ResponseEntity.ok(streak);
     }
 

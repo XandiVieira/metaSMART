@@ -26,4 +26,6 @@ public final class ApiPaths {
     public static final String SCHEDULED_TASKS = "/scheduled-tasks";
     public static final String SCHEDULE_SLOTS = "/schedule-slots";
     public static final String STREAKS = API_V1 + "/streaks";
+    public static final String JOURNAL = API_V1 + "/journal";
+    public static final String HISTORY = API_V1 + "/history";
 }

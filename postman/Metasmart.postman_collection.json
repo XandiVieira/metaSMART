@@ -97,6 +97,11 @@
       "type": "string"
     },
     {
+      "key": "journalId",
+      "value": "",
+      "type": "string"
+    },
+    {
       "key": "taskCompletionId",
       "value": "",
       "type": "string"
@@ -3538,6 +3543,43 @@
           }
         },
         {
+          "name": "Get User Streak Details (with shields)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/streaks/user/details",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "streaks",
+                "user",
+                "details"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Recalculate User Streak",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/streaks/recalculate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "streaks",
+                "recalculate"
+              ]
+            }
+          }
+        },
+        {
           "name": "Get Goal Streak",
           "request": {
             "method": "GET",
@@ -3593,6 +3635,243 @@
                 "goals",
                 "{{goalId}}",
                 "all"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Daily Journal",
+      "description": "Daily journal entries for user reflections",
+      "item": [
+        {
+          "name": "Create Journal Entry",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('journalId', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"journalDate\": \"2026-01-21\",\n    \"content\": \"Today I stayed committed to my goals. Made progress on reading!\",\n    \"mood\": \"GOOD\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "journal"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Journal Entry by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal/{{journalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "journal",
+                "{{journalId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Journal Entry by Date",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal/date/2026-01-21",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "journal",
+                "date",
+                "2026-01-21"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Journal History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "journal"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Journal Entries by Date Range",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal/range?startDate=2026-01-01&endDate=2026-01-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "journal",
+                "range"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-01-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Journal Entry",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"Updated my reflection for today. Feeling even more motivated!\",\n    \"mood\": \"GREAT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal/{{journalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "journal",
+                "{{journalId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Journal Entry",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal/{{journalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "journal",
+                "{{journalId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Activity History",
+      "description": "Unified activity history - tasks, progress, and journal entries",
+      "item": [
+        {
+          "name": "Get Activity History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/history?startDate=2026-01-01&endDate=2026-01-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-01-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Daily Activity",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/history/date/2026-01-21",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "history",
+                "date",
+                "2026-01-21"
               ]
             }
           }

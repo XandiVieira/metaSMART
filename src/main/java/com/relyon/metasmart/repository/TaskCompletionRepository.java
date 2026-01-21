@@ -1,8 +1,10 @@
 package com.relyon.metasmart.repository;
 
 import com.relyon.metasmart.entity.actionplan.ActionItem;
+import com.relyon.metasmart.entity.actionplan.CompletionStatus;
 import com.relyon.metasmart.entity.actionplan.TaskCompletion;
 import com.relyon.metasmart.entity.goal.Goal;
+import com.relyon.metasmart.entity.user.User;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -29,4 +31,35 @@ public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, 
     @Modifying
     @Query("DELETE FROM TaskCompletion tc WHERE tc.actionItem.goal = :goal")
     void deleteByGoal(@Param("goal") Goal goal);
+
+    @Query("SELECT tc FROM TaskCompletion tc " +
+            "JOIN tc.actionItem ai " +
+            "JOIN ai.goal g " +
+            "WHERE g.owner = :user " +
+            "AND tc.scheduledDate BETWEEN :startDate AND :endDate " +
+            "ORDER BY tc.scheduledDate DESC, tc.completedAt DESC")
+    List<TaskCompletion> findByUserAndDateRange(@Param("user") User user,
+                                                 @Param("startDate") LocalDate startDate,
+                                                 @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT DISTINCT tc.scheduledDate FROM TaskCompletion tc " +
+            "JOIN tc.actionItem ai " +
+            "JOIN ai.goal g " +
+            "WHERE g.owner = :user " +
+            "AND tc.status IN :statuses " +
+            "AND tc.scheduledDate BETWEEN :startDate AND :endDate")
+    List<LocalDate> findActiveDatesForUser(@Param("user") User user,
+                                           @Param("statuses") List<CompletionStatus> statuses,
+                                           @Param("startDate") LocalDate startDate,
+                                           @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COUNT(tc) > 0 FROM TaskCompletion tc " +
+            "JOIN tc.actionItem ai " +
+            "JOIN ai.goal g " +
+            "WHERE g.owner = :user " +
+            "AND tc.status IN :statuses " +
+            "AND tc.scheduledDate = :date")
+    boolean hasCompletedTaskOnDate(@Param("user") User user,
+                                   @Param("statuses") List<CompletionStatus> statuses,
+                                   @Param("date") LocalDate date);
 }

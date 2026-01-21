@@ -40,4 +40,8 @@ public final class AppConstants {
     // Subscription Tier Limits - PREMIUM
     public static final int PREMIUM_MAX_GUARDIANS_PER_GOAL = 5;
     public static final int PREMIUM_PROGRESS_HISTORY_DAYS = Integer.MAX_VALUE; // Unlimited
+
+    // Streak shields
+    public static final int MAX_STREAK_SHIELDS = 2;
+    public static final int SHIELDS_PER_WEEK_FROM_JOURNAL = 1;
 }
