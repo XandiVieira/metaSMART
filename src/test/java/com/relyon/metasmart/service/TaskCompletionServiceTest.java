@@ -52,6 +52,9 @@ class TaskCompletionServiceTest {
     @Mock
     private StreakService streakService;
 
+    @Mock
+    private UserStreakService userStreakService;
+
     @InjectMocks
     private TaskCompletionService taskCompletionService;
 

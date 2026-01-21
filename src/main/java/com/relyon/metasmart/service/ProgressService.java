@@ -44,6 +44,7 @@ public class ProgressService {
     private final ProgressEntryMapper progressEntryMapper;
     private final MilestoneMapper milestoneMapper;
     private final UserProfileService userProfileService;
+    private final UserStreakService userStreakService;
 
     @Transactional
     public ProgressEntryResponse addProgress(Long goalId, ProgressEntryRequest request, User user) {
@@ -58,6 +59,7 @@ public class ProgressService {
 
         updateGoalProgress(goal);
         checkAndUpdateMilestones(goal, user);
+        userStreakService.onActivityRecorded(user);
 
         return progressEntryMapper.toResponse(savedEntry);
     }
@@ -84,6 +86,7 @@ public class ProgressService {
 
         updateGoalProgress(goal);
         checkAndUpdateMilestones(goal, user);
+        userStreakService.onActivityRecorded(user);
 
         return responses;
     }

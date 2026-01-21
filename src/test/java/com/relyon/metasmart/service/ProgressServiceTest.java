@@ -57,6 +57,9 @@ class ProgressServiceTest {
     @Mock
     private UserProfileService userProfileService;
 
+    @Mock
+    private UserStreakService userStreakService;
+
     @InjectMocks
     private ProgressService progressService;
 

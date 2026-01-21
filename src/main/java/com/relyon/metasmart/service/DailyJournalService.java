@@ -27,6 +27,7 @@ public class DailyJournalService {
 
     private final DailyJournalRepository dailyJournalRepository;
     private final DailyJournalMapper dailyJournalMapper;
+    private final UserStreakService userStreakService;
 
     @Transactional
     public DailyJournalResponse createJournalEntry(DailyJournalRequest request, User user) {
@@ -43,6 +44,8 @@ public class DailyJournalService {
 
         var savedJournal = dailyJournalRepository.save(journal);
         log.info("Journal entry created with ID: {} for user: {}", savedJournal.getId(), user.getEmail());
+
+        userStreakService.awardJournalShield(user, request.getJournalDate());
 
         return dailyJournalMapper.toResponse(savedJournal);
     }

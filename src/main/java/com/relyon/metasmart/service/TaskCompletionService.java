@@ -33,6 +33,7 @@ public class TaskCompletionService {
     private final GoalRepository goalRepository;
     private final TaskCompletionMapper taskCompletionMapper;
     private final StreakService streakService;
+    private final UserStreakService userStreakService;
 
     @Transactional
     public TaskCompletionDto recordCompletion(Long goalId, Long actionItemId, String note, User user) {
@@ -54,6 +55,7 @@ public class TaskCompletionService {
         log.info("Recorded completion {} for action item {}", saved.getId(), actionItemId);
 
         streakService.updateStreakOnCompletion(user, actionItem, CompletionStatus.COMPLETED);
+        userStreakService.onActivityRecorded(user);
 
         return taskCompletionMapper.toDto(saved);
     }
@@ -77,6 +79,7 @@ public class TaskCompletionService {
         log.info("Recorded completion {} for action item {} on date {}", saved.getId(), actionItemId, date);
 
         streakService.updateStreakOnCompletion(user, actionItem, CompletionStatus.COMPLETED);
+        userStreakService.onActivityRecorded(user);
 
         return taskCompletionMapper.toDto(saved);
     }
