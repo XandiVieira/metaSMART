@@ -162,12 +162,14 @@ public class UserStreakService {
         var weekStart = journalDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         var weekEnd = journalDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
-        var shieldsAwardedThisWeek = dailyJournalRepository.countShieldsUsedInWeek(user, weekStart, weekEnd);
+        var journalEntriesThisWeek = dailyJournalRepository
+                .findJournalDatesByUserAndDateRange(user, weekStart, weekEnd)
+                .size();
 
-        if (shieldsAwardedThisWeek < SHIELDS_PER_WEEK_FROM_JOURNAL
-                && user.getStreakShields() < MAX_STREAK_SHIELDS) {
+        // Award shield only on first journal entry of the week
+        if (journalEntriesThisWeek == 1 && user.getStreakShields() < MAX_STREAK_SHIELDS) {
             userProfileService.addStreakShield(user, 1);
-            log.info("Journal shield awarded to user: {}", user.getEmail());
+            log.info("Journal shield awarded to user: {} (first entry of the week)", user.getEmail());
         }
     }
 
