@@ -10,6 +10,8 @@ import com.relyon.metasmart.entity.guardian.GuardianNudge;
 import com.relyon.metasmart.entity.guardian.GuardianPermission;
 import com.relyon.metasmart.entity.guardian.GuardianStatus;
 import com.relyon.metasmart.entity.guardian.NudgeType;
+import com.relyon.metasmart.entity.journal.DailyJournal;
+import com.relyon.metasmart.entity.journal.Mood;
 import com.relyon.metasmart.entity.notification.NotificationPreferences;
 import com.relyon.metasmart.entity.obstacle.ObstacleEntry;
 import com.relyon.metasmart.entity.progress.Milestone;
@@ -65,6 +67,7 @@ public class DataSeeder implements CommandLineRunner {
     private final GoalReflectionRepository goalReflectionRepository;
     private final GoalNoteRepository goalNoteRepository;
     private final GuardianNudgeRepository guardianNudgeRepository;
+    private final DailyJournalRepository dailyJournalRepository;
     private final PasswordEncoder passwordEncoder;
 
     private final Random random = new Random();
@@ -97,6 +100,7 @@ public class DataSeeder implements CommandLineRunner {
         createGoalReflections(users, goals);
         createGoalNotes(goals);
         createGuardianNudges(guardians);
+        createDailyJournals(users);
 
         log.info("Database seeding completed!");
         log.info("Created {} users, {} goals", users.size(), goals.size());
@@ -1136,5 +1140,50 @@ public class DataSeeder implements CommandLineRunner {
 
             goalTemplateRepository.save(template);
         }
+    }
+
+    private void createDailyJournals(List<User> users) {
+        log.info("Creating daily journal entries...");
+
+        var journalContents = new String[][]{
+                {"Hoje foi um dia muito produtivo! Consegui manter o foco nas minhas metas e me sinto realizado(a).", "GREAT"},
+                {"Dia bom, fiz progresso nas atividades planejadas. Amanha continuo com forca total.", "GOOD"},
+                {"Foi um dia normal, cumpri o basico. Preciso melhorar a organizacao.", "OKAY"},
+                {"Enfrentei algumas dificuldades hoje, mas nao desisti. Amanha sera melhor.", "STRUGGLING"},
+                {"Dia desafiador, tive que lidar com imprevistos. Aprendendo com os obstaculos.", "OKAY"},
+                {"Senti muita motivacao hoje! Cada pequeno passo conta na jornada.", "GREAT"},
+                {"Progresso constante, mesmo que devagar. Consistencia e a chave do sucesso.", "GOOD"},
+                {"Reflexao do dia: preciso ser mais gentil comigo mesmo(a) durante esse processo.", "OKAY"},
+                {"Celebrando pequenas vitorias! Cada dia de dedicacao importa.", "GREAT"},
+                {"Dia de aprendizado. Erros fazem parte do caminho para o sucesso.", "GOOD"},
+                {"Me senti cansado(a) hoje, mas consegui fazer o minimo necessario.", "STRUGGLING"},
+                {"Gratidao pelo progresso ate aqui. Continuo firme nos meus objetivos.", "GOOD"},
+                {"Hoje percebi o quanto ja evoluiu desde o inicio. Orgulho da jornada!", "GREAT"},
+                {"Dia de replanejamento. Ajustei algumas metas para serem mais realistas.", "OKAY"}
+        };
+
+        for (var userIndex = 0; userIndex < Math.min(users.size(), 3); userIndex++) {
+            var user = users.get(userIndex);
+            var today = LocalDate.now();
+
+            for (var dayIndex = 0; dayIndex < 10; dayIndex++) {
+                var journalDate = today.minusDays(dayIndex);
+                var contentIndex = (userIndex + dayIndex) % journalContents.length;
+                var content = journalContents[contentIndex][0];
+                var mood = Mood.valueOf(journalContents[contentIndex][1]);
+
+                var journal = DailyJournal.builder()
+                        .user(user)
+                        .journalDate(journalDate)
+                        .content(content)
+                        .mood(mood)
+                        .shieldUsed(dayIndex == 3 && userIndex == 0)
+                        .build();
+
+                dailyJournalRepository.save(journal);
+            }
+        }
+
+        log.info("Created daily journal entries for users");
     }
 }
