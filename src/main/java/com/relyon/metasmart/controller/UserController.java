@@ -1,6 +1,8 @@
 package com.relyon.metasmart.controller;
 
 import com.relyon.metasmart.constant.ApiPaths;
+import com.relyon.metasmart.entity.feature.dto.FeaturePreferencesRequest;
+import com.relyon.metasmart.entity.feature.dto.FeaturePreferencesResponse;
 import com.relyon.metasmart.entity.notification.dto.NotificationPreferencesRequest;
 import com.relyon.metasmart.entity.notification.dto.NotificationPreferencesResponse;
 import com.relyon.metasmart.entity.user.User;
@@ -8,6 +10,7 @@ import com.relyon.metasmart.entity.user.dto.UpdateProfileRequest;
 import com.relyon.metasmart.entity.user.dto.UserPreferencesRequest;
 import com.relyon.metasmart.entity.user.dto.UserPreferencesResponse;
 import com.relyon.metasmart.entity.user.dto.UserProfileResponse;
+import com.relyon.metasmart.service.FeatureToggleService;
 import com.relyon.metasmart.service.NotificationPreferencesService;
 import com.relyon.metasmart.service.UserPreferencesService;
 import com.relyon.metasmart.service.UserProfileService;
@@ -33,6 +36,7 @@ public class UserController {
     private final UserProfileService userProfileService;
     private final UserPreferencesService userPreferencesService;
     private final NotificationPreferencesService notificationPreferencesService;
+    private final FeatureToggleService featureToggleService;
 
     @GetMapping("/profile")
     @Operation(summary = "Get current user profile")
@@ -115,5 +119,21 @@ public class UserController {
             @Valid @RequestBody NotificationPreferencesRequest request) {
         log.debug("Updating notification preferences for user: {}", user.getEmail());
         return ResponseEntity.ok(notificationPreferencesService.updatePreferences(user, request));
+    }
+
+    @GetMapping("/features/preferences")
+    @Operation(summary = "Get feature preferences")
+    public ResponseEntity<FeaturePreferencesResponse> getFeaturePreferences(@AuthenticationPrincipal User user) {
+        log.debug("Getting feature preferences for user: {}", user.getEmail());
+        return ResponseEntity.ok(featureToggleService.getPreferences(user));
+    }
+
+    @PutMapping("/features/preferences")
+    @Operation(summary = "Update feature preferences")
+    public ResponseEntity<FeaturePreferencesResponse> updateFeaturePreferences(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody FeaturePreferencesRequest request) {
+        log.debug("Updating feature preferences for user: {}", user.getEmail());
+        return ResponseEntity.ok(featureToggleService.updatePreferences(user, request));
     }
 }
