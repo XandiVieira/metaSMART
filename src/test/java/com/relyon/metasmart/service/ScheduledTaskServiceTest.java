@@ -3,6 +3,7 @@ package com.relyon.metasmart.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 import com.relyon.metasmart.constant.ErrorMessages;
@@ -13,6 +14,7 @@ import com.relyon.metasmart.entity.goal.Goal;
 import com.relyon.metasmart.entity.user.User;
 import com.relyon.metasmart.exception.DuplicateResourceException;
 import com.relyon.metasmart.exception.ResourceNotFoundException;
+import com.relyon.metasmart.entity.actionplan.dto.TaskCompletionDto;
 import com.relyon.metasmart.mapper.ScheduledTaskMapper;
 import com.relyon.metasmart.repository.ActionItemRepository;
 import com.relyon.metasmart.repository.GoalRepository;
@@ -44,6 +46,9 @@ class ScheduledTaskServiceTest {
 
     @Mock
     private ScheduledTaskMapper scheduledTaskMapper;
+
+    @Mock
+    private TaskCompletionService taskCompletionService;
 
     @InjectMocks
     private ScheduledTaskService scheduledTaskService;
@@ -336,17 +341,28 @@ class ScheduledTaskServiceTest {
     class MarkCompletionTests {
 
         @Test
-        @DisplayName("Should mark task as completed")
+        @DisplayName("Should mark task as completed and record completion history")
         void shouldMarkTaskAsCompleted() {
+            var completionDto = TaskCompletionDto.builder().id(1L).build();
+
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
             when(scheduledTaskRepository.findById(1L)).thenReturn(Optional.of(scheduledTask));
             when(scheduledTaskRepository.save(any())).thenReturn(scheduledTask);
             when(scheduledTaskMapper.toDto(any())).thenReturn(scheduledTaskDto);
+            when(taskCompletionService.recordCompletionForDate(any(), any(), any(), any(), any()))
+                    .thenReturn(completionDto);
 
             var result = scheduledTaskService.markAsCompleted(1L, 1L, user);
 
             assertThat(result).isNotNull();
             verify(scheduledTaskRepository).save(argThat(task -> task.getCompleted()));
+            verify(taskCompletionService).recordCompletionForDate(
+                    eq(1L),
+                    eq(actionItem.getId()),
+                    eq(scheduledTask.getScheduledDate()),
+                    isNull(),
+                    eq(user)
+            );
         }
 
         @Test

@@ -34,6 +34,7 @@ public class ScheduledTaskService {
     private final ActionItemRepository actionItemRepository;
     private final GoalRepository goalRepository;
     private final ScheduledTaskMapper scheduledTaskMapper;
+    private final TaskCompletionService taskCompletionService;
 
     @Setter(onMethod_ = {@Autowired, @Lazy})
     private ScheduledTaskService self;
@@ -165,6 +166,14 @@ public class ScheduledTaskService {
 
         var saved = scheduledTaskRepository.save(scheduledTask);
         log.info("Marked scheduled task {} as completed", scheduledTaskId);
+
+        taskCompletionService.recordCompletionForDate(
+                goalId,
+                scheduledTask.getActionItem().getId(),
+                scheduledTask.getScheduledDate(),
+                null,
+                user
+        );
 
         return scheduledTaskMapper.toDto(saved);
     }
