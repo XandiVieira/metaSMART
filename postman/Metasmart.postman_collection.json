@@ -1429,6 +1429,83 @@
           }
         },
         {
+          "name": "25a. Delete Action Item with Related Entities",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "pm.test('Action item deleted successfully (cascade delete worked)', function () {",
+                  "    // If we get here without a 500 error, cascade delete worked correctly",
+                  "    // The action item had: scheduled tasks, task completions",
+                  "    pm.expect(pm.response.code).to.eql(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{frequencyActionItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{frequencyActionItemId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "25b. Verify Deleted Action Item Returns 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Action item no longer exists', function () {",
+                  "    // Confirms the action item was actually deleted",
+                  "    pm.expect(pm.response.code).to.eql(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/{{goalId}}/action-items/{{frequencyActionItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "goals",
+                "{{goalId}}",
+                "action-items",
+                "{{frequencyActionItemId}}"
+              ]
+            }
+          }
+        },
+        {
           "name": "26. Create Goal Note",
           "event": [
             {

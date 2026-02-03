@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +20,10 @@ import com.relyon.metasmart.mapper.ActionItemMapper;
 import com.relyon.metasmart.mapper.TaskCompletionMapper;
 import com.relyon.metasmart.repository.ActionItemRepository;
 import com.relyon.metasmart.repository.GoalRepository;
+import com.relyon.metasmart.repository.ScheduledTaskRepository;
+import com.relyon.metasmart.repository.StreakInfoRepository;
 import com.relyon.metasmart.repository.TaskCompletionRepository;
+import com.relyon.metasmart.repository.TaskScheduleSlotRepository;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +33,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,6 +49,15 @@ class ActionItemServiceTest {
 
     @Mock
     private TaskCompletionRepository taskCompletionRepository;
+
+    @Mock
+    private ScheduledTaskRepository scheduledTaskRepository;
+
+    @Mock
+    private TaskScheduleSlotRepository taskScheduleSlotRepository;
+
+    @Mock
+    private StreakInfoRepository streakInfoRepository;
 
     @Mock
     private ActionItemMapper actionItemMapper;
@@ -141,6 +155,51 @@ class ActionItemServiceTest {
             assertThat(result).hasSize(1);
             assertThat(result.get(0).getTitle()).isEqualTo("Buy running shoes");
         }
+
+        @Test
+        @DisplayName("Should throw exception when goal not found for findByGoal")
+        void shouldThrowExceptionWhenGoalNotFoundForFindByGoal() {
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> actionItemService.findByGoal(1L, user))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.GOAL_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("Should find action item by id")
+        void shouldFindActionItemById() {
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
+            when(actionItemMapper.toResponse(actionItem)).thenReturn(response);
+            when(taskCompletionRepository.findByActionItemOrderByCompletedAtDesc(any())).thenReturn(Collections.emptyList());
+
+            var result = actionItemService.findById(1L, 1L, user);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getTitle()).isEqualTo("Buy running shoes");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when goal not found for findById")
+        void shouldThrowExceptionWhenGoalNotFoundForFindById() {
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> actionItemService.findById(1L, 1L, user))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.GOAL_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when action item not found for findById")
+        void shouldThrowExceptionWhenActionItemNotFoundForFindById() {
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> actionItemService.findById(1L, 1L, user))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.ACTION_ITEM_NOT_FOUND);
+        }
     }
 
     @Nested
@@ -178,6 +237,100 @@ class ActionItemServiceTest {
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessage(ErrorMessages.ACTION_ITEM_NOT_FOUND);
         }
+
+        @Test
+        @DisplayName("Should throw exception when goal not found for update")
+        void shouldThrowExceptionWhenGoalNotFoundForUpdate() {
+            var updateRequest = UpdateActionItemRequest.builder().build();
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> actionItemService.update(1L, 1L, updateRequest, user))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.GOAL_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("Should update action item with context and dependencies")
+        void shouldUpdateActionItemWithContextAndDependencies() {
+            var updateRequest = UpdateActionItemRequest.builder()
+                    .context(List.of("home", "weekend"))
+                    .dependencies(List.of(2L, 3L))
+                    .build();
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
+            when(actionItemRepository.save(any(ActionItem.class))).thenReturn(actionItem);
+            when(actionItemMapper.toResponse(actionItem)).thenReturn(response);
+            when(taskCompletionRepository.findByActionItemOrderByCompletedAtDesc(any())).thenReturn(Collections.emptyList());
+
+            actionItemService.update(1L, 1L, updateRequest, user);
+
+            assertThat(actionItem.getContext()).isEqualTo("home,weekend");
+            assertThat(actionItem.getDependencies()).isEqualTo("2,3");
+            verify(actionItemRepository).save(actionItem);
+        }
+
+        @Test
+        @DisplayName("Should clear completedAt when marking action item as incomplete")
+        void shouldClearCompletedAtWhenMarkingAsIncomplete() {
+            actionItem.setCompleted(true);
+            actionItem.setCompletedAt(java.time.LocalDateTime.now());
+
+            var updateRequest = UpdateActionItemRequest.builder()
+                    .completed(false)
+                    .build();
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
+            when(actionItemRepository.save(any(ActionItem.class))).thenReturn(actionItem);
+            when(actionItemMapper.toResponse(actionItem)).thenReturn(response);
+            when(taskCompletionRepository.findByActionItemOrderByCompletedAtDesc(any())).thenReturn(Collections.emptyList());
+
+            actionItemService.update(1L, 1L, updateRequest, user);
+
+            assertThat(actionItem.getCompleted()).isFalse();
+            assertThat(actionItem.getCompletedAt()).isNull();
+        }
+
+        @Test
+        @DisplayName("Should set completedAt when marking action item as complete")
+        void shouldSetCompletedAtWhenMarkingAsComplete() {
+            actionItem.setCompleted(false);
+            actionItem.setCompletedAt(null);
+
+            var updateRequest = UpdateActionItemRequest.builder()
+                    .completed(true)
+                    .build();
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
+            when(actionItemRepository.save(any(ActionItem.class))).thenReturn(actionItem);
+            when(actionItemMapper.toResponse(actionItem)).thenReturn(response);
+            when(taskCompletionRepository.findByActionItemOrderByCompletedAtDesc(any())).thenReturn(Collections.emptyList());
+
+            actionItemService.update(1L, 1L, updateRequest, user);
+
+            assertThat(actionItem.getCompleted()).isTrue();
+            assertThat(actionItem.getCompletedAt()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("Should handle empty dependencies list")
+        void shouldHandleEmptyDependenciesList() {
+            var updateRequest = UpdateActionItemRequest.builder()
+                    .dependencies(Collections.emptyList())
+                    .build();
+
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
+            when(actionItemRepository.save(any(ActionItem.class))).thenReturn(actionItem);
+            when(actionItemMapper.toResponse(actionItem)).thenReturn(response);
+            when(taskCompletionRepository.findByActionItemOrderByCompletedAtDesc(any())).thenReturn(Collections.emptyList());
+
+            actionItemService.update(1L, 1L, updateRequest, user);
+
+            assertThat(actionItem.getDependencies()).isNull();
+        }
     }
 
     @Nested
@@ -189,12 +342,44 @@ class ActionItemServiceTest {
         void shouldDeleteActionItemSuccessfully() {
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
             when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
+            doNothing().when(streakInfoRepository).deleteByActionItem(any());
+            doNothing().when(scheduledTaskRepository).deleteByActionItem(any());
+            doNothing().when(taskScheduleSlotRepository).deleteByActionItem(any());
             doNothing().when(taskCompletionRepository).deleteByActionItem(any());
 
             actionItemService.delete(1L, 1L, user);
 
+            verify(streakInfoRepository).deleteByActionItem(actionItem);
+            verify(scheduledTaskRepository).deleteByActionItem(actionItem);
+            verify(taskScheduleSlotRepository).deleteByActionItem(actionItem);
             verify(taskCompletionRepository).deleteByActionItem(actionItem);
             verify(actionItemRepository).delete(actionItem);
+        }
+
+        @Test
+        @DisplayName("Should delete related entities before action item to avoid FK constraint violations")
+        void shouldDeleteRelatedEntitiesBeforeActionItem() {
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
+            when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
+            doNothing().when(streakInfoRepository).deleteByActionItem(any());
+            doNothing().when(scheduledTaskRepository).deleteByActionItem(any());
+            doNothing().when(taskScheduleSlotRepository).deleteByActionItem(any());
+            doNothing().when(taskCompletionRepository).deleteByActionItem(any());
+
+            actionItemService.delete(1L, 1L, user);
+
+            var inOrderVerifier = inOrder(
+                    streakInfoRepository,
+                    scheduledTaskRepository,
+                    taskScheduleSlotRepository,
+                    taskCompletionRepository,
+                    actionItemRepository
+            );
+            inOrderVerifier.verify(streakInfoRepository).deleteByActionItem(actionItem);
+            inOrderVerifier.verify(scheduledTaskRepository).deleteByActionItem(actionItem);
+            inOrderVerifier.verify(taskScheduleSlotRepository).deleteByActionItem(actionItem);
+            inOrderVerifier.verify(taskCompletionRepository).deleteByActionItem(actionItem);
+            inOrderVerifier.verify(actionItemRepository).delete(actionItem);
         }
 
         @Test
@@ -206,6 +391,16 @@ class ActionItemServiceTest {
             assertThatThrownBy(() -> actionItemService.delete(1L, 1L, user))
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessage(ErrorMessages.ACTION_ITEM_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when goal not found for delete")
+        void shouldThrowExceptionWhenGoalNotFoundForDelete() {
+            when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> actionItemService.delete(1L, 1L, user))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage(ErrorMessages.GOAL_NOT_FOUND);
         }
     }
 }

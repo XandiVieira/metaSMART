@@ -14,7 +14,10 @@ import com.relyon.metasmart.mapper.ActionItemMapper;
 import com.relyon.metasmart.mapper.TaskCompletionMapper;
 import com.relyon.metasmart.repository.ActionItemRepository;
 import com.relyon.metasmart.repository.GoalRepository;
+import com.relyon.metasmart.repository.ScheduledTaskRepository;
+import com.relyon.metasmart.repository.StreakInfoRepository;
 import com.relyon.metasmart.repository.TaskCompletionRepository;
+import com.relyon.metasmart.repository.TaskScheduleSlotRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +34,9 @@ public class ActionItemService {
     private final ActionItemRepository actionItemRepository;
     private final GoalRepository goalRepository;
     private final TaskCompletionRepository taskCompletionRepository;
+    private final ScheduledTaskRepository scheduledTaskRepository;
+    private final TaskScheduleSlotRepository taskScheduleSlotRepository;
+    private final StreakInfoRepository streakInfoRepository;
     private final ActionItemMapper actionItemMapper;
     private final TaskCompletionMapper taskCompletionMapper;
 
@@ -134,6 +140,9 @@ public class ActionItemService {
         var actionItem = actionItemRepository.findByIdAndGoal(itemId, goal)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.ACTION_ITEM_NOT_FOUND));
 
+        streakInfoRepository.deleteByActionItem(actionItem);
+        scheduledTaskRepository.deleteByActionItem(actionItem);
+        taskScheduleSlotRepository.deleteByActionItem(actionItem);
         taskCompletionRepository.deleteByActionItem(actionItem);
         actionItemRepository.delete(actionItem);
         log.info("Action item ID: {} deleted from goal ID: {}", itemId, goalId);
