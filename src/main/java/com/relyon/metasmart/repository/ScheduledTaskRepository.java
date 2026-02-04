@@ -39,4 +39,7 @@ public interface ScheduledTaskRepository extends JpaRepository<ScheduledTask, Lo
     @Modifying
     @Query("DELETE FROM ScheduledTask st WHERE st.actionItem.goal = :goal")
     void deleteByGoal(@Param("goal") Goal goal);
+
+    @Query("SELECT st FROM ScheduledTask st JOIN FETCH st.actionItem WHERE st.id = :id")
+    Optional<ScheduledTask> findByIdWithActionItem(@Param("id") Long id);
 }

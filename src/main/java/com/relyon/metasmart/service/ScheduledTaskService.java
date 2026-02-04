@@ -158,7 +158,7 @@ public class ScheduledTaskService {
 
         findGoalByUser(goalId, user);
 
-        var scheduledTask = scheduledTaskRepository.findById(scheduledTaskId)
+        var scheduledTask = scheduledTaskRepository.findByIdWithActionItem(scheduledTaskId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.SCHEDULED_TASK_NOT_FOUND));
 
         scheduledTask.setCompleted(true);

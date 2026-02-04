@@ -346,7 +346,7 @@ class ScheduledTaskServiceTest {
             var completionDto = TaskCompletionDto.builder().id(1L).build();
 
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
-            when(scheduledTaskRepository.findById(1L)).thenReturn(Optional.of(scheduledTask));
+            when(scheduledTaskRepository.findByIdWithActionItem(1L)).thenReturn(Optional.of(scheduledTask));
             when(scheduledTaskRepository.save(any())).thenReturn(scheduledTask);
             when(scheduledTaskMapper.toDto(any())).thenReturn(scheduledTaskDto);
             when(taskCompletionService.recordCompletionForDate(any(), any(), any(), any(), any()))
@@ -386,7 +386,7 @@ class ScheduledTaskServiceTest {
         @DisplayName("Should throw when scheduled task not found")
         void shouldThrowWhenScheduledTaskNotFound() {
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
-            when(scheduledTaskRepository.findById(1L)).thenReturn(Optional.empty());
+            when(scheduledTaskRepository.findByIdWithActionItem(1L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> scheduledTaskService.markAsCompleted(1L, 1L, user))
                     .isInstanceOf(ResourceNotFoundException.class)
