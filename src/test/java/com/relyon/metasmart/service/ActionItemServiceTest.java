@@ -351,14 +351,14 @@ class ActionItemServiceTest {
 
             verify(streakInfoRepository).deleteByActionItem(actionItem);
             verify(scheduledTaskRepository).deleteByActionItem(actionItem);
-            verify(taskScheduleSlotRepository).deleteByActionItem(actionItem);
             verify(taskCompletionRepository).deleteByActionItem(actionItem);
+            verify(taskScheduleSlotRepository).deleteByActionItem(actionItem);
             verify(actionItemRepository).delete(actionItem);
         }
 
         @Test
-        @DisplayName("Should delete related entities before action item to avoid FK constraint violations")
-        void shouldDeleteRelatedEntitiesBeforeActionItem() {
+        @DisplayName("Should delete task completions BEFORE schedule slots to avoid FK constraint violation on schedule_slot_id")
+        void shouldDeleteCompletionsBeforeSlotsToAvoidFkViolation() {
             when(goalRepository.findByIdAndOwner(1L, user)).thenReturn(Optional.of(goal));
             when(actionItemRepository.findByIdAndGoal(1L, goal)).thenReturn(Optional.of(actionItem));
             doNothing().when(streakInfoRepository).deleteByActionItem(any());
@@ -368,17 +368,19 @@ class ActionItemServiceTest {
 
             actionItemService.delete(1L, 1L, user);
 
+            // Critical: task_completions.schedule_slot_id references task_schedule_slots.id
+            // Completions MUST be deleted before slots, otherwise FK constraint fails
             var inOrderVerifier = inOrder(
                     streakInfoRepository,
                     scheduledTaskRepository,
-                    taskScheduleSlotRepository,
                     taskCompletionRepository,
+                    taskScheduleSlotRepository,
                     actionItemRepository
             );
             inOrderVerifier.verify(streakInfoRepository).deleteByActionItem(actionItem);
             inOrderVerifier.verify(scheduledTaskRepository).deleteByActionItem(actionItem);
-            inOrderVerifier.verify(taskScheduleSlotRepository).deleteByActionItem(actionItem);
             inOrderVerifier.verify(taskCompletionRepository).deleteByActionItem(actionItem);
+            inOrderVerifier.verify(taskScheduleSlotRepository).deleteByActionItem(actionItem);
             inOrderVerifier.verify(actionItemRepository).delete(actionItem);
         }
 

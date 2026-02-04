@@ -1439,9 +1439,9 @@
                   "    pm.response.to.have.status(204);",
                   "});",
                   "",
-                  "pm.test('Action item deleted successfully (cascade delete worked)', function () {",
-                  "    // If we get here without a 500 error, cascade delete worked correctly",
-                  "    // The action item had: scheduled tasks, task completions",
+                  "pm.test('Action item deleted successfully with all related entities', function () {",
+                  "    // Verifies correct deletion order: completions before slots (FK constraint)",
+                  "    // Related entities: streak_info, scheduled_tasks, task_completions, task_schedule_slots",
                   "    pm.expect(pm.response.code).to.eql(204);",
                   "});"
                 ],

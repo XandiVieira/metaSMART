@@ -142,8 +142,8 @@ public class ActionItemService {
 
         streakInfoRepository.deleteByActionItem(actionItem);
         scheduledTaskRepository.deleteByActionItem(actionItem);
-        taskScheduleSlotRepository.deleteByActionItem(actionItem);
         taskCompletionRepository.deleteByActionItem(actionItem);
+        taskScheduleSlotRepository.deleteByActionItem(actionItem);
         actionItemRepository.delete(actionItem);
         log.info("Action item ID: {} deleted from goal ID: {}", itemId, goalId);
     }
