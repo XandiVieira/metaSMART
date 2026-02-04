@@ -65,21 +65,43 @@ public class TaskCompletionService {
         log.debug("Recording completion for action item {} on date {}", actionItemId, date);
 
         var actionItem = findActionItemByGoalAndUser(goalId, actionItemId, user);
+        var periodStart = calculatePeriodStart(date);
+
+        log.debug("Creating TaskCompletion: actionItemId={}, scheduledDate={}, periodStart={}, status=COMPLETED",
+                actionItemId, date, periodStart);
 
         var completion = TaskCompletion.builder()
                 .actionItem(actionItem)
                 .scheduledDate(date)
-                .periodStart(calculatePeriodStart(date))
+                .periodStart(periodStart)
                 .status(CompletionStatus.COMPLETED)
                 .completedAt(LocalDateTime.now())
                 .note(note)
                 .build();
 
-        var saved = taskCompletionRepository.save(completion);
-        log.info("Recorded completion {} for action item {} on date {}", saved.getId(), actionItemId, date);
+        TaskCompletion saved;
+        try {
+            saved = taskCompletionRepository.save(completion);
+            log.info("Recorded completion {} for action item {} on date {}", saved.getId(), actionItemId, date);
+        } catch (Exception e) {
+            log.error("Failed to save TaskCompletion (actionItemId={}, scheduledDate={}, periodStart={}): {}",
+                    actionItemId, date, periodStart, e.getMessage(), e);
+            throw e;
+        }
 
-        streakService.updateStreakOnCompletion(user, actionItem, CompletionStatus.COMPLETED);
-        userStreakService.onActivityRecorded(user);
+        try {
+            streakService.updateStreakOnCompletion(user, actionItem, CompletionStatus.COMPLETED);
+        } catch (Exception e) {
+            log.error("Failed to update streak for user {} on action item {}: {}", user.getEmail(), actionItemId, e.getMessage(), e);
+            throw e;
+        }
+
+        try {
+            userStreakService.onActivityRecorded(user);
+        } catch (Exception e) {
+            log.error("Failed to record activity for user {}: {}", user.getEmail(), e.getMessage(), e);
+            throw e;
+        }
 
         return taskCompletionMapper.toDto(saved);
     }

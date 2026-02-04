@@ -161,19 +161,34 @@ public class ScheduledTaskService {
         var scheduledTask = scheduledTaskRepository.findByIdWithActionItem(scheduledTaskId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.SCHEDULED_TASK_NOT_FOUND));
 
+        var actionItem = scheduledTask.getActionItem();
+        if (actionItem == null) {
+            log.error("Scheduled task {} has no associated action item", scheduledTaskId);
+            throw new IllegalStateException("Scheduled task has no associated action item");
+        }
+
+        log.debug("Recording completion for scheduled task {} (actionItem={}, date={})",
+                scheduledTaskId, actionItem.getId(), scheduledTask.getScheduledDate());
+
         scheduledTask.setCompleted(true);
         scheduledTask.setCompletedAt(LocalDateTime.now());
 
         var saved = scheduledTaskRepository.save(scheduledTask);
         log.info("Marked scheduled task {} as completed", scheduledTaskId);
 
-        taskCompletionService.recordCompletionForDate(
-                goalId,
-                scheduledTask.getActionItem().getId(),
-                scheduledTask.getScheduledDate(),
-                null,
-                user
-        );
+        try {
+            taskCompletionService.recordCompletionForDate(
+                    goalId,
+                    actionItem.getId(),
+                    scheduledTask.getScheduledDate(),
+                    null,
+                    user
+            );
+        } catch (Exception e) {
+            log.error("Failed to record completion history for scheduled task {} (goalId={}, actionItemId={}, date={}): {}",
+                    scheduledTaskId, goalId, actionItem.getId(), scheduledTask.getScheduledDate(), e.getMessage(), e);
+            throw e;
+        }
 
         return scheduledTaskMapper.toDto(saved);
     }
